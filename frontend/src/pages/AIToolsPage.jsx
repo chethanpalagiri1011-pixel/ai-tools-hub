@@ -1,11 +1,13 @@
-import { ImageIcon, FileText, MessageSquare, Sparkles } from 'lucide-react';
+import { ImageIcon, FileText, MessageSquare, Sparkles, Film } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import ImageGenerator  from '../components/tools/ImageGenerator';
 import TextSummarizer  from '../components/tools/TextSummarizer';
 import CaptionGenerator from '../components/tools/CaptionGenerator';
 import PromptEnhancer  from '../components/tools/PromptEnhancer';
+import VideoGenerator    from '../components/tools/VideoGenerator';
 
 const TABS = [
+  { id: 'video',   label: 'Video Gen',  icon: Film,          color: 'from-indigo-500 to-purple-500', activeColor: 'text-indigo-300',  borderColor: 'border-indigo-500' },
   { id: 'image',   label: 'Image Gen',  icon: ImageIcon,     color: 'from-purple-500 to-pink-500',   activeColor: 'text-purple-300',  borderColor: 'border-purple-500' },
   { id: 'summary', label: 'Summarizer', icon: FileText,      color: 'from-blue-500 to-cyan-500',     activeColor: 'text-blue-300',    borderColor: 'border-blue-500' },
   { id: 'caption', label: 'Captions',   icon: MessageSquare, color: 'from-teal-500 to-green-500',    activeColor: 'text-teal-300',    borderColor: 'border-teal-500' },
@@ -17,11 +19,12 @@ export default function AIToolsPage() {
 
   const renderTool = () => {
     switch(activeTool) {
+      case 'video':   return <VideoGenerator />;
       case 'image':   return <ImageGenerator />;
       case 'summary': return <TextSummarizer />;
       case 'caption': return <CaptionGenerator />;
       case 'prompt':  return <PromptEnhancer />;
-      default:        return <ImageGenerator />;
+      default:        return <VideoGenerator />;
     }
   };
 

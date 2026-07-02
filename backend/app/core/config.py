@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     # External APIs (Optional for startup)
     OPENAI_API_KEY: str = ""
     STABILITY_API_KEY: str = ""
+    REPLICATE_API_TOKEN: str = ""
 
     class Config:
         case_sensitive = True

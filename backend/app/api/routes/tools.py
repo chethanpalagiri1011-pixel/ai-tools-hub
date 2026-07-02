@@ -4,7 +4,8 @@ from pydantic import BaseModel
 from app.db.database import get_db
 from app.models.models import User, GenerationHistory
 from app.core.security import get_current_user
-import asyncio, random, json
+from app.core.config import settings
+import asyncio, random, json, os, replicate
 
 router = APIRouter()
 
@@ -12,6 +13,10 @@ router = APIRouter()
 class ImageRequest(BaseModel):
     prompt: str
     style: str = "photorealistic"
+    aspect_ratio: str = "16:9"
+
+class VideoRequest(BaseModel):
+    prompt: str
     aspect_ratio: str = "16:9"
 
 class SummarizeRequest(BaseModel):
@@ -42,6 +47,42 @@ def save_history(db: Session, user_id: int, type_: str, prompt: str, result: str
     db.commit()
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
+@router.post("/video")
+async def generate_video(data: VideoRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    await deduct_credits(user, db, 15)
+    
+    if not settings.REPLICATE_API_TOKEN:
+        # Fallback to simulated demo if no API key is provided
+        await asyncio.sleep(3)
+        video_url = "https://cdn.pixabay.com/video/2023/10/22/186005-877685601_large.mp4"
+        result = {"video_url": video_url, "prompt": data.prompt, "aspect_ratio": data.aspect_ratio, "status": "simulated"}
+        save_history(db, user.id, "video", data.prompt, json.dumps(result), 15)
+        return result
+
+    try:
+        # Set API token for replicate client
+        os.environ["REPLICATE_API_TOKEN"] = settings.REPLICATE_API_TOKEN
+        
+        # Use stability-ai/stable-video-diffusion or similar
+        # For this example we use stability-ai/stable-video-diffusion (requires an image, but let's assume minimax or similar prompt-to-video)
+        # We will use lucataco/hotshot-xl as a fast prompt-to-video model
+        output = await asyncio.to_thread(
+            replicate.run,
+            "lucataco/hotshot-xl:78b3a6257e16e4b241245d65c8b2b81ea2e1ff7ed4c55306b511509ddbfd3275",
+            input={"prompt": data.prompt, "mp4": True}
+        )
+        # output is a list of URIs or a single URI depending on the model.
+        video_url = output if isinstance(output, str) else output[0]
+        
+        result = {"video_url": video_url, "prompt": data.prompt, "aspect_ratio": data.aspect_ratio, "status": "success"}
+        save_history(db, user.id, "video", data.prompt, json.dumps(result), 15)
+        return result
+    except Exception as e:
+        # Refund credits on failure
+        user.credits += 15
+        db.commit()
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/image")
 async def generate_image(data: ImageRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     await deduct_credits(user, db, 5)
