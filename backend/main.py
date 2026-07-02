@@ -5,10 +5,10 @@ from fastapi.responses import JSONResponse
 # Import routers
 from app.api.routes import auth, users, tools, history
 from app.db.database import engine
-from app.models import models
+from app.models.models import Base
 
 # Create database tables automatically
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="AI Tools Hub API",
