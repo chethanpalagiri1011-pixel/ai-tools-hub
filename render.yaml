@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: ai-tools-backend
+    env: python
+    region: oregon
+    buildCommand: "cd backend && pip install -r requirements.txt"
+    startCommand: "cd backend && uvicorn main:app --host 0.0.0.0 --port 10000"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-tools-db
+          property: connectionString
+
+databases:
+  - name: ai-tools-db
+    region: oregon
+    plan: free
