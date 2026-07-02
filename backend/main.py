@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 # Import routers
 from app.api.routes import auth, users, tools, history
 from app.db.database import engine
-from app.db import models
+from app.models import models
 
 # Create database tables automatically
 models.Base.metadata.create_all(bind=engine)
