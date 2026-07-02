@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const API_URL = 'https://ai-tools-backend-dedn.onrender.com/api';
+
 const api = axios.create({
-  baseURL: '', // Dev proxy handles /api routing
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
