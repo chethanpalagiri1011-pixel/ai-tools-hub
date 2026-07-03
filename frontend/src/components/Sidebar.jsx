@@ -45,10 +45,7 @@ export default function Sidebar({ open, onClose }) {
       {/* Logo */}
       <div className="flex items-center justify-between px-5 py-5 border-b border-white/5">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-               style={{ background: 'linear-gradient(135deg, #7c3aed, #3b82f6)' }}>
-            <Zap size={16} className="text-white" />
-          </div>
+          <img src="/logo.png" alt="AI Tools Hub" className="w-8 h-8 rounded-lg object-cover" />
           <span className="font-display font-bold text-white text-lg">AI Tools Hub</span>
         </div>
         <button onClick={onClose} className="lg:hidden text-gray-500 hover:text-white p-1">

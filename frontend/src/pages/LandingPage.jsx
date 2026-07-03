@@ -90,10 +90,7 @@ export default function LandingPage() {
       <nav className="relative z-50 flex items-center justify-between px-6 md:px-12 py-5 border-b border-white/5"
            style={{ background: 'rgba(5,5,20,0.8)', backdropFilter: 'blur(20px)', position: 'sticky', top: 0 }}>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-               style={{ background: 'linear-gradient(135deg, #7c3aed, #3b82f6)' }}>
-            <Zap size={16} className="text-white" />
-          </div>
+          <img src="/logo.png" alt="AI Tools Hub" className="w-8 h-8 rounded-lg object-cover" />
           <span className="font-display font-bold text-white text-lg">AI Tools Hub</span>
         </div>
 
@@ -369,10 +366,7 @@ export default function LandingPage() {
       <footer className="py-10 px-6 border-t border-white/5">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md flex items-center justify-center"
-                 style={{ background: 'linear-gradient(135deg, #7c3aed, #3b82f6)' }}>
-              <Zap size={12} className="text-white" />
-            </div>
+            <img src="/logo.png" alt="AI Tools Hub" className="w-6 h-6 rounded-md object-cover" />
             <span className="text-white font-semibold text-sm">AI Tools Hub</span>
           </div>
           <p className="text-gray-600 text-sm">© 2025 AI Tools Hub. All rights reserved.</p>
