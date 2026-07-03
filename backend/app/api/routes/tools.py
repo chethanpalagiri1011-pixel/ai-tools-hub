@@ -54,7 +54,7 @@ async def generate_video(data: VideoRequest, db: Session = Depends(get_db), user
     if not settings.REPLICATE_API_TOKEN:
         # Fallback to simulated demo if no API key is provided
         await asyncio.sleep(3)
-        video_url = "https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-1173-large.mp4"
+        video_url = "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
         result = {"video_url": video_url, "prompt": data.prompt, "aspect_ratio": data.aspect_ratio, "status": "simulated"}
         save_history(db, user.id, "video", data.prompt, json.dumps(result), 15)
         return result
