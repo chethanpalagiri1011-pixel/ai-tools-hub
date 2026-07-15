@@ -2,27 +2,43 @@ import api from './api';
 
 // ── Image Generator — Generates via Pollinations.ai (free, no API key needed) ─
 export const generateImage = async ({ prompt, style = 'photorealistic', aspectRatio = '16:9' }) => {
-  const [w, h] = aspectRatio === '1:1' ? [800, 800] : aspectRatio === '9:16' ? [600, 900] : [800, 600];
-  const seed = Math.floor(Math.random() * 999999);
+  try {
+    const res = await api.post('/api/tools/image', {
+      prompt,
+      style,
+      aspect_ratio: aspectRatio
+    });
 
-  const styleModifier = style === 'photorealistic' ? ', hyperrealistic photography'
-    : style === 'anime' ? ', anime style, studio ghibli'
-    : style === 'digital-art' ? ', digital art, trending on artstation'
-    : style === 'painting' ? ', oil painting masterpiece'
-    : style === 'sketch' ? ', pencil sketch, detailed' : '';
+    const data = res.data;
 
-  const fullPrompt = `${prompt}${styleModifier}`;
-  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${w}&height=${h}&seed=${seed}&nologo=true`;
+    // Preload the image so spinner stays active until image is ready,
+    // but fail gracefully with a timeout so it doesn't block UI if preloading fails.
+    try {
+      await new Promise((resolve, reject) => {
+        const img = new Image();
+        const timeout = setTimeout(() => {
+          resolve();
+        }, 8000); // 8 second timeout
 
-  // Preload the image so spinner stays active until image is ready
-  await new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve();
-    img.onerror = () => reject(new Error('Failed to load image'));
-    img.src = url;
-  });
+        img.onload = () => {
+          clearTimeout(timeout);
+          resolve();
+        };
+        img.onerror = () => {
+          clearTimeout(timeout);
+          reject(new Error('Failed to load image'));
+        };
+        img.src = data.url;
+      });
+    } catch (preloadError) {
+      console.warn("Image preloading failed/timed out, rendering directly:", preloadError);
+    }
 
-  return { url, width: w, height: h, style, prompt, seed };
+    return { url: data.url, seed: data.seed, style: data.style, prompt: data.prompt };
+  } catch (error) {
+    console.error("Image generation error:", error);
+    throw error;
+  }
 };
 
 // ── Text Summarizer ──────────────────────────────────────────────────────────
