@@ -415,11 +415,46 @@ const GAMES = [
     component: ReactionGame,
   },
 ];
-
 export default function ArcadePage() {
   const { user, updateUser } = useAuth();
   const [activeGame, setActiveGame] = useState(null);
   const [key, setKey] = useState(0);
+  const [muted, setMuted] = useState(false);
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    if (activeGame) {
+      // Play 8-bit retro arcade loop when game starts
+      const audio = new Audio("https://assets.mixkit.co/music/preview/mixkit-arcade-retro-game-217.mp3");
+      audio.loop = true;
+      audio.volume = 0.2; // Gentle background volume
+      audio.muted = muted;
+      audioRef.current = audio;
+      
+      audio.play().catch(err => {
+        console.warn("Audio autoplay blocked by browser settings:", err);
+      });
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, [activeGame]);
+
+  // Update volume/mute state dynamically
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.muted = muted;
+    }
+  }, [muted]);
 
   const handleWin = useCallback(async (amount) => {
     await claimReward(amount, activeGame, updateUser);
@@ -480,10 +515,17 @@ export default function ArcadePage() {
                   <p className="text-white/70 text-xs">Reward: {game.reward}</p>
                 </div>
               </div>
-              <button onClick={closeGame}
-                      className="text-white/70 hover:text-white text-xl font-bold w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-all">
-                ✕
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setMuted(!muted)}
+                        title={muted ? "Unmute game music" : "Mute game music"}
+                        className="text-white/70 hover:text-white text-lg w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-all">
+                  {muted ? '🔈' : '🔊'}
+                </button>
+                <button onClick={closeGame}
+                        className="text-white/70 hover:text-white text-xl font-bold w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-all">
+                  ✕
+                </button>
+              </div>
             </div>
             <div className="p-5">
               <GameComponent key={key} onWin={handleWin} />
