@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Wand2, History, User, Settings,
-  Zap, X, ImageIcon, FileText, MessageSquare, Sparkles, Images, Gamepad2
+  Zap, X, ImageIcon, FileText, MessageSquare, Sparkles, Images, Gamepad2, ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
@@ -11,6 +11,7 @@ const navItems = [
   { to: '/dashboard/tools',        icon: Wand2,            label: 'AI Tools' },
   { to: '/dashboard/my-images',    icon: Images,           label: 'My Images 🖼️' },
   { to: '/dashboard/arcade',       icon: Gamepad2,         label: '🎮 Earn Credits' },
+  { to: '/dashboard/admin',        icon: ShieldCheck,      label: '👑 Owner Panel' },
   { to: '/dashboard/history',      icon: History,          label: 'History' },
   { to: '/dashboard/profile',      icon: User,             label: 'Profile' },
   { to: '/dashboard/settings',     icon: Settings,         label: 'Settings' },

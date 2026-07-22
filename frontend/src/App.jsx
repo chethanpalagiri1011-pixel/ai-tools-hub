@@ -13,6 +13,7 @@ import SettingsPage   from './pages/SettingsPage';
 import HistoryPage    from './pages/HistoryPage';
 import ArcadePage     from './pages/ArcadePage';
 import MyImagesPage   from './pages/MyImagesPage';
+import AdminDashboard from './pages/AdminDashboard';
 import DashboardLayout from './layouts/DashboardLayout';
 
 function ProtectedRoute({ children }) {
@@ -70,6 +71,7 @@ function App() {
               <Route path="profile"   element={<ProfilePage />} />
               <Route path="settings"  element={<SettingsPage />} />
               <Route path="arcade"    element={<ArcadePage />} />
+              <Route path="admin"     element={<AdminDashboard />} />
             </Route>
 
             {/* Fallback */}

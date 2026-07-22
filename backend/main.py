@@ -3,9 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 # Import routers
-from app.api.routes import auth, users, tools, history
-from app.db.database import engine
-from app.models.models import Base
+from app.api.routes import auth, users, tools, history, admin
 
 # Create database tables automatically
 Base.metadata.create_all(bind=engine)
@@ -37,6 +35,7 @@ app.include_router(auth.router,    prefix="/api/auth",    tags=["Authentication"
 app.include_router(users.router,   prefix="/api/users",   tags=["Users"])
 app.include_router(tools.router,   prefix="/api/tools",   tags=["AI Tools"])
 app.include_router(history.router, prefix="/api/history", tags=["History"])
+app.include_router(admin.router,   prefix="/api/admin",   tags=["Admin Analytics"])
 
 @app.get("/api/health")
 async def health_check():
