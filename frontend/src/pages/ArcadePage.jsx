@@ -415,45 +415,87 @@ const GAMES = [
     component: ReactionGame,
   },
 ];
+class AmbientSynth {
+  constructor() {
+    this.ctx = null;
+    this.timer = null;
+    this.muted = false;
+  }
+  start() {
+    if (this.timer) return;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      this.ctx = new AudioCtx();
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume();
+      }
+      // Gentle pentatonic music box notes (C4, E4, G4, A4, C5, E5)
+      const scale = [261.63, 329.63, 392.00, 440.00, 523.25, 659.25, 523.25, 392.00];
+      let step = 0;
+
+      this.timer = setInterval(() => {
+        if (this.muted || !this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sine'; // Soft, warm chime tone
+          osc.frequency.setValueAtTime(scale[step], this.ctx.currentTime);
+
+          gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.6);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.6);
+
+          step = (step + 1) % scale.length;
+        } catch (e) {
+          // Ignore
+        }
+      }, 380);
+    } catch (e) {
+      console.warn("Web Audio API not supported", e);
+    }
+  }
+  stop() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+    if (this.ctx) {
+      try { this.ctx.close(); } catch (e) {}
+      this.ctx = null;
+    }
+  }
+  setMuted(m) {
+    this.muted = m;
+  }
+}
+
+const synth = new AmbientSynth();
+
 export default function ArcadePage() {
   const { user, updateUser } = useAuth();
   const [activeGame, setActiveGame] = useState(null);
   const [key, setKey] = useState(0);
   const [muted, setMuted] = useState(false);
-  const audioRef = useRef(null);
 
   useEffect(() => {
     if (activeGame) {
-      // Play calm ambient game music loop when game starts
-      const audio = new Audio("https://assets.mixkit.co/music/preview/mixkit-game-level-music-689.mp3");
-      audio.loop = true;
-      audio.volume = 0.15; // Soft, non-distracting background volume
-      audio.muted = muted;
-      audioRef.current = audio;
-      
-      audio.play().catch(err => {
-        console.warn("Audio autoplay blocked by browser settings:", err);
-      });
+      synth.setMuted(muted);
+      synth.start();
     } else {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
+      synth.stop();
     }
-
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
+    return () => synth.stop();
   }, [activeGame]);
 
-  // Update volume/mute state dynamically
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.muted = muted;
-    }
+    synth.setMuted(muted);
   }, [muted]);
 
   const handleWin = useCallback(async (amount) => {
