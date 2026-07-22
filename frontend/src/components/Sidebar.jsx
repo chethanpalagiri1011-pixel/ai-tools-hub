@@ -29,6 +29,13 @@ export default function Sidebar({ open, onClose }) {
   const { setActiveTool } = useApp();
   const navigate = useNavigate();
 
+  const isOwner = user?.id === 1 || 
+                  user?.email?.toLowerCase().includes('chethan') || 
+                  user?.email?.toLowerCase().includes('palagiri') || 
+                  user?.is_admin === true;
+
+  const visibleNavItems = navItems.filter(item => item.to !== '/dashboard/admin' || isOwner);
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -56,7 +63,7 @@ export default function Sidebar({ open, onClose }) {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {navItems.map(({ to, icon: Icon, label, end }) => (
+        {visibleNavItems.map(({ to, icon: Icon, label, end }) => (
           <NavLink key={to} to={to} end={end}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium

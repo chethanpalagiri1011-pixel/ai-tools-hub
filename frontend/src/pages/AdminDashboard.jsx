@@ -1,14 +1,21 @@
 import { useState, useEffect } from 'react';
 import { 
   Users, Activity, ImageIcon, FileText, MessageSquare, 
-  Sparkles, ShieldCheck, Clock, TrendingUp, RefreshCw, BarChart2 
+  Sparkles, ShieldCheck, Clock, TrendingUp, RefreshCw, BarChart2, ShieldAlert
 } from 'lucide-react';
 import api from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
+
+  const isOwner = user?.id === 1 || 
+                  user?.email?.toLowerCase().includes('chethan') || 
+                  user?.email?.toLowerCase().includes('palagiri') || 
+                  user?.is_admin === true;
 
   const fetchStats = async () => {
     setLoading(true);
@@ -24,8 +31,24 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    fetchStats();
-  }, []);
+    if (isOwner) {
+      fetchStats();
+    }
+  }, [isOwner]);
+
+  if (!isOwner) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8">
+        <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+          <ShieldAlert size={32} className="text-red-400" />
+        </div>
+        <h2 className="font-display text-2xl font-bold text-white mb-2">Access Restricted</h2>
+        <p className="text-gray-400 text-sm max-w-md">
+          The Owner Panel is restricted exclusively to the website owner. Regular members cannot view administrative analytics.
+        </p>
+      </div>
+    );
+  }
 
   if (loading && !stats) {
     return (
