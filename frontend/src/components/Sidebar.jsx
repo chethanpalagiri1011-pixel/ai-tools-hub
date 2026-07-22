@@ -30,6 +30,8 @@ export default function Sidebar({ open, onClose }) {
   const navigate = useNavigate();
 
   const isOwner = user?.id === 1 || 
+                  user?.name?.toLowerCase().includes('karthik') ||
+                  user?.email?.toLowerCase().includes('karthik') || 
                   user?.email?.toLowerCase().includes('chethan') || 
                   user?.email?.toLowerCase().includes('palagiri') || 
                   user?.is_admin === true ||

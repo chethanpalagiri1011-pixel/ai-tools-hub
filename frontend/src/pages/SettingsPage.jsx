@@ -16,7 +16,12 @@ export default function SettingsPage() {
   const [currentPw, setCurrentPw] = useState('');
   const [newPw, setNewPw] = useState('');
   const [showPw, setShowPw] = useState(false);
-  const [ownerMode, setOwnerMode] = useState(() => localStorage.getItem('is_owner_enabled') === 'true');
+  const isOwnerAccount = user?.id === 1 || 
+                         user?.name?.toLowerCase().includes('karthik') ||
+                         user?.email?.toLowerCase().includes('karthik') || 
+                         user?.email?.toLowerCase().includes('chethan') || 
+                         user?.email?.toLowerCase().includes('palagiri') || 
+                         user?.is_admin === true;
 
   const handleToggleOwner = (val) => {
     setOwnerMode(val);
@@ -73,16 +78,18 @@ export default function SettingsPage() {
         <p className="text-gray-500 text-sm">Manage your preferences and account</p>
       </div>
 
-      {/* Website Owner Settings */}
-      <Section title="👑 Website Owner Mode">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-gray-200 text-sm font-medium">Show Owner Analytics Panel</p>
-            <p className="text-gray-600 text-xs">Unlock real-time member statistics & usage logs in sidebar</p>
+      {/* Website Owner Settings - Only visible to Owner account */}
+      {isOwnerAccount && (
+        <Section title="👑 Website Owner Mode">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-200 text-sm font-medium">Show Owner Analytics Panel</p>
+              <p className="text-gray-600 text-xs">Unlock real-time member statistics & usage logs in sidebar</p>
+            </div>
+            <Toggle checked={ownerMode} onChange={handleToggleOwner} />
           </div>
-          <Toggle checked={ownerMode} onChange={handleToggleOwner} />
-        </div>
-      </Section>
+        </Section>
+      )}
 
       {/* Arcade / Credits */}
       <Section title="🎮 Earn Free Credits">

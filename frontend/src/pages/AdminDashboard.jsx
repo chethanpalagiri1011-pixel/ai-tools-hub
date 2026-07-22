@@ -13,6 +13,8 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
 
   const isOwner = user?.id === 1 || 
+                  user?.name?.toLowerCase().includes('karthik') ||
+                  user?.email?.toLowerCase().includes('karthik') || 
                   user?.email?.toLowerCase().includes('chethan') || 
                   user?.email?.toLowerCase().includes('palagiri') || 
                   user?.is_admin === true ||
