@@ -424,10 +424,10 @@ export default function ArcadePage() {
 
   useEffect(() => {
     if (activeGame) {
-      // Play 8-bit retro arcade loop when game starts
-      const audio = new Audio("https://assets.mixkit.co/music/preview/mixkit-arcade-retro-game-217.mp3");
+      // Play calm ambient game music loop when game starts
+      const audio = new Audio("https://assets.mixkit.co/music/preview/mixkit-game-level-music-689.mp3");
       audio.loop = true;
-      audio.volume = 0.2; // Gentle background volume
+      audio.volume = 0.15; // Soft, non-distracting background volume
       audio.muted = muted;
       audioRef.current = audio;
       
