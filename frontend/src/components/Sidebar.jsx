@@ -32,7 +32,8 @@ export default function Sidebar({ open, onClose }) {
   const isOwner = user?.id === 1 || 
                   user?.email?.toLowerCase().includes('chethan') || 
                   user?.email?.toLowerCase().includes('palagiri') || 
-                  user?.is_admin === true;
+                  user?.is_admin === true ||
+                  localStorage.getItem('is_owner_enabled') === 'true';
 
   const visibleNavItems = navItems.filter(item => item.to !== '/dashboard/admin' || isOwner);
 

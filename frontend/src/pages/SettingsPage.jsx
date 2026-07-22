@@ -16,6 +16,19 @@ export default function SettingsPage() {
   const [currentPw, setCurrentPw] = useState('');
   const [newPw, setNewPw] = useState('');
   const [showPw, setShowPw] = useState(false);
+  const [ownerMode, setOwnerMode] = useState(() => localStorage.getItem('is_owner_enabled') === 'true');
+
+  const handleToggleOwner = (val) => {
+    setOwnerMode(val);
+    if (val) {
+      localStorage.setItem('is_owner_enabled', 'true');
+      toast.success('👑 Owner Panel unlocked in sidebar!');
+    } else {
+      localStorage.removeItem('is_owner_enabled');
+      toast.success('Owner Panel hidden');
+    }
+    setTimeout(() => window.location.reload(), 500);
+  };
 
   const handleSaveNotifs = () => {
     toast.success('Notification preferences saved!');
@@ -59,6 +72,17 @@ export default function SettingsPage() {
         <h1 className="font-display text-2xl font-bold text-white mb-1">Settings</h1>
         <p className="text-gray-500 text-sm">Manage your preferences and account</p>
       </div>
+
+      {/* Website Owner Settings */}
+      <Section title="👑 Website Owner Mode">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-gray-200 text-sm font-medium">Show Owner Analytics Panel</p>
+            <p className="text-gray-600 text-xs">Unlock real-time member statistics & usage logs in sidebar</p>
+          </div>
+          <Toggle checked={ownerMode} onChange={handleToggleOwner} />
+        </div>
+      </Section>
 
       {/* Arcade / Credits */}
       <Section title="🎮 Earn Free Credits">
