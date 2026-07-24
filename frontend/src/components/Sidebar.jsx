@@ -44,38 +44,37 @@ export default function Sidebar({ open, onClose }) {
     navigate('/');
   };
 
-  return (
-    <aside className={`
-      fixed lg:static inset-y-0 left-0 z-30
-      w-64 flex flex-col
-      transition-transform duration-300
-      ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      border-r border-white/5
-    `} style={{ background: 'rgba(5,5,20,0.95)', backdropFilter: 'blur(20px)' }}>
+  const userAvatar = user?.avatar || (user?.id ? localStorage.getItem(`user_avatar_${user.id}`) : localStorage.getItem('user_avatar_default'));
 
-      {/* Logo */}
-      <div className="flex items-center justify-between px-5 py-5 border-b border-white/5">
-        <div className="flex items-center gap-2">
-          <img src="/logo.png" alt="AI Tools Hub" className="w-8 h-8 rounded-lg object-cover" />
-          <span className="font-display font-bold text-white text-lg">AI Tools Hub</span>
-        </div>
-        <button onClick={onClose} className="lg:hidden text-gray-500 hover:text-white p-1">
-          <X size={18} />
+  return (
+    <aside className={`fixed lg:static inset-y-0 left-0 z-40 w-64 border-r border-white/5 flex flex-col transition-all duration-300 ${
+      open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+    }`} style={{ background: '#0a0a14' }}>
+      
+      {/* Brand Header */}
+      <div className="flex items-center justify-between p-6 border-b border-white/5">
+        <Link to="/dashboard" className="flex items-center gap-3">
+          <img src="/logo.png" alt="AI Tools Hub Logo" className="w-8 h-8 rounded-xl object-contain drop-shadow-[0_0_12px_rgba(124,58,237,0.5)]" />
+          <span className="font-display font-bold text-lg text-white">
+            AI Tools Hub
+          </span>
+        </Link>
+        <button onClick={onClose} className="lg:hidden text-gray-400 hover:text-white">
+          <X size={20} />
         </button>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {visibleNavItems.map(({ to, icon: Icon, label, end }) => (
-          <NavLink key={to} to={to} end={end}
+        {visibleNavItems.map(({ to, icon: Icon, label }) => (
+          <NavLink key={to} to={to} onClick={() => window.innerWidth < 1024 && onClose()}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-medium
-               ${isActive
-                 ? 'bg-gradient-to-r from-purple-600/20 to-blue-600/20 text-purple-300 border border-purple-500/30'
-                 : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
-               }`
+              `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                isActive 
+                  ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30' 
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+              }`
             }
-            onClick={() => window.innerWidth < 1024 && onClose()}
           >
             <Icon size={18} />
             {label}
@@ -103,9 +102,13 @@ export default function Sidebar({ open, onClose }) {
       {/* User Card */}
       <div className="px-3 py-4 border-t border-white/5">
         <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-white/5">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 overflow-hidden"
                style={{ background: 'linear-gradient(135deg, #7c3aed, #3b82f6)' }}>
-            {user?.name?.[0]?.toUpperCase() || 'U'}
+            {userAvatar ? (
+              <img src={userAvatar} alt="User Avatar" className="w-full h-full object-cover" />
+            ) : (
+              user?.name?.[0]?.toUpperCase() || 'U'
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white text-sm font-medium truncate">{user?.name}</p>

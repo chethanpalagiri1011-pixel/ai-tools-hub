@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { User, Mail, Camera, Save, CheckCircle2, Shield, Award, Phone } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { User, Mail, Camera, Save, CheckCircle2, Shield, Award, Phone, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import api from '../utils/api';
@@ -8,6 +8,12 @@ import toast from 'react-hot-toast';
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
   const { history } = useApp();
+  const fileInputRef = useRef(null);
+
+  const [avatar, setAvatar] = useState(() => {
+    return user?.avatar || localStorage.getItem(`user_avatar_${user?.id || 'default'}`) || null;
+  });
+
   const [form, setForm] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -15,6 +21,39 @@ export default function ProfilePage() {
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  const handleCameraClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be under 5MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result;
+      if (base64) {
+        setAvatar(base64);
+        localStorage.setItem(`user_avatar_${user?.id || 'default'}`, base64);
+        updateUser({ avatar: base64 });
+        toast.success('Profile picture updated! 📸');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = () => {
+    setAvatar(null);
+    localStorage.removeItem(`user_avatar_${user?.id || 'default'}`);
+    updateUser({ avatar: null });
+    toast.success('Profile picture removed');
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -58,16 +97,41 @@ export default function ProfilePage() {
         {/* Avatar & Plan */}
         <div className="p-6 rounded-2xl border border-white/8 text-center"
              style={{ background: 'rgba(255,255,255,0.02)' }}>
-          <div className="relative inline-block mb-4">
-            <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold text-white mx-auto"
+          {/* Hidden File Input for Avatar Upload */}
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            accept="image/*" 
+            onChange={handleImageUpload} 
+            className="hidden" 
+          />
+
+          <div className="relative inline-block mb-4 group cursor-pointer" onClick={handleCameraClick}>
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold text-white mx-auto overflow-hidden shadow-lg border border-white/10"
                  style={{ background: 'linear-gradient(135deg, #7c3aed, #3b82f6)' }}>
-              {user?.name?.[0]?.toUpperCase() || 'U'}
+              {avatar ? (
+                <img src={avatar} alt="Profile Avatar" className="w-full h-full object-cover" />
+              ) : (
+                user?.name?.[0]?.toUpperCase() || 'U'
+              )}
             </div>
-            <button className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center border-2 border-dark-400 text-white transition-all hover:scale-110"
-                    style={{ background: 'linear-gradient(135deg, #7c3aed, #3b82f6)' }}>
-              <Camera size={12} />
+            <button 
+              type="button"
+              onClick={(e) => { e.stopPropagation(); handleCameraClick(); }}
+              title="Upload your photo"
+              className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center border-2 border-slate-900 text-white transition-all hover:scale-110 shadow-lg"
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #3b82f6)' }}>
+              <Camera size={14} />
             </button>
           </div>
+
+          {avatar && (
+            <button 
+              onClick={handleRemovePhoto} 
+              className="text-[11px] text-gray-500 hover:text-red-400 flex items-center justify-center gap-1 mx-auto mb-2 transition-colors">
+              <Trash2 size={11} /> Remove photo
+            </button>
+          )}
           <h3 className="text-white font-semibold">{user?.name}</h3>
           <p className="text-gray-500 text-sm truncate">{user?.email}</p>
           {user?.phone && (
