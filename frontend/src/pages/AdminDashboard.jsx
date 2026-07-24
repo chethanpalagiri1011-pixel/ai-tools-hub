@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { 
   Users, Activity, ImageIcon, FileText, MessageSquare, 
   Sparkles, ShieldCheck, Clock, TrendingUp, RefreshCw, BarChart2, ShieldAlert,
@@ -27,23 +28,21 @@ export default function AdminDashboard() {
       setStats(res.data);
     } catch (err) {
       console.error("Failed to load admin stats:", err);
-      toast.error("Failed to load analytics dashboard");
+      toast.error("Connecting to server...");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (isOwner) {
-      fetchStats();
-    }
-  }, [isOwner]);
+    fetchStats();
+  }, []);
 
   if (!isOwner) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8">
-        <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
-          <ShieldAlert size={32} className="text-red-400" />
+        <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4 text-red-400">
+          <ShieldAlert size={32} />
         </div>
         <h2 className="font-display text-2xl font-bold text-white mb-2">Access Restricted</h2>
         <p className="text-gray-400 text-sm max-w-md">
@@ -53,46 +52,20 @@ export default function AdminDashboard() {
     );
   }
 
-  if (!stats) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8">
-        {loading ? (
-          <>
-            <div className="w-12 h-12 rounded-full border-2 border-purple-600 border-t-transparent animate-spin mb-4" />
-            <p className="text-gray-400 text-sm font-medium">Loading Owner Analytics Dashboard...</p>
-          </>
-        ) : (
-          <>
-            <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-4 text-purple-400 mx-auto">
-              <RefreshCw size={28} />
-            </div>
-            <h2 className="font-display text-xl font-bold text-white mb-2">Connecting to Analytics...</h2>
-            <p className="text-gray-400 text-sm max-w-sm mb-4">
-              Your server is spinning up. Click below to load your member statistics.
-            </p>
-            <button onClick={fetchStats} className="btn-primary py-2.5 px-6 text-sm font-semibold">
-              Load Owner Panel
-            </button>
-          </>
-        )}
-      </div>
-    );
-  }
-
   const breakdown = stats?.breakdown || { image: 0, summary: 0, caption: 0, prompt: 0 };
   const maxVal = Math.max(breakdown.image, breakdown.summary, breakdown.caption, breakdown.prompt, 1);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-12">
+    <div className="max-w-6xl mx-auto space-y-8 pb-12 animate-fade-in">
       {/* Title Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-6">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-2 bg-purple-500/10 text-purple-300 border border-purple-500/20">
-            <ShieldCheck size={14} /> Owner & Admin Panel
+            <ShieldCheck size={14} /> Owner Dashboard
           </div>
-          <h1 className="font-display text-3xl font-bold text-white">Owner Analytics Hub</h1>
+          <h1 className="font-display text-3xl font-bold text-white">👑 Owner Control Panel</h1>
           <p className="text-gray-400 text-sm mt-1">
-            Real-time insights on registered members, tool usage, and generation metrics.
+            Track user registrations, tool activity, credit usage, and member feedback in real time.
           </p>
         </div>
         <button 
@@ -105,19 +78,19 @@ export default function AdminDashboard() {
         </button>
       </div>
 
-      {/* Overview Stat Cards */}
+      {/* Top 4 Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Users */}
+        {/* Total Members */}
         <div className="p-5 rounded-2xl border border-white/8 relative overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)' }}>
           <div className="flex items-center justify-between mb-3">
             <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Total Members</span>
-            <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
-              <Users size={18} className="text-purple-400" />
+            <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+              <Users size={18} />
             </div>
           </div>
           <p className="text-3xl font-display font-bold text-white mb-1">{stats?.total_users ?? 0}</p>
           <p className="text-xs text-green-400 flex items-center gap-1">
-            <TrendingUp size={12} /> Active registered accounts
+            <TrendingUp size={12} /> Registered accounts
           </p>
         </div>
 
@@ -125,38 +98,38 @@ export default function AdminDashboard() {
         <div className="p-5 rounded-2xl border border-white/8 relative overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)' }}>
           <div className="flex items-center justify-between mb-3">
             <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Total Generations</span>
-            <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-              <Activity size={18} className="text-blue-400" />
+            <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+              <Activity size={18} />
             </div>
           </div>
           <p className="text-3xl font-display font-bold text-white mb-1">{stats?.total_generations ?? 0}</p>
-          <p className="text-xs text-blue-400">Total AI content produced</p>
+          <p className="text-xs text-blue-400">AI content generated</p>
         </div>
 
-        {/* Image Generations */}
+        {/* Photo Generations */}
         <div className="p-5 rounded-2xl border border-white/8 relative overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)' }}>
           <div className="flex items-center justify-between mb-3">
             <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Photo Generations</span>
-            <div className="w-9 h-9 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center">
-              <ImageIcon size={18} className="text-pink-400" />
+            <div className="w-9 h-9 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400">
+              <ImageIcon size={18} />
             </div>
           </div>
           <p className="text-3xl font-display font-bold text-white mb-1">{breakdown.image}</p>
-          <p className="text-xs text-pink-400">Visual creations generated</p>
+          <p className="text-xs text-pink-400">Images created</p>
         </div>
 
-        {/* Text Generations */}
+        {/* Text & Prompt Tools */}
         <div className="p-5 rounded-2xl border border-white/8 relative overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)' }}>
           <div className="flex items-center justify-between mb-3">
             <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Text & Prompt Tools</span>
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-              <FileText size={18} className="text-emerald-400" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <FileText size={18} />
             </div>
           </div>
           <p className="text-3xl font-display font-bold text-white mb-1">
             {breakdown.summary + breakdown.caption + breakdown.prompt}
           </p>
-          <p className="text-xs text-emerald-400">Summaries, captions & prompts</p>
+          <p className="text-xs text-emerald-400">Summaries & captions</p>
         </div>
       </div>
 
@@ -164,7 +137,7 @@ export default function AdminDashboard() {
       <div className="p-6 rounded-2xl border border-white/8 space-y-6" style={{ background: 'rgba(255,255,255,0.02)' }}>
         <div className="flex items-center gap-3 border-b border-white/5 pb-4">
           <BarChart2 size={20} className="text-purple-400" />
-          <h2 className="text-white font-bold text-lg">Where Users Spend Their Time</h2>
+          <h2 className="text-white font-bold text-lg">Tool Usage Breakdown</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -240,9 +213,9 @@ export default function AdminDashboard() {
         <div className="p-6 rounded-2xl border border-white/8 space-y-4" style={{ background: 'rgba(255,255,255,0.02)' }}>
           <div className="flex items-center justify-between border-b border-white/5 pb-4">
             <h3 className="text-white font-bold text-base flex items-center gap-2">
-              <Users size={18} className="text-purple-400" /> Newly Joined Members
+              <Users size={18} className="text-purple-400" /> Registered Members
             </h3>
-            <span className="text-xs text-gray-500">Latest 10</span>
+            <span className="text-xs text-gray-500">Latest Users</span>
           </div>
 
           <div className="overflow-x-auto">
@@ -269,7 +242,7 @@ export default function AdminDashboard() {
                     </td>
                     <td className="py-3 font-bold text-yellow-400">{u.credits}</td>
                     <td className="py-3 text-gray-500">
-                      {u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}
+                      {u.created_at ? u.created_at.slice(0, 10) : 'N/A'}
                     </td>
                   </tr>
                 ))}
@@ -309,7 +282,7 @@ export default function AdminDashboard() {
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-xs font-semibold text-white truncate">{act.user_name}</p>
                     <span className="text-[10px] text-gray-500">
-                      {act.created_at ? new Date(act.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                      {act.created_at ? act.created_at.slice(0, 10) : ''}
                     </span>
                   </div>
                   <p className="text-xs text-gray-400 truncate mt-0.5">"{act.prompt}"</p>
@@ -331,7 +304,7 @@ export default function AdminDashboard() {
           <h3 className="text-white font-bold text-base flex items-center gap-2">
             <MessageSquareHeart size={18} className="text-pink-400" /> Member Ratings & Feedback
           </h3>
-          <span className="text-xs text-gray-500">Collected from users after work</span>
+          <span className="text-xs text-gray-500">Collected from users</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -360,7 +333,7 @@ export default function AdminDashboard() {
                 </p>
               </div>
               <p className="text-[10px] text-gray-500 text-right">
-                {fb.created_at ? new Date(fb.created_at).toLocaleDateString() : ''}
+                {fb.created_at ? fb.created_at.slice(0, 10) : ''}
               </p>
             </div>
           ))}
