@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, Link } from 'react-router-dom';
 import {
   LayoutDashboard, Wand2, History, User, Settings,
   Zap, X, ImageIcon, FileText, MessageSquare, Sparkles, Images, Gamepad2, ShieldCheck
