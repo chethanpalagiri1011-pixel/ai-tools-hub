@@ -46,18 +46,23 @@ async def get_admin_stats(db: Session = Depends(get_db), current_user: User = De
         })
 
     # Recent user feedback
-    feedback_db = db.query(Feedback).order_by(Feedback.created_at.desc()).limit(20).all()
-    recent_feedback = [
-        {
-            "id": fb.id,
-            "user_name": fb.user_name or "Anonymous User",
-            "tool_type": fb.tool_type,
-            "rating": fb.rating,
-            "comment": fb.comment,
-            "created_at": fb.created_at.isoformat() if fb.created_at else None
-        }
-        for fb in feedback_db
-    ]
+    recent_feedback = []
+    try:
+        feedback_db = db.query(Feedback).order_by(Feedback.created_at.desc()).limit(20).all()
+        recent_feedback = [
+            {
+                "id": fb.id,
+                "user_name": fb.user_name or "Anonymous User",
+                "tool_type": fb.tool_type,
+                "rating": fb.rating,
+                "comment": fb.comment,
+                "created_at": fb.created_at.isoformat() if fb.created_at else None
+            }
+            for fb in feedback_db
+        ]
+    except Exception as e:
+        print("Feedback table query exception:", e)
+        db.rollback()
 
     return {
         "total_users": total_users,

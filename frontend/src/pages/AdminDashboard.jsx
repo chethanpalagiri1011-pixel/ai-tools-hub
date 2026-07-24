@@ -53,11 +53,28 @@ export default function AdminDashboard() {
     );
   }
 
-  if (loading && !stats) {
+  if (!stats) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <div className="w-12 h-12 rounded-full border-2 border-purple-600 border-t-transparent animate-spin mb-4" />
-        <p className="text-gray-400 text-sm font-medium">Loading Owner Analytics Dashboard...</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8">
+        {loading ? (
+          <>
+            <div className="w-12 h-12 rounded-full border-2 border-purple-600 border-t-transparent animate-spin mb-4" />
+            <p className="text-gray-400 text-sm font-medium">Loading Owner Analytics Dashboard...</p>
+          </>
+        ) : (
+          <>
+            <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-4 text-purple-400 mx-auto">
+              <RefreshCw size={28} />
+            </div>
+            <h2 className="font-display text-xl font-bold text-white mb-2">Connecting to Analytics...</h2>
+            <p className="text-gray-400 text-sm max-w-sm mb-4">
+              Your server is spinning up. Click below to load your member statistics.
+            </p>
+            <button onClick={fetchStats} className="btn-primary py-2.5 px-6 text-sm font-semibold">
+              Load Owner Panel
+            </button>
+          </>
+        )}
       </div>
     );
   }
