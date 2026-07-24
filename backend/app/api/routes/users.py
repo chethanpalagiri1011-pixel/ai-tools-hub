@@ -3,13 +3,17 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from app.db.database import get_db
 from app.models.models import User, GenerationHistory
-from app.core.security import get_current_user
+from app.core.security import get_current_user, verify_password, get_password_hash
 
 router = APIRouter()
 
 class UpdateUserRequest(BaseModel):
     name: str | None = None
     phone: str | None = None
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
 
 class RewardRequest(BaseModel):
     amount: int = 20
@@ -40,6 +44,21 @@ async def update_profile(
     db.commit()
     db.refresh(current_user)
     return {"message": "Profile updated", "name": current_user.name, "phone": current_user.phone}
+
+@router.post("/change-password")
+async def change_password(
+    data: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if not verify_password(data.current_password, current_user.password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    if len(data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters")
+    
+    current_user.password = get_password_hash(data.new_password)
+    db.commit()
+    return {"message": "Password changed successfully"}
 
 @router.get("/me/stats")
 async def get_stats(

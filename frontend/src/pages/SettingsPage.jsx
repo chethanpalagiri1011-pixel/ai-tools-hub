@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import api from '../utils/api';
 import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
@@ -44,9 +45,19 @@ export default function SettingsPage() {
     e.preventDefault();
     if (!currentPw || !newPw) { toast.error('Please fill all fields'); return; }
     if (newPw.length < 6) { toast.error('New password must be at least 6 characters'); return; }
-    await new Promise(r => setTimeout(r, 800));
-    toast.success('Password updated successfully!');
-    setCurrentPw(''); setNewPw('');
+    
+    try {
+      await api.post('/api/users/change-password', {
+        current_password: currentPw,
+        new_password: newPw
+      });
+      toast.success('Password updated successfully!');
+      setCurrentPw(''); 
+      setNewPw('');
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.detail || 'Failed to update password');
+    }
   };
 
   const handleDeleteAccount = () => {
