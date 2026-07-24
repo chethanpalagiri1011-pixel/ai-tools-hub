@@ -33,18 +33,20 @@ export default function ImageGenerator() {
 
   const handleGenerate = async () => {
     if (!prompt.trim()) { toast.error('Please enter a prompt'); return; }
+    if ((user?.credits || 0) < 10) { toast.error('Not enough credits! Image generation costs 10 credits.'); return; }
 
     setLoading(true); setSaved(false); setResult(null);
     try {
       const data = await generateImage({ prompt: prompt.trim(), style, aspectRatio: ratio });
       setResult(data);
+      updateUser({ credits: Math.max(0, (user?.credits || 0) - 10) });
       // Auto-save to history so it always appears in My Images gallery
       addToHistory({ type: 'image', prompt: prompt.trim(), style, ratio, url: data.url, seed: data.seed });
-      toast.success('Image generated! ✨');
+      toast.success('Image generated! (10 credits used) ✨');
       // Prompt user for feedback after completing work
       setTimeout(() => setShowFeedback(true), 1500);
     } catch (e) {
-      toast.error('Generation failed. Try again.');
+      toast.error(e.response?.data?.detail || 'Generation failed. Try again.');
     } finally {
       setLoading(false);
     }
@@ -82,7 +84,7 @@ export default function ImageGenerator() {
         </div>
         <div>
           <h2 className="font-display text-xl font-bold text-white">AI Image Generator</h2>
-          <p className="text-gray-500 text-sm">Turn your ideas into stunning visuals (5 credits)</p>
+          <p className="text-gray-500 text-sm">Turn your ideas into stunning visuals (10 credits)</p>
         </div>
       </div>
 
@@ -160,7 +162,7 @@ export default function ImageGenerator() {
             {loading ? (
               <><div className="spinner" /><span>Generating...</span></>
             ) : (
-              <><Wand2 size={18} /><span>Generate Image</span></>
+              <><Wand2 size={18} /><span>Generate Image (10 Credits)</span></>
             )}
           </button>
         </div>

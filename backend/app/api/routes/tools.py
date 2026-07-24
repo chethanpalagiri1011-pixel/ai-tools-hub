@@ -51,7 +51,7 @@ def save_history(db: Session, user_id: int, type_: str, prompt: str, result: str
 
 @router.post("/image")
 async def generate_image(data: ImageRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
-    await deduct_credits(user, db, 5)
+    await deduct_credits(user, db, 10)
     await asyncio.sleep(0.5)  # Simulate processing
 
     import urllib.parse
@@ -59,7 +59,7 @@ async def generate_image(data: ImageRequest, db: Session = Depends(get_db), user
     encoded_prompt = urllib.parse.quote(data.prompt)
     url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?seed={seed}&nologo=true"
     result = {"url": url, "seed": seed, "style": data.style, "prompt": data.prompt}
-    save_history(db, user.id, "image", data.prompt, json.dumps(result), 5)
+    save_history(db, user.id, "image", data.prompt, json.dumps(result), 10)
     return result
 
 @router.post("/summarize")
