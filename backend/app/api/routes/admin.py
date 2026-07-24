@@ -38,7 +38,7 @@ async def get_admin_stats(db: Session = Depends(get_db)):
     # Recent Users
     recent_users = []
     try:
-        users_db = db.query(User).order_by(User.created_at.desc()).limit(15).all()
+        users_db = db.query(User).order_by(User.id.desc()).limit(25).all()
         for u in users_db:
             recent_users.append({
                 "id": u.id,
@@ -54,7 +54,7 @@ async def get_admin_stats(db: Session = Depends(get_db)):
     # Recent Activity
     recent_activity = []
     try:
-        act_db = db.query(GenerationHistory).order_by(GenerationHistory.created_at.desc()).limit(15).all()
+        act_db = db.query(GenerationHistory).order_by(GenerationHistory.id.desc()).limit(25).all()
         for act in act_db:
             act_user = db.query(User).filter(User.id == act.user_id).first()
             recent_activity.append({
@@ -71,7 +71,7 @@ async def get_admin_stats(db: Session = Depends(get_db)):
     # Recent Feedback
     recent_feedback = []
     try:
-        fb_db = db.query(Feedback).order_by(Feedback.created_at.desc()).limit(15).all()
+        fb_db = db.query(Feedback).order_by(Feedback.id.desc()).limit(25).all()
         for fb in fb_db:
             recent_feedback.append({
                 "id": fb.id,
