@@ -29,13 +29,13 @@ export default function Sidebar({ open, onClose }) {
   const { setActiveTool } = useApp();
   const navigate = useNavigate();
 
-  const isOwner = user?.id === 1 || 
-                  user?.name?.toLowerCase().includes('karthik') ||
-                  user?.email?.toLowerCase().includes('karthik') || 
+  const isOwner = user?.email?.toLowerCase() === 'chethanpalagiri1011@gmail.com' ||
                   user?.email?.toLowerCase().includes('chethan') || 
                   user?.email?.toLowerCase().includes('palagiri') || 
+                  user?.name?.toLowerCase().includes('karthik') ||
+                  user?.email?.toLowerCase().includes('karthik') || 
                   user?.is_admin === true ||
-                  localStorage.getItem('is_owner_enabled') === 'true';
+                  user?.id === 1;
 
   const visibleNavItems = navItems.filter(item => item.to !== '/dashboard/admin' || isOwner);
 

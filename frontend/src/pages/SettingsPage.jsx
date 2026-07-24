@@ -16,12 +16,13 @@ export default function SettingsPage() {
   const [currentPw, setCurrentPw] = useState('');
   const [newPw, setNewPw] = useState('');
   const [showPw, setShowPw] = useState(false);
-  const isOwnerAccount = user?.id === 1 || 
-                         user?.name?.toLowerCase().includes('karthik') ||
-                         user?.email?.toLowerCase().includes('karthik') || 
+  const isOwnerAccount = user?.email?.toLowerCase() === 'chethanpalagiri1011@gmail.com' ||
                          user?.email?.toLowerCase().includes('chethan') || 
                          user?.email?.toLowerCase().includes('palagiri') || 
-                         user?.is_admin === true;
+                         user?.name?.toLowerCase().includes('karthik') ||
+                         user?.email?.toLowerCase().includes('karthik') || 
+                         user?.is_admin === true ||
+                         user?.id === 1;
 
   const handleToggleOwner = (val) => {
     setOwnerMode(val);
