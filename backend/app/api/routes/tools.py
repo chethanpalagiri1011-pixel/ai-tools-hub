@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from app.db.database import get_db
-from app.models.models import User, GenerationHistory
+from app.models.models import User, GenerationHistory, Feedback
 from app.core.security import get_current_user
 from app.core.config import settings
 import asyncio, random, json, os
@@ -10,6 +10,10 @@ import asyncio, random, json, os
 router = APIRouter()
 
 # ── Schemas ──────────────────────────────────────────────────────────────────
+class FeedbackRequest(BaseModel):
+    tool_type: str = "general"
+    rating: int = 5
+    comment: str | None = None
 class ImageRequest(BaseModel):
     prompt: str
     style: str = "photorealistic"
@@ -91,3 +95,17 @@ async def enhance_prompt(data: PromptRequest, db: Session = Depends(get_db), use
     result = {"original": data.prompt, "enhanced": enhanced, "negative_prompt": negative}
     save_history(db, user.id, "prompt", data.prompt, json.dumps(result), 1)
     return result
+
+@router.post("/feedback")
+async def submit_feedback(data: FeedbackRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    entry = Feedback(
+        user_id=user.id if user else None,
+        user_name=user.name if user else "Anonymous",
+        tool_type=data.tool_type,
+        rating=max(1, min(5, data.rating)),
+        comment=data.comment
+    )
+    db.add(entry)
+    db.commit()
+    db.refresh(entry)
+    return {"message": "Thank you for your feedback! ❤️", "id": entry.id}

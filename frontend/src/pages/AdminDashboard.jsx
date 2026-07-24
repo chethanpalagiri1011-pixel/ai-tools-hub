@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
 import { 
   Users, Activity, ImageIcon, FileText, MessageSquare, 
-  Sparkles, ShieldCheck, Clock, TrendingUp, RefreshCw, BarChart2, ShieldAlert
+  Sparkles, ShieldCheck, Clock, TrendingUp, RefreshCw, BarChart2, ShieldAlert,
+  Star, MessageSquareHeart
 } from 'lucide-react';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
@@ -305,6 +305,53 @@ export default function AdminDashboard() {
               </div>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* User Feedback & Rating Section */}
+      <div className="p-6 rounded-2xl border border-white/8 space-y-4" style={{ background: 'rgba(255,255,255,0.02)' }}>
+        <div className="flex items-center justify-between border-b border-white/5 pb-4">
+          <h3 className="text-white font-bold text-base flex items-center gap-2">
+            <MessageSquareHeart size={18} className="text-pink-400" /> Member Ratings & Feedback
+          </h3>
+          <span className="text-xs text-gray-500">Collected from users after work</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {stats?.recent_feedback?.map((fb) => (
+            <div key={fb.id} className="p-4 rounded-xl bg-white/5 border border-white/5 flex flex-col justify-between space-y-3">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-white truncate">{fb.user_name}</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/20 uppercase">
+                    {fb.tool_type}
+                  </span>
+                </div>
+                {/* Rating Stars */}
+                <div className="flex items-center gap-1 mb-2">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star
+                      key={s}
+                      size={14}
+                      className={s <= fb.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-600'}
+                    />
+                  ))}
+                  <span className="text-xs text-gray-400 font-bold ml-1">{fb.rating}/5</span>
+                </div>
+                <p className="text-xs text-gray-300 italic">
+                  {fb.comment ? `"${fb.comment}"` : <span className="text-gray-500 font-normal">No written comment left</span>}
+                </p>
+              </div>
+              <p className="text-[10px] text-gray-500 text-right">
+                {fb.created_at ? new Date(fb.created_at).toLocaleDateString() : ''}
+              </p>
+            </div>
+          ))}
+          {(!stats?.recent_feedback || stats.recent_feedback.length === 0) && (
+            <div className="col-span-full py-8 text-center text-gray-600 text-xs">
+              No user feedback received yet. As members use the tools, their ratings will appear here!
+            </div>
+          )}
         </div>
       </div>
     </div>

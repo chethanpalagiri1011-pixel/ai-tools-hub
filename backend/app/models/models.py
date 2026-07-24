@@ -40,3 +40,16 @@ class GenerationHistory(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="history")
+
+
+class Feedback(Base):
+    __tablename__ = "feedback"
+
+    id           = Column(Integer, primary_key=True, index=True)
+    user_id      = Column(Integer, ForeignKey("users.id"), nullable=True)
+    user_name    = Column(String(100), nullable=True)
+    tool_type    = Column(String(50), nullable=False)  # image|summary|caption|prompt|general
+    rating       = Column(Integer, nullable=False)     # 1-5 stars
+    comment      = Column(Text, nullable=True)
+    created_at   = Column(DateTime(timezone=True), server_default=func.now())
+

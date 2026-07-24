@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.models.models import User, GenerationHistory
+from app.models.models import User, GenerationHistory, Feedback
 from app.core.security import get_current_user
 
 router = APIRouter()
@@ -45,6 +45,20 @@ async def get_admin_stats(db: Session = Depends(get_db), current_user: User = De
             "created_at": act.created_at.isoformat() if act.created_at else None
         })
 
+    # Recent user feedback
+    feedback_db = db.query(Feedback).order_by(Feedback.created_at.desc()).limit(20).all()
+    recent_feedback = [
+        {
+            "id": fb.id,
+            "user_name": fb.user_name or "Anonymous User",
+            "tool_type": fb.tool_type,
+            "rating": fb.rating,
+            "comment": fb.comment,
+            "created_at": fb.created_at.isoformat() if fb.created_at else None
+        }
+        for fb in feedback_db
+    ]
+
     return {
         "total_users": total_users,
         "total_generations": total_generations,
@@ -55,5 +69,6 @@ async def get_admin_stats(db: Session = Depends(get_db), current_user: User = De
             "prompt": prompts_count
         },
         "recent_users": recent_users,
-        "recent_activity": recent_activity
+        "recent_activity": recent_activity,
+        "recent_feedback": recent_feedback
     }

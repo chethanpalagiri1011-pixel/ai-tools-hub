@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { ImageIcon, Download, Save, RefreshCw, Wand2, CheckCircle2 } from 'lucide-react';
+import { ImageIcon, Download, Save, RefreshCw, Wand2, CheckCircle2, MessageSquareHeart } from 'lucide-react';
 import { generateImage } from '../../utils/aiService';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
+import FeedbackModal from '../FeedbackModal';
 import toast from 'react-hot-toast';
 
 const STYLES = [
@@ -26,6 +27,7 @@ export default function ImageGenerator() {
   const [loading, setLoading]     = useState(false);
   const [result, setResult]       = useState(null);
   const [saved, setSaved]         = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const { addToHistory }          = useApp();
   const { user, updateUser }      = useAuth();
 
@@ -39,6 +41,8 @@ export default function ImageGenerator() {
       // Auto-save to history so it always appears in My Images gallery
       addToHistory({ type: 'image', prompt: prompt.trim(), style, ratio, url: data.url, seed: data.seed });
       toast.success('Image generated! ✨');
+      // Prompt user for feedback after completing work
+      setTimeout(() => setShowFeedback(true), 1500);
     } catch (e) {
       toast.error('Generation failed. Try again.');
     } finally {
@@ -205,6 +209,14 @@ export default function ImageGenerator() {
           )}
         </div>
       </div>
+
+      {/* Feedback Modal Popup */}
+      <FeedbackModal 
+        isOpen={showFeedback} 
+        onClose={() => setShowFeedback(false)} 
+        toolType="image" 
+        toolName="Image Generator" 
+      />
     </div>
   );
 }

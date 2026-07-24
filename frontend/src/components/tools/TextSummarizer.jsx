@@ -3,6 +3,7 @@ import { FileText, Copy, Save, Wand2, CheckCircle2, BarChart2 } from 'lucide-rea
 import { summarizeText } from '../../utils/aiService';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
+import FeedbackModal from '../FeedbackModal';
 import toast from 'react-hot-toast';
 
 const LENGTH_OPTIONS = [
@@ -20,6 +21,7 @@ export default function TextSummarizer() {
   const [result, setResult]   = useState(null);
   const [copied, setCopied]   = useState(false);
   const [saved, setSaved]     = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const { addToHistory }      = useApp();
   const { user, updateUser }  = useAuth();
 
@@ -35,6 +37,7 @@ export default function TextSummarizer() {
       setResult(data);
       updateUser({ credits: Math.max(0, (user?.credits || 0) - 2) });
       toast.success('Text summarized! ✨');
+      setTimeout(() => setShowFeedback(true), 1500);
     } catch {
       toast.error('Summarization failed. Try again.');
     } finally {
@@ -201,6 +204,14 @@ export default function TextSummarizer() {
           )}
         </div>
       </div>
+
+      {/* Feedback Modal Popup */}
+      <FeedbackModal 
+        isOpen={showFeedback} 
+        onClose={() => setShowFeedback(false)} 
+        toolType="summary" 
+        toolName="Smart Summarizer" 
+      />
     </div>
   );
 }
