@@ -2,9 +2,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import {
   Zap, ArrowRight, Star, ImageIcon, FileText, MessageSquare,
   Sparkles, Shield, Globe, BarChart3, CheckCircle2, ChevronRight,
-  Menu, X
+  Menu, X, Play
 } from 'lucide-react';
 import { useState } from 'react';
+import CinematicIntro from '../components/CinematicIntro';
 
 const FEATURES = [
   {
@@ -72,6 +73,20 @@ const PLANS = [
 export default function LandingPage() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showIntro, setShowIntro] = useState(() => {
+    return !sessionStorage.getItem('intro_seen');
+  });
+
+  if (showIntro) {
+    return (
+      <CinematicIntro 
+        onComplete={() => {
+          setShowIntro(false);
+          sessionStorage.setItem('intro_seen', 'true');
+        }} 
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-dark-400 overflow-x-hidden">
@@ -102,6 +117,11 @@ export default function LandingPage() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
+          <button 
+            onClick={() => setShowIntro(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-purple-300 bg-purple-500/10 border border-purple-500/20 hover:bg-purple-500/20 transition-all cursor-pointer">
+            <Play size={12} className="fill-purple-300" /> Watch Cinematic Intro
+          </button>
           <Link to="/login"
             className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors">
             Sign in

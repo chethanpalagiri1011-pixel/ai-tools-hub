@@ -1,10 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import {
   ImageIcon, FileText, MessageSquare, Sparkles,
-  Zap, TrendingUp, Clock, Star, ArrowRight, Activity
+  Zap, TrendingUp, Clock, Star, ArrowRight, Activity, Play
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
+import { useState } from 'react';
+import CinematicIntro from '../components/CinematicIntro';
 
 const TOOLS = [
   { id: 'image',   icon: ImageIcon,     label: 'Image Generator', desc: 'Text to image',       color: 'from-purple-500 to-pink-500',   count: '1.2M' },
@@ -24,6 +26,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const { history, setActiveTool } = useApp();
   const navigate = useNavigate();
+  const [showIntro, setShowIntro] = useState(false);
 
   const recentHistory = history.slice(0, 4);
 
@@ -34,6 +37,10 @@ export default function Dashboard() {
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
+  if (showIntro) {
+    return <CinematicIntro onComplete={() => setShowIntro(false)} />;
+  }
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -53,11 +60,18 @@ export default function Dashboard() {
               You have <span className="text-purple-300 font-semibold">{user?.credits} credits</span> remaining
             </p>
           </div>
-          <button onClick={() => navigate('/dashboard/tools')}
-            className="btn-primary flex items-center gap-2 text-sm">
-            Start Creating
-            <ArrowRight size={16} />
-          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setShowIntro(true)} 
+              className="flex items-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-xl text-purple-300 bg-purple-500/10 border border-purple-500/30 hover:bg-purple-500/20 transition-all shadow-lg cursor-pointer">
+              <Play size={14} className="fill-purple-300" /> Watch Intro (7s)
+            </button>
+            <button onClick={() => navigate('/dashboard/tools')}
+              className="btn-primary flex items-center gap-2 text-sm py-2.5 px-5">
+              Start Creating
+              <ArrowRight size={16} />
+            </button>
+          </div>
         </div>
       </div>
 
