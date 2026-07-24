@@ -28,7 +28,6 @@ export default function AdminDashboard() {
       setStats(res.data);
     } catch (err) {
       console.error("Failed to load admin stats:", err);
-      toast.error("Connecting to server...");
     } finally {
       setLoading(false);
     }

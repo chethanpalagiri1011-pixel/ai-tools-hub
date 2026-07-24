@@ -16,7 +16,7 @@ def safe_str(val):
     return str(val)
 
 @router.get("/stats")
-async def get_admin_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def get_admin_stats(db: Session = Depends(get_db)):
     try:
         total_users = db.query(User).count()
     except Exception:
