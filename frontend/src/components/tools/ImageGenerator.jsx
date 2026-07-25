@@ -36,44 +36,69 @@ export default function ImageGenerator() {
   const handleVoiceInput = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      toast.error('Voice input is not supported in this browser. Try Chrome or Safari!');
+      toast.error('Voice input requires Google Chrome, Microsoft Edge, or Safari!');
       return;
     }
 
     if (isListening) {
       window._recognitionInstance?.stop();
       setIsListening(false);
+      toast.success('Voice input stopped');
       return;
     }
 
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
 
-    recognition.onstart = () => {
-      setIsListening(true);
-      toast.success('Listening... Speak your prompt! 🎙️');
-    };
+      let initialPrompt = prompt;
 
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setPrompt((prev) => (prev.trim() ? prev + ' ' + transcript : transcript));
-      toast.success('Voice captured! ✨');
-    };
+      recognition.onstart = () => {
+        setIsListening(true);
+        toast.success('🎙️ Microphone active! Speak now to auto-type...');
+      };
 
-    recognition.onerror = (err) => {
-      console.error("Speech recognition error:", err);
+      recognition.onresult = (event) => {
+        let liveTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          liveTranscript += event.results[i][0].transcript;
+        }
+
+        if (liveTranscript) {
+          setPrompt(() => {
+            const prefix = initialPrompt.trim();
+            return prefix ? `${prefix} ${liveTranscript}` : liveTranscript;
+          });
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.warn("Speech recognition event:", event.error);
+        if (event.error === 'no-speech') {
+          // Ignore silence timeout quietly
+          return;
+        }
+        if (event.error === 'not-allowed') {
+          toast.error('Microphone access blocked. Please allow microphone in browser settings! 🎙️');
+        } else {
+          toast.error('Microphone paused. Tap Voice Input to speak again!');
+        }
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      window._recognitionInstance = recognition;
+      recognition.start();
+    } catch (err) {
+      console.error("Speech recognition start error:", err);
       setIsListening(false);
-      toast.error('Voice input error. Try again!');
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    window._recognitionInstance = recognition;
-    recognition.start();
+      toast.error('Could not access microphone. Check browser permissions!');
+    }
   };
 
   const handleVoiceOver = () => {
