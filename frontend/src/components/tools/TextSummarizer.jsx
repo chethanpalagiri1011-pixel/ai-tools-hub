@@ -209,6 +209,32 @@ export default function TextSummarizer() {
               rows={8}
               className="input-field resize-none leading-relaxed"
             />
+
+            {/* Listening Indicator Bar */}
+            {isListening && (
+              <div className="mt-2.5 p-3 rounded-xl border border-red-500/50 bg-red-500/15 flex items-center justify-between animate-pulse">
+                <div className="flex items-center gap-3">
+                  <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-red-500 text-white">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <Mic size={16} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-red-300">🎙️ Listening to your voice...</p>
+                    <p className="text-[11px] text-gray-300">Speak now! Words will auto-type into text box</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    try { window._recognitionInstance?.stop(); } catch {}
+                    setIsListening(false);
+                  }}
+                  className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors shadow cursor-pointer"
+                >
+                  Done
+                </button>
+              </div>
+            )}
             <div className="flex justify-between text-xs text-gray-600 mt-1">
               <span>{text.split(/\s+/).filter(Boolean).length} words</span>
               <span>{text.length} characters</span>

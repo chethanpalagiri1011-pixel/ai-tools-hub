@@ -48,42 +48,30 @@ export default function ImageGenerator() {
 
     try {
       const recognition = new SpeechRecognition();
-      recognition.continuous = true;
+      recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.lang = 'en-US';
-
-      let initialPrompt = prompt;
+      recognition.lang = navigator.language || 'en-US';
 
       recognition.onstart = () => {
         setIsListening(true);
-        toast.success('🎙️ Microphone active! Speak to auto-type...');
       };
 
       recognition.onresult = (event) => {
-        let finalText = '';
-        let interimText = '';
-
+        let resultText = '';
         for (let i = 0; i < event.results.length; i++) {
-          const textChunk = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalText += textChunk + ' ';
-          } else {
-            interimText += textChunk;
-          }
+          resultText += event.results[i][0].transcript;
         }
-
-        const fullSpokenText = (finalText + interimText).trim();
-        if (fullSpokenText) {
-          setPrompt(fullSpokenText);
+        if (resultText) {
+          setPrompt(resultText);
         }
       };
 
       recognition.onerror = (event) => {
         console.warn("Speech recognition event:", event.error);
+        setIsListening(false);
         if (event.error === 'not-allowed') {
           toast.error('Microphone permission blocked in browser settings! 🎙️');
         }
-        setIsListening(false);
       };
 
       recognition.onend = () => {
@@ -95,6 +83,7 @@ export default function ImageGenerator() {
     } catch (err) {
       console.error("Speech recognition start error:", err);
       setIsListening(false);
+      toast.error('Microphone error. Please allow microphone access!');
     }
   };
 
@@ -224,6 +213,32 @@ export default function ImageGenerator() {
               rows={4}
               className="input-field resize-none leading-relaxed"
             />
+
+            {/* Listening Indicator Bar */}
+            {isListening && (
+              <div className="mt-2.5 p-3 rounded-xl border border-red-500/50 bg-red-500/15 flex items-center justify-between animate-pulse">
+                <div className="flex items-center gap-3">
+                  <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-red-500 text-white">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <Mic size={16} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-red-300">🎙️ Listening to your voice...</p>
+                    <p className="text-[11px] text-gray-300">Speak now! Words will auto-type into text box</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    try { window._recognitionInstance?.stop(); } catch {}
+                    setIsListening(false);
+                  }}
+                  className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors shadow cursor-pointer"
+                >
+                  Done
+                </button>
+              </div>
+            )}
             {/* Examples */}
             <div className="flex flex-wrap gap-2 mt-2">
               {EXAMPLE_PROMPTS.map(ex => (
