@@ -63,7 +63,7 @@ export default function VoiceAssistant({
     };
   }, []);
 
-  const toggleListening = () => {
+  const toggleListening = async () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       toast.error('Voice typing requires Google Chrome, Safari, or Microsoft Edge!');
@@ -78,6 +78,17 @@ export default function VoiceAssistant({
       setIsListening(false);
       setLiveTranscript('');
       toast.success('Voice typing stopped');
+      return;
+    }
+
+    // Explicitly request microphone stream permission from browser
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
+    } catch (micErr) {
+      console.warn("Microphone stream error:", micErr);
+      toast.error('Microphone permission denied! Please click Allow on the browser popup.');
       return;
     }
 
@@ -145,8 +156,8 @@ export default function VoiceAssistant({
 
       recognition.onerror = (event) => {
         console.warn("Speech recognition notice:", event.error);
-        if (event.error === 'not-allowed') {
-          toast.error('Microphone permission blocked. Please allow microphone in browser settings! 🎙️');
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          toast.error('Brave Browser blocks Speech Cloud API. Please open in Google Chrome or Edge for instant voice typing!', { duration: 7000 });
           isListeningRef.current = false;
           setIsListening(false);
         }
@@ -167,7 +178,7 @@ export default function VoiceAssistant({
       };
 
       recognitionRef.current = recognition;
-      toast.success(`🎙️ Voice typing active! Speak now...`);
+      toast.success(`🎙️ Microphone active! Speak now...`);
       recognition.start();
     } catch (err) {
       console.error("Speech recognition error:", err);
