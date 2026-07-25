@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { ImageIcon, Download, Save, RefreshCw, Wand2, CheckCircle2, MessageSquareHeart, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { ImageIcon, Download, Save, RefreshCw, Wand2, CheckCircle2, MessageSquareHeart } from 'lucide-react';
 import { generateImage } from '../../utils/aiService';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import FeedbackModal from '../FeedbackModal';
+import VoiceAssistant from '../VoiceAssistant';
 import toast from 'react-hot-toast';
 
 const STYLES = [
@@ -169,78 +170,17 @@ export default function ImageGenerator() {
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Input Panel */}
         <div className="space-y-4">
-          {/* Prompt */}
+          {/* Prompt with Voice Assistant */}
           <div>
-            <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-              <label className="block text-sm text-gray-400 font-medium">Describe your image</label>
-              <div className="flex items-center gap-2">
-                {/* Voice Input Button */}
-                <button
-                  type="button"
-                  onClick={handleVoiceInput}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                    isListening
-                      ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse'
-                      : 'bg-purple-500/10 text-purple-300 border border-purple-500/20 hover:bg-purple-500/20'
-                  }`}
-                  title="Speak your prompt via microphone"
-                >
-                  {isListening ? <MicOff size={13} /> : <Mic size={13} />}
-                  <span>{isListening ? 'Listening...' : 'Voice Input 🎙️'}</span>
-                </button>
-
-                {/* Voice Over Button */}
-                <button
-                  type="button"
-                  onClick={handleVoiceOver}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                    isSpeaking
-                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40 animate-pulse'
-                      : 'bg-white/5 text-gray-400 border border-white/10 hover:text-white hover:bg-white/10'
-                  }`}
-                  title="Listen to voice-over"
-                >
-                  {isSpeaking ? <VolumeX size={13} /> : <Volume2 size={13} />}
-                  <span>{isSpeaking ? 'Speaking...' : 'Voice Over 🔊'}</span>
-                </button>
-              </div>
-            </div>
-
-            <textarea
-              value={prompt}
-              onChange={e => setPrompt(e.target.value)}
-              placeholder="A serene Japanese garden with cherry blossoms at sunset... (or click Voice Input to speak)"
-              rows={4}
-              className="input-field resize-none leading-relaxed"
+            <label className="block text-sm text-gray-400 mb-2 font-medium">Describe your image</label>
+            <VoiceAssistant 
+              value={prompt} 
+              onChange={setPrompt} 
+              onAutoSubmit={handleGenerate}
+              placeholder="A serene Japanese garden with cherry blossoms at sunset... (or click Real-Time Voice Typing to speak)" 
             />
-
-            {/* Listening Indicator Bar */}
-            {isListening && (
-              <div className="mt-2.5 p-3 rounded-xl border border-red-500/50 bg-red-500/15 flex items-center justify-between animate-pulse">
-                <div className="flex items-center gap-3">
-                  <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-red-500 text-white">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <Mic size={16} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-red-300">🎙️ Listening to your voice...</p>
-                    <p className="text-[11px] text-gray-300">Speak now! Words will auto-type into text box</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    try { window._recognitionInstance?.stop(); } catch {}
-                    setIsListening(false);
-                  }}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors shadow cursor-pointer"
-                >
-                  Done
-                </button>
-              </div>
-            )}
             {/* Examples */}
-            <div className="flex flex-wrap gap-2 mt-2">
+            <div className="flex flex-wrap gap-2 mt-3">
               {EXAMPLE_PROMPTS.map(ex => (
                 <button key={ex}
                   onClick={() => setPrompt(ex)}

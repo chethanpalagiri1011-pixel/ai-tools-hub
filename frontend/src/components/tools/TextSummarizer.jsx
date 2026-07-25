@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { FileText, Copy, Save, Wand2, CheckCircle2, BarChart2, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { FileText, Copy, Save, Wand2, CheckCircle2, BarChart2 } from 'lucide-react';
 import { summarizeText } from '../../utils/aiService';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import FeedbackModal from '../FeedbackModal';
+import VoiceAssistant from '../VoiceAssistant';
 import toast from 'react-hot-toast';
 
 const LENGTH_OPTIONS = [
@@ -165,76 +166,19 @@ export default function TextSummarizer() {
         {/* Input */}
         <div className="space-y-4">
           <div>
-            <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+            <div className="flex items-center justify-between mb-2">
               <label className="text-sm text-gray-400 font-medium">Input Text</label>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleVoiceInput}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                    isListening
-                      ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse'
-                      : 'bg-purple-500/10 text-purple-300 border border-purple-500/20 hover:bg-purple-500/20'
-                  }`}
-                  title="Speak document with microphone"
-                >
-                  {isListening ? <MicOff size={13} /> : <Mic size={13} />}
-                  <span>{isListening ? 'Listening...' : 'Voice Input 🎙️'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleVoiceOver(text)}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                    isSpeaking
-                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40 animate-pulse'
-                      : 'bg-white/5 text-gray-400 border border-white/10 hover:text-white hover:bg-white/10'
-                  }`}
-                  title="Listen to voice-over"
-                >
-                  {isSpeaking ? <VolumeX size={13} /> : <Volume2 size={13} />}
-                  <span>{isSpeaking ? 'Speaking...' : 'Voice Over 🔊'}</span>
-                </button>
-
-                <button onClick={() => setText(SAMPLE_TEXT)}
-                  className="text-xs text-purple-400 hover:text-purple-300 transition-colors ml-1">
-                  Load sample
-                </button>
-              </div>
+              <button onClick={() => setText(SAMPLE_TEXT)}
+                className="text-xs text-purple-400 hover:text-purple-300 transition-colors">
+                Load sample
+              </button>
             </div>
-            <textarea
-              value={text}
-              onChange={e => setText(e.target.value)}
-              placeholder="Paste your article, document, or speak with Voice Input..."
-              rows={8}
-              className="input-field resize-none leading-relaxed"
+            <VoiceAssistant 
+              value={text} 
+              onChange={setText} 
+              onAutoSubmit={handleSummarize}
+              placeholder="Paste your article or speak out loud... your words will auto-type here in real-time!" 
             />
-
-            {/* Listening Indicator Bar */}
-            {isListening && (
-              <div className="mt-2.5 p-3 rounded-xl border border-red-500/50 bg-red-500/15 flex items-center justify-between animate-pulse">
-                <div className="flex items-center gap-3">
-                  <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-red-500 text-white">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <Mic size={16} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-red-300">🎙️ Listening to your voice...</p>
-                    <p className="text-[11px] text-gray-300">Speak now! Words will auto-type into text box</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    try { window._recognitionInstance?.stop(); } catch {}
-                    setIsListening(false);
-                  }}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors shadow cursor-pointer"
-                >
-                  Done
-                </button>
-              </div>
-            )}
             <div className="flex justify-between text-xs text-gray-600 mt-1">
               <span>{text.split(/\s+/).filter(Boolean).length} words</span>
               <span>{text.length} characters</span>
