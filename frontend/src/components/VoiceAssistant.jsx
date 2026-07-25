@@ -67,42 +67,54 @@ export default function VoiceAssistant({
       }
       setIsListening(false);
       setLiveTranscript('');
-      toast.success('Voice typing stopped.');
+      toast.success('Voice typing stopped');
       return;
     }
 
     try {
       const recognition = new SpeechRecognition();
-      recognition.continuous = false;
+      recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = selectedLang;
+
+      let sessionBaseText = valueRef.current || '';
 
       recognition.onstart = () => {
         setIsListening(true);
         isListeningRef.current = true;
-        setLiveTranscript('');
-        toast.success(`🎙️ Voice typing active! Speak now...`);
       };
 
       recognition.onresult = (event) => {
-        let textChunk = '';
+        let interimText = '';
+        let finalText   = '';
+
         for (let i = 0; i < event.results.length; i++) {
-          textChunk += event.results[i][0].transcript;
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalText += transcript + ' ';
+          } else {
+            interimText += transcript;
+          }
         }
 
-        if (textChunk) {
-          const currentBase = valueRef.current || '';
-          let formatted = textChunk.trim();
+        const currentSpoken = (finalText + interimText).trim();
+        if (currentSpoken) {
+          let formatted = currentSpoken;
           if (autoPunctuate && formatted.length > 0) {
             formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
           }
 
-          const combined = currentBase 
-            ? `${currentBase.trim()} ${formatted}`
+          const combinedText = sessionBaseText 
+            ? `${sessionBaseText.trim()} ${formatted}`
             : formatted;
 
-          onChange(combined);
+          onChange(combinedText);
           setLiveTranscript(formatted);
+
+          // If final phrase completed, update sessionBaseText
+          if (finalText.trim()) {
+            sessionBaseText = combinedText;
+          }
 
           // Voice Command: "Generate image"
           if (formatted.toLowerCase().includes('generate image') || formatted.toLowerCase().includes('start generating')) {
@@ -140,6 +152,7 @@ export default function VoiceAssistant({
       };
 
       recognitionRef.current = recognition;
+      toast.success(`🎙️ Voice typing active! Speak now...`);
       recognition.start();
     } catch (err) {
       console.error("Speech recognition error:", err);
