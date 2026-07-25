@@ -30,11 +30,15 @@ export default function VoiceAssistant({
   const [liveTranscript, setLiveTranscript] = useState('');
   const [autoPunctuate, setAutoPunctuate]   = useState(true);
   const recognitionRef = useRef(null);
-  const valueRef = useRef(value);
+  const textareaRef    = useRef(null);
+  const valueRef       = useRef(value);
   const isListeningRef = useRef(isListening);
 
   useEffect(() => {
     valueRef.current = value;
+    if (textareaRef.current && !isListeningRef.current) {
+      textareaRef.current.value = value || '';
+    }
   }, [value]);
 
   useEffect(() => {
@@ -108,6 +112,10 @@ export default function VoiceAssistant({
             ? `${sessionBaseText.trim()} ${formatted}`
             : formatted;
 
+          // ZERO-LATENCY INSTANT DOM WRITES (ChatGPT & Antigravity style)
+          if (textareaRef.current) {
+            textareaRef.current.value = combinedText;
+          }
           onChange(combinedText);
           setLiveTranscript(formatted);
 
@@ -157,7 +165,7 @@ export default function VoiceAssistant({
     } catch (err) {
       console.error("Speech recognition error:", err);
       setIsListening(false);
-      toast.error('Could not access microphone. Please check browser permissions.');
+      toast.error('Could not access microphone. Please check permissions.');
     }
   };
 
@@ -187,6 +195,7 @@ export default function VoiceAssistant({
 
   const handleClear = () => {
     onChange('');
+    if (textareaRef.current) textareaRef.current.value = '';
     setLiveTranscript('');
     toast.success('Text cleared');
   };
@@ -260,11 +269,14 @@ export default function VoiceAssistant({
       {/* TEXTAREA INPUT WITH LIVE VOICE DISPLAY */}
       <div className="relative">
         <textarea
+          ref={textareaRef}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={4}
-          className="input-field resize-none leading-relaxed text-sm md:text-base font-normal tracking-wide"
+          className={`input-field resize-none leading-relaxed text-sm md:text-base font-normal tracking-wide transition-all ${
+            isListening ? 'border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.3)] bg-purple-950/20' : ''
+          }`}
         />
 
         {/* ACTIVE LIVE RECORDING CARD */}
