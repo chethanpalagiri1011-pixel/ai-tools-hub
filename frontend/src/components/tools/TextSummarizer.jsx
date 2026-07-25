@@ -30,14 +30,13 @@ export default function TextSummarizer() {
   const handleVoiceInput = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      toast.error('Voice input requires Google Chrome, Microsoft Edge, or Safari!');
+      toast.error('Voice input requires Chrome, Edge, or Safari browser!');
       return;
     }
 
     if (isListening) {
-      window._recognitionInstance?.stop();
+      try { window._recognitionInstance?.stop(); } catch {}
       setIsListening(false);
-      toast.success('Voice input stopped');
       return;
     }
 
@@ -51,7 +50,7 @@ export default function TextSummarizer() {
 
       recognition.onstart = () => {
         setIsListening(true);
-        toast.success('🎙️ Microphone active! Speak now to auto-type...');
+        toast.success('🎙️ Microphone active! Speak to auto-type...');
       };
 
       recognition.onresult = (event) => {
@@ -70,13 +69,8 @@ export default function TextSummarizer() {
 
       recognition.onerror = (event) => {
         console.warn("Speech recognition event:", event.error);
-        if (event.error === 'no-speech') {
-          return;
-        }
         if (event.error === 'not-allowed') {
-          toast.error('Microphone access blocked. Please allow microphone in browser settings! 🎙️');
-        } else {
-          toast.error('Microphone paused. Tap Voice Input to speak again!');
+          toast.error('Microphone permission blocked in browser settings! 🎙️');
         }
         setIsListening(false);
       };
@@ -90,7 +84,6 @@ export default function TextSummarizer() {
     } catch (err) {
       console.error("Speech recognition start error:", err);
       setIsListening(false);
-      toast.error('Could not access microphone. Check browser permissions!');
     }
   };
 
