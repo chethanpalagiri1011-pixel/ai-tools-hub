@@ -60,16 +60,21 @@ export default function ImageGenerator() {
       };
 
       recognition.onresult = (event) => {
-        let liveTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          liveTranscript += event.results[i][0].transcript;
+        let finalText = '';
+        let interimText = '';
+
+        for (let i = 0; i < event.results.length; i++) {
+          const textChunk = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalText += textChunk + ' ';
+          } else {
+            interimText += textChunk;
+          }
         }
 
-        if (liveTranscript) {
-          setPrompt(() => {
-            const prefix = initialPrompt.trim();
-            return prefix ? `${prefix} ${liveTranscript}` : liveTranscript;
-          });
+        const fullSpokenText = (finalText + interimText).trim();
+        if (fullSpokenText) {
+          setPrompt(fullSpokenText);
         }
       };
 
