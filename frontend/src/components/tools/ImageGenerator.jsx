@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ImageIcon, Download, Save, RefreshCw, Wand2, CheckCircle2, MessageSquareHeart } from 'lucide-react';
+import { ImageIcon, Download, Save, RefreshCw, Wand2, CheckCircle2, MessageSquareHeart, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { generateImage } from '../../utils/aiService';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
@@ -28,8 +28,75 @@ export default function ImageGenerator() {
   const [result, setResult]       = useState(null);
   const [saved, setSaved]         = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [isListening, setIsListening]   = useState(false);
+  const [isSpeaking, setIsSpeaking]     = useState(false);
   const { addToHistory }          = useApp();
   const { user, updateUser }      = useAuth();
+
+  const handleVoiceInput = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error('Voice input is not supported in this browser. Try Chrome or Safari!');
+      return;
+    }
+
+    if (isListening) {
+      window._recognitionInstance?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      toast.success('Listening... Speak your prompt! 🎙️');
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setPrompt((prev) => (prev.trim() ? prev + ' ' + transcript : transcript));
+      toast.success('Voice captured! ✨');
+    };
+
+    recognition.onerror = (err) => {
+      console.error("Speech recognition error:", err);
+      setIsListening(false);
+      toast.error('Voice input error. Try again!');
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    window._recognitionInstance = recognition;
+    recognition.start();
+  };
+
+  const handleVoiceOver = () => {
+    if (!prompt.trim()) {
+      toast.error('Type or speak a prompt first to listen!');
+      return;
+    }
+
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(prompt);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    window.speechSynthesis.speak(utterance);
+  };
 
   const handleGenerate = async () => {
     if (!prompt.trim()) { toast.error('Please enter a prompt'); return; }
@@ -93,11 +160,45 @@ export default function ImageGenerator() {
         <div className="space-y-4">
           {/* Prompt */}
           <div>
-            <label className="block text-sm text-gray-400 mb-2 font-medium">Describe your image</label>
+            <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+              <label className="block text-sm text-gray-400 font-medium">Describe your image</label>
+              <div className="flex items-center gap-2">
+                {/* Voice Input Button */}
+                <button
+                  type="button"
+                  onClick={handleVoiceInput}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    isListening
+                      ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse'
+                      : 'bg-purple-500/10 text-purple-300 border border-purple-500/20 hover:bg-purple-500/20'
+                  }`}
+                  title="Speak your prompt via microphone"
+                >
+                  {isListening ? <MicOff size={13} /> : <Mic size={13} />}
+                  <span>{isListening ? 'Listening...' : 'Voice Input 🎙️'}</span>
+                </button>
+
+                {/* Voice Over Button */}
+                <button
+                  type="button"
+                  onClick={handleVoiceOver}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    isSpeaking
+                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40 animate-pulse'
+                      : 'bg-white/5 text-gray-400 border border-white/10 hover:text-white hover:bg-white/10'
+                  }`}
+                  title="Listen to voice-over"
+                >
+                  {isSpeaking ? <VolumeX size={13} /> : <Volume2 size={13} />}
+                  <span>{isSpeaking ? 'Speaking...' : 'Voice Over 🔊'}</span>
+                </button>
+              </div>
+            </div>
+
             <textarea
               value={prompt}
               onChange={e => setPrompt(e.target.value)}
-              placeholder="A serene Japanese garden with cherry blossoms at sunset..."
+              placeholder="A serene Japanese garden with cherry blossoms at sunset... (or click Voice Input to speak)"
               rows={4}
               className="input-field resize-none leading-relaxed"
             />

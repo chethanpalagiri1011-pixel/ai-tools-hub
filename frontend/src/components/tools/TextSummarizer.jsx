@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileText, Copy, Save, Wand2, CheckCircle2, BarChart2 } from 'lucide-react';
+import { FileText, Copy, Save, Wand2, CheckCircle2, BarChart2, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { summarizeText } from '../../utils/aiService';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
@@ -22,8 +22,70 @@ export default function TextSummarizer() {
   const [copied, setCopied]   = useState(false);
   const [saved, setSaved]     = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [isListening, setIsListening]   = useState(false);
+  const [isSpeaking, setIsSpeaking]     = useState(false);
   const { addToHistory }      = useApp();
   const { user, updateUser }  = useAuth();
+
+  const handleVoiceInput = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error('Voice input is not supported in this browser!');
+      return;
+    }
+
+    if (isListening) {
+      window._recognitionInstance?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      toast.success('Listening... Speak your document! 🎙️');
+    };
+
+    recognition.onresult = (event) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setText((prev) => (prev.trim() ? prev + ' ' + transcript : transcript));
+    };
+
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+
+    window._recognitionInstance = recognition;
+    recognition.start();
+  };
+
+  const handleVoiceOver = (contentToRead) => {
+    const targetText = contentToRead || text;
+    if (!targetText.trim()) {
+      toast.error('No text available for voice-over!');
+      return;
+    }
+
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(targetText);
+    utterance.rate = 1.0;
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    window.speechSynthesis.speak(utterance);
+  };
 
   const handleSummarize = async () => {
     const trimmed = text.trim();
@@ -76,17 +138,47 @@ export default function TextSummarizer() {
         {/* Input */}
         <div className="space-y-4">
           <div>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
               <label className="text-sm text-gray-400 font-medium">Input Text</label>
-              <button onClick={() => setText(SAMPLE_TEXT)}
-                className="text-xs text-purple-400 hover:text-purple-300 transition-colors">
-                Load sample
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleVoiceInput}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    isListening
+                      ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse'
+                      : 'bg-purple-500/10 text-purple-300 border border-purple-500/20 hover:bg-purple-500/20'
+                  }`}
+                  title="Speak document with microphone"
+                >
+                  {isListening ? <MicOff size={13} /> : <Mic size={13} />}
+                  <span>{isListening ? 'Listening...' : 'Voice Input 🎙️'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleVoiceOver(text)}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    isSpeaking
+                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40 animate-pulse'
+                      : 'bg-white/5 text-gray-400 border border-white/10 hover:text-white hover:bg-white/10'
+                  }`}
+                  title="Listen to voice-over"
+                >
+                  {isSpeaking ? <VolumeX size={13} /> : <Volume2 size={13} />}
+                  <span>{isSpeaking ? 'Speaking...' : 'Voice Over 🔊'}</span>
+                </button>
+
+                <button onClick={() => setText(SAMPLE_TEXT)}
+                  className="text-xs text-purple-400 hover:text-purple-300 transition-colors ml-1">
+                  Load sample
+                </button>
+              </div>
             </div>
             <textarea
               value={text}
               onChange={e => setText(e.target.value)}
-              placeholder="Paste your article, document, or any long text here..."
+              placeholder="Paste your article, document, or speak with Voice Input..."
               rows={8}
               className="input-field resize-none leading-relaxed"
             />
