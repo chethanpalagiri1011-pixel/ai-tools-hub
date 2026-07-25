@@ -29,21 +29,27 @@ export default function VoiceAssistant({
   const [selectedLang, setSelectedLang] = useState('en-US');
   const [liveTranscript, setLiveTranscript] = useState('');
   const [autoPunctuate, setAutoPunctuate]   = useState(true);
+  const [textVal, setTextVal]               = useState(value || '');
+
   const recognitionRef = useRef(null);
   const textareaRef    = useRef(null);
-  const valueRef       = useRef(value);
+  const valueRef       = useRef(value || '');
   const isListeningRef = useRef(isListening);
 
   useEffect(() => {
-    valueRef.current = value;
-    if (textareaRef.current && !isListeningRef.current) {
-      textareaRef.current.value = value || '';
-    }
+    setTextVal(value || '');
+    valueRef.current = value || '';
   }, [value]);
 
   useEffect(() => {
     isListeningRef.current = isListening;
   }, [isListening]);
+
+  const handleInputChange = (newVal) => {
+    setTextVal(newVal);
+    onChange(newVal);
+    valueRef.current = newVal;
+  };
 
   // Clean up speech recognition on unmount
   useEffect(() => {
@@ -112,12 +118,13 @@ export default function VoiceAssistant({
             ? `${sessionBaseText.trim()} ${formatted}`
             : formatted;
 
-          // ZERO-LATENCY INSTANT DOM WRITES (ChatGPT & Antigravity style)
+          setTextVal(combinedText);
+          onChange(combinedText);
+          setLiveTranscript(formatted);
+
           if (textareaRef.current) {
             textareaRef.current.value = combinedText;
           }
-          onChange(combinedText);
-          setLiveTranscript(formatted);
 
           // If final phrase completed, update sessionBaseText
           if (finalText.trim()) {
@@ -170,7 +177,7 @@ export default function VoiceAssistant({
   };
 
   const handleTextToSpeech = () => {
-    if (!value || !value.trim()) {
+    if (!textVal || !textVal.trim()) {
       toast.error('Please speak or type some text first to read out loud!');
       return;
     }
@@ -181,7 +188,7 @@ export default function VoiceAssistant({
       return;
     }
 
-    const utterance = new SpeechSynthesisUtterance(value);
+    const utterance = new SpeechSynthesisUtterance(textVal);
     utterance.lang = selectedLang;
     utterance.rate = 0.95; // Clear natural speed for easy listening
     utterance.pitch = 1.0;
@@ -194,6 +201,7 @@ export default function VoiceAssistant({
   };
 
   const handleClear = () => {
+    setTextVal('');
     onChange('');
     if (textareaRef.current) textareaRef.current.value = '';
     setLiveTranscript('');
@@ -253,7 +261,7 @@ export default function VoiceAssistant({
           </button>
 
           {/* Clear Button */}
-          {value && (
+          {textVal && (
             <button
               type="button"
               onClick={handleClear}
@@ -270,8 +278,8 @@ export default function VoiceAssistant({
       <div className="relative">
         <textarea
           ref={textareaRef}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
+          value={textVal}
+          onChange={(e) => handleInputChange(e.target.value)}
           placeholder={placeholder}
           rows={4}
           className={`input-field resize-none leading-relaxed text-sm md:text-base font-normal tracking-wide transition-all ${
