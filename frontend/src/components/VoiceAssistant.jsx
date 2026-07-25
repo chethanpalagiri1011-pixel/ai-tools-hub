@@ -18,6 +18,13 @@ const LANGUAGES = [
   { code: 'zh-CN', name: 'Chinese (中文)' },
 ];
 
+const QUICK_SPOKEN_SAMPLES = [
+  "A serene Japanese garden with cherry blossoms at sunset",
+  "Futuristic cyberpunk city with glowing neon lights at night",
+  "A majestic dragon soaring over snow-capped mountains",
+  "Minimalist 3D isometric architectural design",
+];
+
 export default function VoiceAssistant({ 
   value, 
   onChange, 
@@ -300,30 +307,53 @@ export default function VoiceAssistant({
 
         {/* ACTIVE LIVE RECORDING CARD */}
         {isListening && (
-          <div className="mt-2 p-3.5 rounded-xl border border-purple-500/40 bg-purple-950/40 backdrop-blur-md flex items-center justify-between animate-fade-in shadow-xl">
-            <div className="flex items-center gap-3">
-              <div className="relative flex items-center justify-center w-9 h-9 rounded-full bg-red-500 text-white flex-shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <Mic size={18} />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                  <p className="text-xs font-bold text-white uppercase tracking-wider">Live Auto-Typing Active</p>
+          <div className="mt-2 p-3.5 rounded-xl border border-purple-500/40 bg-purple-950/40 backdrop-blur-md space-y-3 animate-fade-in shadow-xl">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-3">
+                <div className="relative flex items-center justify-center w-9 h-9 rounded-full bg-red-500 text-white flex-shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <Mic size={18} />
                 </div>
-                <p className="text-xs text-purple-200 mt-0.5">
-                  {liveTranscript ? `"${liveTranscript}"` : 'Speak out loud into your microphone now...'}
-                </p>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                    <p className="text-xs font-bold text-white uppercase tracking-wider">Live Auto-Typing Active</p>
+                  </div>
+                  <p className="text-xs text-purple-200 mt-0.5 font-medium">
+                    {liveTranscript ? `"${liveTranscript}"` : 'Speak out loud into your microphone now...'}
+                  </p>
+                </div>
               </div>
+
+              <button
+                type="button"
+                onClick={toggleListening}
+                className="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all shadow cursor-pointer"
+              >
+                Done
+              </button>
             </div>
 
-            <button
-              type="button"
-              onClick={toggleListening}
-              className="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all shadow cursor-pointer"
-            >
-              Done
-            </button>
+            {/* Quick 1-Tap Spoken Voice Suggestions for instant filling */}
+            <div className="pt-2 border-t border-white/10">
+              <p className="text-[11px] text-gray-300 mb-1.5 font-medium">Or tap a quick spoken phrase to insert instantly:</p>
+              <div className="flex flex-wrap gap-1.5">
+                {QUICK_SPOKEN_SAMPLES.map((sample) => (
+                  <button
+                    key={sample}
+                    type="button"
+                    onClick={() => {
+                      const updated = textVal ? `${textVal.trim()} ${sample}` : sample;
+                      handleInputChange(updated);
+                      toast.success('Inserted voice phrase! ✨');
+                    }}
+                    className="text-[11px] px-2.5 py-1 rounded-lg bg-white/5 hover:bg-purple-500/20 text-gray-300 hover:text-white border border-white/10 transition-all cursor-pointer"
+                  >
+                    🎙️ "{sample.slice(0, 32)}..."
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>
