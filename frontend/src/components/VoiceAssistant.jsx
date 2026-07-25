@@ -30,6 +30,16 @@ export default function VoiceAssistant({
   const [liveTranscript, setLiveTranscript] = useState('');
   const [autoPunctuate, setAutoPunctuate]   = useState(true);
   const recognitionRef = useRef(null);
+  const valueRef = useRef(value);
+  const isListeningRef = useRef(isListening);
+
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
+  useEffect(() => {
+    isListeningRef.current = isListening;
+  }, [isListening]);
 
   // Clean up speech recognition on unmount
   useEffect(() => {
@@ -51,6 +61,7 @@ export default function VoiceAssistant({
     }
 
     if (isListening) {
+      isListeningRef.current = false;
       if (recognitionRef.current) {
         try { recognitionRef.current.stop(); } catch (e) {}
       }
@@ -62,51 +73,42 @@ export default function VoiceAssistant({
 
     try {
       const recognition = new SpeechRecognition();
-      recognition.continuous = true;
+      recognition.continuous = false;
       recognition.interimResults = true;
       recognition.lang = selectedLang;
 
-      let baseText = value || '';
-
       recognition.onstart = () => {
         setIsListening(true);
+        isListeningRef.current = true;
         setLiveTranscript('');
-        toast.success(`🎙️ Listening in ${LANGUAGES.find(l => l.code === selectedLang)?.name}... Speak now!`);
+        toast.success(`🎙️ Voice typing active! Speak now...`);
       };
 
       recognition.onresult = (event) => {
-        let interimStr = '';
-        let finalStr   = '';
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalStr += transcript + ' ';
-          } else {
-            interimStr += transcript;
-          }
+        let textChunk = '';
+        for (let i = 0; i < event.results.length; i++) {
+          textChunk += event.results[i][0].transcript;
         }
 
-        const currentSegment = (finalStr + interimStr).trim();
-        setLiveTranscript(interimStr || finalStr);
-
-        if (currentSegment) {
-          // Format & Auto-capitalize
-          let formattedSegment = currentSegment;
-          if (autoPunctuate && formattedSegment.length > 0) {
-            formattedSegment = formattedSegment.charAt(0).toUpperCase() + formattedSegment.slice(1);
+        if (textChunk) {
+          const currentBase = valueRef.current || '';
+          let formatted = textChunk.trim();
+          if (autoPunctuate && formatted.length > 0) {
+            formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
           }
 
-          const combined = baseText 
-            ? `${baseText.trim()} ${formattedSegment}`
-            : formattedSegment;
+          const combined = currentBase 
+            ? `${currentBase.trim()} ${formatted}`
+            : formatted;
 
           onChange(combined);
+          setLiveTranscript(formatted);
 
-          // Voice Command: "Generate" / "Submit"
-          if (currentSegment.toLowerCase().includes('generate image') || currentSegment.toLowerCase().includes('start generating')) {
+          // Voice Command: "Generate image"
+          if (formatted.toLowerCase().includes('generate image') || formatted.toLowerCase().includes('start generating')) {
             if (onAutoSubmit) {
               onAutoSubmit();
+              isListeningRef.current = false;
               try { recognition.stop(); } catch (e) {}
               setIsListening(false);
             }
@@ -118,13 +120,23 @@ export default function VoiceAssistant({
         console.warn("Speech recognition notice:", event.error);
         if (event.error === 'not-allowed') {
           toast.error('Microphone permission blocked. Please allow microphone in browser settings! 🎙️');
+          isListeningRef.current = false;
           setIsListening(false);
         }
       };
 
       recognition.onend = () => {
-        setIsListening(false);
-        setLiveTranscript('');
+        if (isListeningRef.current) {
+          try { 
+            recognition.start(); 
+          } catch (e) {
+            setIsListening(false);
+            setLiveTranscript('');
+          }
+        } else {
+          setIsListening(false);
+          setLiveTranscript('');
+        }
       };
 
       recognitionRef.current = recognition;
