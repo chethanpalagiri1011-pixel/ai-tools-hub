@@ -6,16 +6,16 @@ import {
 import toast from 'react-hot-toast';
 
 const LANGUAGES = [
-  { code: 'en-US', name: 'English (US)', flag: '🇺🇸' },
-  { code: 'en-IN', name: 'English (India)', flag: '🇮🇳' },
-  { code: 'hi-IN', name: 'Hindi (हिंदी)', flag: '🇮🇳' },
-  { code: 'te-IN', name: 'Telugu (తెలుగు)', flag: '🇮🇳' },
-  { code: 'ta-IN', name: 'Tamil (தமிழ்)', flag: '🇮🇳' },
-  { code: 'es-ES', name: 'Spanish (Español)', flag: '🇪🇸' },
-  { code: 'fr-FR', name: 'French (Français)', flag: '🇫🇷' },
-  { code: 'de-DE', name: 'German (Deutsch)', flag: '🇩🇪' },
-  { code: 'ar-SA', name: 'Arabic (العربية)', flag: '🇸🇦' },
-  { code: 'zh-CN', name: 'Chinese (中文)', flag: '🇨🇳' },
+  { code: 'en-US', name: 'English (US)' },
+  { code: 'en-IN', name: 'English (India)' },
+  { code: 'hi-IN', name: 'Hindi (हिंदी)' },
+  { code: 'te-IN', name: 'Telugu (తెలుగు)' },
+  { code: 'ta-IN', name: 'Tamil (தமிழ்)' },
+  { code: 'es-ES', name: 'Spanish (Español)' },
+  { code: 'fr-FR', name: 'French (Français)' },
+  { code: 'de-DE', name: 'German (Deutsch)' },
+  { code: 'ar-SA', name: 'Arabic (العربية)' },
+  { code: 'zh-CN', name: 'Chinese (中文)' },
 ];
 
 export default function VoiceAssistant({ 
@@ -215,7 +215,7 @@ export default function VoiceAssistant({
           >
             {LANGUAGES.map(lang => (
               <option key={lang.code} value={lang.code}>
-                {lang.flag} {lang.name}
+                {lang.name}
               </option>
             ))}
           </select>
