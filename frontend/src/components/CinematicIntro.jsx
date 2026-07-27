@@ -28,7 +28,9 @@ export default function CinematicIntro({ onComplete, autoPlay = true }) {
     { icon: Zap,               title: 'AI Productivity',     color: 'from-cyan-500 to-blue-600',   glow: '#06b6d4', desc: 'Automated Flow' },
   ];
 
-  // Synthesize Premium Sci-Fi Sound FX via Web Audio API
+  const [soundStyle, setSoundStyle] = useState('orchestra'); // 'orchestra', 'cyberpunk', 'minimal'
+
+  // Synthesize Multi-Style Sound FX via Web Audio API
   const playSound = (type, index = 0) => {
     if (!soundEnabled) return;
     try {
@@ -41,46 +43,102 @@ export default function CinematicIntro({ onComplete, autoPlay = true }) {
       const now = ctx.currentTime;
 
       if (type === 'whoosh') {
-        // Sub-bass sweep + crystalline harmonic riser
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(80, now);
-        osc.frequency.exponentialRampToValueAtTime(650, now + 0.5);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.5);
+        if (soundStyle === 'orchestra') {
+          // Symphonic Riser
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc1.type = 'sine';
+          osc2.type = 'triangle';
+          osc1.frequency.setValueAtTime(130.81, now); // C3
+          osc2.frequency.setValueAtTime(261.63, now); // C4
+          osc1.frequency.exponentialRampToValueAtTime(523.25, now + 0.6);
+          osc2.frequency.exponentialRampToValueAtTime(1046.50, now + 0.6);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+          osc1.connect(gain);
+          osc2.connect(gain);
+          gain.connect(ctx.destination);
+          osc1.start(now); osc2.start(now);
+          osc1.stop(now + 0.6); osc2.stop(now + 0.6);
+        } else if (soundStyle === 'cyberpunk') {
+          // Cyberpunk FM Laser Sweep
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.exponentialRampToValueAtTime(1200, now + 0.4);
+          gain.gain.setValueAtTime(0.22, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now); osc.stop(now + 0.4);
+        } else {
+          // Minimal Silk Riser
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.exponentialRampToValueAtTime(800, now + 0.35);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now); osc.stop(now + 0.35);
+        }
       } else if (type === 'node') {
-        // Pentatonic Crystalline Glass Chimes
-        const pentatonicScale = [523.25, 659.25, 783.99, 1046.50, 1174.66, 1318.51, 1567.98];
-        const freq = pentatonicScale[index % pentatonicScale.length];
-
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now);
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.4);
+        if (soundStyle === 'orchestra') {
+          // Celestial Orchestra Harp Chimes
+          const harpScale = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
+          const freq = harpScale[index % harpScale.length];
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now); osc.stop(now + 0.5);
+        } else if (soundStyle === 'cyberpunk') {
+          // High-Tech Cyber Pulse
+          const cyberScale = [440, 554.37, 659.25, 880, 1108.73, 1318.51];
+          const freq = cyberScale[index % cyberScale.length];
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now); osc.stop(now + 0.25);
+        } else {
+          // Sleek Glass Pings
+          const glassScale = [880, 1046.50, 1318.51, 1567.98, 1760];
+          const freq = glassScale[index % glassScale.length];
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now); osc.stop(now + 0.3);
+        }
       } else if (type === 'shockwave') {
-        // Deep 40Hz Cinematic Sub-Bass Impact Boom
+        // Deep Sub-Bass Cinematic Boom
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(110, now);
-        osc.frequency.exponentialRampToValueAtTime(35, now + 0.9);
-        gain.gain.setValueAtTime(0.35, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+        osc.frequency.setValueAtTime(soundStyle === 'cyberpunk' ? 120 : 90, now);
+        osc.frequency.exponentialRampToValueAtTime(32, now + 1.0);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
         osc.connect(gain);
         gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.9);
+        osc.start(now); osc.stop(now + 1.0);
       }
     } catch (e) {
       // Audio context policy fallback
@@ -301,8 +359,32 @@ export default function CinematicIntro({ onComplete, autoPlay = true }) {
           ))}
         </div>
 
-        {/* Right: Sound Toggle & Skip Button */}
-        <div className="flex items-center gap-3">
+        {/* Right: Sound FX Style Selector, Mute & Skip Button */}
+        <div className="flex items-center gap-2">
+          {/* Sound FX Style Selector */}
+          <div className="hidden md:flex items-center gap-1 p-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15">
+            {[
+              { id: 'orchestra', label: '🎻 Orchestra' },
+              { id: 'cyberpunk', label: '⚡ Cyberpunk' },
+              { id: 'minimal',   label: '✨ Minimal' },
+            ].map(style => (
+              <button
+                key={style.id}
+                onClick={() => {
+                  setSoundStyle(style.id);
+                  playSound('whoosh');
+                }}
+                className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer ${
+                  soundStyle === style.id 
+                    ? 'bg-cyan-500 text-black font-bold shadow-md shadow-cyan-500/30'
+                    : 'text-gray-300 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                {style.label}
+              </button>
+            ))}
+          </div>
+
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
             className="p-2.5 rounded-full text-gray-300 hover:text-white bg-white/10 hover:bg-white/20 border border-white/15 transition-all backdrop-blur-md cursor-pointer"
