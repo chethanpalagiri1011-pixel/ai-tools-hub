@@ -141,23 +141,12 @@ export default function CinematicIntro({ onComplete, autoPlay = true }) {
         osc.start(now); osc.stop(now + 1.0);
   const bgNodesRef = useRef(null);
 
-  // Continuous Ambient Background Drone & Music Engine
+  // Upbeat 135 BPM High-Tech Arpeggiator Music Engine
   useEffect(() => {
     if (!soundEnabled) {
       if (bgNodesRef.current) {
-        try {
-          const now = audioCtxRef.current?.currentTime || 0;
-          bgNodesRef.current.gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
-          const nodes = bgNodesRef.current;
-          setTimeout(() => {
-            try {
-              nodes.osc1.stop();
-              nodes.osc2.stop();
-              nodes.lfo.stop();
-            } catch (e) {}
-          }, 450);
-          bgNodesRef.current = null;
-        } catch (e) {}
+        clearInterval(bgNodesRef.current.intervalId);
+        bgNodesRef.current = null;
       }
       return;
     }
@@ -169,77 +158,52 @@ export default function CinematicIntro({ onComplete, autoPlay = true }) {
       const ctx = audioCtxRef.current;
       if (ctx.state === 'suspended') ctx.resume();
 
-      if (bgNodesRef.current) return;
+      if (bgNodesRef.current) clearInterval(bgNodesRef.current.intervalId);
 
-      const now = ctx.currentTime;
-      const osc1 = ctx.createOscillator();
-      const osc2 = ctx.createOscillator();
-      const lfo  = ctx.createOscillator();
-      const lfoGain = ctx.createGain();
-      const gainNode = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
+      // Bright Melodic Arpeggio Sequences (135 BPM)
+      const arpeggioNotes = 
+        soundStyle === 'orchestra'
+          ? [523.25, 659.25, 783.99, 1046.50, 783.99, 659.25] // C Major Bright Shimmer
+          : soundStyle === 'cyberpunk'
+          ? [440.00, 554.37, 659.25, 880.00, 659.25, 554.37] // A Major Cyber Synth
+          : [587.33, 739.99, 880.00, 1174.66, 880.00, 739.99]; // D Major Crystal Chime
 
-      // Atmospheric tuning depending on soundStyle
-      if (soundStyle === 'orchestra') {
-        osc1.type = 'sine';
-        osc2.type = 'triangle';
-        osc1.frequency.setValueAtTime(65.41, now); // C2 Sub-Drone
-        osc2.frequency.setValueAtTime(130.81, now); // C3 Warm Pad
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(450, now);
-      } else if (soundStyle === 'cyberpunk') {
-        osc1.type = 'sawtooth';
-        osc2.type = 'square';
-        osc1.frequency.setValueAtTime(55.00, now); // A1 Cyber Bass
-        osc2.frequency.setValueAtTime(110.00, now); // A2 Synth
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(320, now);
-      } else {
-        osc1.type = 'sine';
-        osc2.type = 'sine';
-        osc1.frequency.setValueAtTime(216.00, now); // 432Hz Harmonic Sub
-        osc2.frequency.setValueAtTime(432.00, now); // 432Hz Pure Ambient
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(600, now);
-      }
+      let noteIdx = 0;
 
-      // LFO modulation for breathing ambient soundscape
-      lfo.frequency.setValueAtTime(0.2, now); // 0.2Hz slow ambient swell
-      lfoGain.gain.setValueAtTime(100, now);
-      lfo.connect(filter.frequency);
+      const playArpeggioStep = () => {
+        if (!soundEnabled || !audioCtxRef.current) return;
+        const now = audioCtxRef.current.currentTime;
 
-      gainNode.gain.setValueAtTime(0.001, now);
-      gainNode.gain.exponentialRampToValueAtTime(0.05, now + 1.2); // Smooth ambient volume fade in
+        const osc = audioCtxRef.current.createOscillator();
+        const gain = audioCtxRef.current.createGain();
 
-      osc1.connect(filter);
-      osc2.connect(filter);
-      filter.connect(gainNode);
-      gainNode.connect(ctx.destination);
+        const freq = arpeggioNotes[noteIdx % arpeggioNotes.length];
+        noteIdx++;
 
-      osc1.start(now);
-      osc2.start(now);
-      lfo.start(now);
+        osc.type = soundStyle === 'cyberpunk' ? 'sawtooth' : 'sine';
+        osc.frequency.setValueAtTime(freq, now);
 
-      bgNodesRef.current = { osc1, osc2, lfo, gainNode };
+        gain.gain.setValueAtTime(0.07, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+        osc.connect(gain);
+        gain.connect(audioCtxRef.current.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.22);
+      };
+
+      const intervalId = setInterval(playArpeggioStep, 220);
+      bgNodesRef.current = { intervalId };
+
     } catch (e) {
-      console.warn("Ambient background audio error:", e);
+      console.warn("Music arpeggio error:", e);
     }
 
     return () => {
       if (bgNodesRef.current) {
-        try {
-          const now = audioCtxRef.current?.currentTime || 0;
-          bgNodesRef.current.gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
-          const nodes = bgNodesRef.current;
-          setTimeout(() => {
-            try {
-              nodes.osc1.stop();
-              nodes.osc2.stop();
-              nodes.lfo.stop();
-            } catch (e) {}
-          }, 500);
-          bgNodesRef.current = null;
-        } catch (e) {}
+        clearInterval(bgNodesRef.current.intervalId);
+        bgNodesRef.current = null;
       }
     };
   }, [soundEnabled, soundStyle]);
