@@ -139,71 +139,51 @@ export default function CinematicIntro({ onComplete, autoPlay = true }) {
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start(now); osc.stop(now + 1.0);
-  const bgNodesRef = useRef(null);
+  const audioTrackRef = useRef(null);
 
-  // Upbeat 135 BPM High-Tech Arpeggiator Music Engine
+  const MUSIC_TRACKS = {
+    orchestra: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
+    cyberpunk: 'https://assets.mixkit.co/music/preview/mixkit-cyber-war-663.mp3',
+    minimal:   'https://assets.mixkit.co/music/preview/mixkit-futuristic-beat-388.mp3',
+  };
+
+  // High-Fidelity Studio MP3 Music Soundtrack Engine
   useEffect(() => {
     if (!soundEnabled) {
-      if (bgNodesRef.current) {
-        clearInterval(bgNodesRef.current.intervalId);
-        bgNodesRef.current = null;
+      if (audioTrackRef.current) {
+        audioTrackRef.current.pause();
+        audioTrackRef.current = null;
       }
       return;
     }
 
     try {
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioTrackRef.current) {
+        audioTrackRef.current.pause();
       }
-      const ctx = audioCtxRef.current;
-      if (ctx.state === 'suspended') ctx.resume();
 
-      if (bgNodesRef.current) clearInterval(bgNodesRef.current.intervalId);
+      const audio = new Audio(MUSIC_TRACKS[soundStyle] || MUSIC_TRACKS.orchestra);
+      audio.volume = 0.45;
+      audio.loop = true;
 
-      // Bright Melodic Arpeggio Sequences (135 BPM)
-      const arpeggioNotes = 
-        soundStyle === 'orchestra'
-          ? [523.25, 659.25, 783.99, 1046.50, 783.99, 659.25] // C Major Bright Shimmer
-          : soundStyle === 'cyberpunk'
-          ? [440.00, 554.37, 659.25, 880.00, 659.25, 554.37] // A Major Cyber Synth
-          : [587.33, 739.99, 880.00, 1174.66, 880.00, 739.99]; // D Major Crystal Chime
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn("Audio play policy notice:", err);
+        });
+      }
 
-      let noteIdx = 0;
-
-      const playArpeggioStep = () => {
-        if (!soundEnabled || !audioCtxRef.current) return;
-        const now = audioCtxRef.current.currentTime;
-
-        const osc = audioCtxRef.current.createOscillator();
-        const gain = audioCtxRef.current.createGain();
-
-        const freq = arpeggioNotes[noteIdx % arpeggioNotes.length];
-        noteIdx++;
-
-        osc.type = soundStyle === 'cyberpunk' ? 'sawtooth' : 'sine';
-        osc.frequency.setValueAtTime(freq, now);
-
-        gain.gain.setValueAtTime(0.07, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-
-        osc.connect(gain);
-        gain.connect(audioCtxRef.current.destination);
-
-        osc.start(now);
-        osc.stop(now + 0.22);
-      };
-
-      const intervalId = setInterval(playArpeggioStep, 220);
-      bgNodesRef.current = { intervalId };
-
+      audioTrackRef.current = audio;
     } catch (e) {
-      console.warn("Music arpeggio error:", e);
+      console.warn("Audio soundtrack player error:", e);
     }
 
     return () => {
-      if (bgNodesRef.current) {
-        clearInterval(bgNodesRef.current.intervalId);
-        bgNodesRef.current = null;
+      if (audioTrackRef.current) {
+        try {
+          audioTrackRef.current.pause();
+          audioTrackRef.current = null;
+        } catch (e) {}
       }
     };
   }, [soundEnabled, soundStyle]);
