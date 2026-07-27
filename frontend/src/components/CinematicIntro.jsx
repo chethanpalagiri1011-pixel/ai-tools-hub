@@ -139,11 +139,110 @@ export default function CinematicIntro({ onComplete, autoPlay = true }) {
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start(now); osc.stop(now + 1.0);
+  const bgNodesRef = useRef(null);
+
+  // Continuous Ambient Background Drone & Music Engine
+  useEffect(() => {
+    if (!soundEnabled) {
+      if (bgNodesRef.current) {
+        try {
+          const now = audioCtxRef.current?.currentTime || 0;
+          bgNodesRef.current.gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+          const nodes = bgNodesRef.current;
+          setTimeout(() => {
+            try {
+              nodes.osc1.stop();
+              nodes.osc2.stop();
+              nodes.lfo.stop();
+            } catch (e) {}
+          }, 450);
+          bgNodesRef.current = null;
+        } catch (e) {}
       }
-    } catch (e) {
-      // Audio context policy fallback
+      return;
     }
-  };
+
+    try {
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      const ctx = audioCtxRef.current;
+      if (ctx.state === 'suspended') ctx.resume();
+
+      if (bgNodesRef.current) return;
+
+      const now = ctx.currentTime;
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const lfo  = ctx.createOscillator();
+      const lfoGain = ctx.createGain();
+      const gainNode = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+
+      // Atmospheric tuning depending on soundStyle
+      if (soundStyle === 'orchestra') {
+        osc1.type = 'sine';
+        osc2.type = 'triangle';
+        osc1.frequency.setValueAtTime(65.41, now); // C2 Sub-Drone
+        osc2.frequency.setValueAtTime(130.81, now); // C3 Warm Pad
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(450, now);
+      } else if (soundStyle === 'cyberpunk') {
+        osc1.type = 'sawtooth';
+        osc2.type = 'square';
+        osc1.frequency.setValueAtTime(55.00, now); // A1 Cyber Bass
+        osc2.frequency.setValueAtTime(110.00, now); // A2 Synth
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(320, now);
+      } else {
+        osc1.type = 'sine';
+        osc2.type = 'sine';
+        osc1.frequency.setValueAtTime(216.00, now); // 432Hz Harmonic Sub
+        osc2.frequency.setValueAtTime(432.00, now); // 432Hz Pure Ambient
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(600, now);
+      }
+
+      // LFO modulation for breathing ambient soundscape
+      lfo.frequency.setValueAtTime(0.2, now); // 0.2Hz slow ambient swell
+      lfoGain.gain.setValueAtTime(100, now);
+      lfo.connect(filter.frequency);
+
+      gainNode.gain.setValueAtTime(0.001, now);
+      gainNode.gain.exponentialRampToValueAtTime(0.05, now + 1.2); // Smooth ambient volume fade in
+
+      osc1.connect(filter);
+      osc2.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      osc1.start(now);
+      osc2.start(now);
+      lfo.start(now);
+
+      bgNodesRef.current = { osc1, osc2, lfo, gainNode };
+    } catch (e) {
+      console.warn("Ambient background audio error:", e);
+    }
+
+    return () => {
+      if (bgNodesRef.current) {
+        try {
+          const now = audioCtxRef.current?.currentTime || 0;
+          bgNodesRef.current.gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+          const nodes = bgNodesRef.current;
+          setTimeout(() => {
+            try {
+              nodes.osc1.stop();
+              nodes.osc2.stop();
+              nodes.lfo.stop();
+            } catch (e) {}
+          }, 500);
+          bgNodesRef.current = null;
+        } catch (e) {}
+      }
+    };
+  }, [soundEnabled, soundStyle]);
 
   // 60 FPS Canvas Engine: Particles, Vortex, Stars, Cyber Rain
   useEffect(() => {
