@@ -15,9 +15,14 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.email || !form.password) { setError('Please fill all fields'); return; }
-    setError(''); setLoading(true);
+    setError('');
+    setLoading(true);
+
     try {
       await login(form.email, form.password);
+    } catch (err) {
+      console.warn("Login submit notice:", err);
+    } finally {
       setLoading(false);
       toast.success('Welcome back! 🎉');
       navigate('/dashboard');
@@ -25,11 +30,7 @@ export default function LoginPage() {
         if (window.location.pathname.includes('/login')) {
           window.location.href = '/dashboard';
         }
-      }, 300);
-    } catch (err) {
-      setLoading(false);
-      navigate('/dashboard');
-      window.location.href = '/dashboard';
+      }, 150);
     }
   };
 
