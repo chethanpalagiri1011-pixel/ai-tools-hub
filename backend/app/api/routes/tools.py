@@ -52,14 +52,50 @@ def save_history(db: Session, user_id: int, type_: str, prompt: str, result: str
 @router.post("/image")
 async def generate_image(data: ImageRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     await deduct_credits(user, db, 10)
-    await asyncio.sleep(0.5)  # Simulate processing
+    await asyncio.sleep(0.3)
 
-    import urllib.parse
+    import urllib.parse, re
+
+    raw_prompt = data.prompt.strip()
+
+    # 1. Clean conversational filler prefixes ("give me an image of", "picture of", etc.)
+    clean_prompt = re.sub(
+        r'^(give\s+me\s+(an?|the)?\s*image\s+of|give\s+me\s+(an?|the)?\s*picture\s+of|generate\s+(an?|the)?\s*image\s+of|generate\s+(an?|the)?\s*picture\s+of|create\s+(an?|the)?\s*image\s+of|create\s+(an?|the)?\s*picture\s+of|draw\s+(an?|the)?\s*picture\s+of|show\s+me\s+(an?|the)?\s*image\s+of|show\s+me\s+(an?|the)?\s*picture\s+of|image\s+of|picture\s+of|photo\s+of)\s+',
+        '',
+        raw_prompt,
+        flags=re.IGNORECASE
+    ).strip()
+
+    if not clean_prompt:
+        clean_prompt = raw_prompt
+
+    # 2. Add style and quality enhancement parameters
+    style_modifiers = {
+        "photorealistic": "photorealistic portrait, 8k resolution, ultra-detailed face, sharp focus, professional studio photography, highly detailed, masterwork",
+        "digital-art": "digital art, highly detailed, vibrant colors, trending on artstation, 8k resolution",
+        "anime": "anime style, highly detailed anime portrait, vibrant, studio ghibli style, clean line art",
+        "painting": "oil painting, masterpiece, textured brushstrokes, rich colors, fine art",
+        "sketch": "pencil sketch, highly detailed pencil drawing, fine line art, graphite shading",
+    }
+    
+    modifier = style_modifiers.get(data.style, style_modifiers["photorealistic"])
+    
+    enhanced_prompt = f"{clean_prompt}, {modifier}"
+
+    # Aspect ratio dimensions
+    dimensions = {
+        "16:9": "width=1280&height=720",
+        "1:1":  "width=1024&height=1024",
+        "9:16": "width=720&height=1280",
+    }
+    dim_str = dimensions.get(data.aspect_ratio, "width=1024&height=1024")
+
     seed = random.randint(1, 999999)
-    encoded_prompt = urllib.parse.quote(data.prompt)
-    url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?seed={seed}&nologo=true"
-    result = {"url": url, "seed": seed, "style": data.style, "prompt": data.prompt}
-    save_history(db, user.id, "image", data.prompt, json.dumps(result), 10)
+    encoded_prompt = urllib.parse.quote(enhanced_prompt)
+    url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?seed={seed}&{dim_str}&model=flux&nologo=true"
+
+    result = {"url": url, "seed": seed, "style": data.style, "prompt": raw_prompt, "enhanced_prompt": enhanced_prompt}
+    save_history(db, user.id, "image", raw_prompt, json.dumps(result), 10)
     return result
 
 @router.post("/summarize")

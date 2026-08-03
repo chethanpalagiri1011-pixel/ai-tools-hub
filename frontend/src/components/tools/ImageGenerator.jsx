@@ -148,22 +148,33 @@ export default function ImageGenerator() {
     toast.success('Download started!');
   };
 
+  const handleEnhancePrompt = () => {
+    if (!prompt.trim()) {
+      toast.error('Please type or speak a prompt first!');
+      return;
+    }
+    const cleaned = prompt.replace(/^(give\s+me\s+(an?|the)?\s*image\s+of|give\s+me\s+(an?|the)?\s*picture\s+of|generate\s+(an?|the)?\s*image\s+of|create\s+(an?|the)?\s*image\s+of|show\s+me\s+(an?|the)?\s*image\s+of|image\s+of|picture\s+of)\s+/i, '').trim();
+    const enhanced = `Ultra-realistic 8K portrait of ${cleaned || prompt}, detailed face, sharp focus, professional lighting, photorealistic masterpiece`;
+    setPrompt(enhanced);
+    toast.success('Prompt enhanced with 8K AI detail! ✨');
+  };
+
   const EXAMPLE_PROMPTS = [
+    'Virat Kohli in Indian Blue Jersey',
     'Futuristic city at night with neon lights',
     'Majestic dragon in a fantasy forest',
-    'Abstract geometric patterns in purple and gold',
     'Astronaut floating in colorful nebula',
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-display">
       <div className="flex items-center gap-3 mb-2">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
           <ImageIcon size={20} className="text-white" />
         </div>
         <div>
           <h2 className="font-display text-xl font-bold text-white">AI Image Generator</h2>
-          <p className="text-gray-500 text-sm">Turn your ideas into stunning visuals (10 credits)</p>
+          <p className="text-gray-400 text-sm">Turn your ideas into stunning visuals (10 credits)</p>
         </div>
       </div>
 
@@ -172,21 +183,31 @@ export default function ImageGenerator() {
         <div className="space-y-4">
           {/* Prompt with Voice Assistant */}
           <div>
-            <label className="block text-sm text-gray-400 mb-2 font-medium">Describe your image</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm text-gray-300 font-medium">Describe your image</label>
+              <button
+                type="button"
+                onClick={handleEnhancePrompt}
+                className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/30 transition-all cursor-pointer font-semibold"
+                title="Enhance prompt with 8K AI detail"
+              >
+                <Wand2 size={12} />
+                <span>Magic AI Enhance</span>
+              </button>
+            </div>
             <VoiceAssistant 
               value={prompt} 
               onChange={setPrompt} 
               onAutoSubmit={handleGenerate}
-              placeholder="A serene Japanese garden with cherry blossoms at sunset... (or click Real-Time Voice Typing to speak)" 
+              placeholder="e.g. Virat Kohli in Indian Blue Jersey... (or click Real-Time Voice Typing to speak)" 
             />
             {/* Examples */}
             <div className="flex flex-wrap gap-2 mt-3">
               {EXAMPLE_PROMPTS.map(ex => (
                 <button key={ex}
                   onClick={() => setPrompt(ex)}
-                  className="text-xs px-2.5 py-1 rounded-full text-gray-500 hover:text-gray-300 transition-all border border-white/5 hover:border-white/15"
-                  style={{ background: 'rgba(255,255,255,0.03)' }}>
-                  {ex.slice(0, 30)}...
+                  className="text-xs px-2.5 py-1 rounded-full text-gray-400 hover:text-white transition-all border border-white/10 hover:border-purple-500/40 bg-white/5 cursor-pointer">
+                  {ex}
                 </button>
               ))}
             </div>

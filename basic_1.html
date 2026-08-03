@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Type Image Classification</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>🌾 Crop Type Image Classification</h1>
+    <p class="subtitle">
+        Upload a crop image and let AI identify the crop type.
+    </p>
+
+    <form action="/predict" method="POST" enctype="multipart/form-data">
+
+        <label class="upload-box">
+            <input type="file" name="file" accept="image/*" onchange="previewImage(event)" required>
+            <span>📷 Click to Upload Crop Image</span>
+        </label>
+
+        <img id="preview" src="" alt="Image Preview">
+
+        <button type="submit">🔍 Predict Crop</button>
+
+    </form>
+
+    {% if prediction %}
+    <div class="result">
+        <h2>Prediction Result</h2>
+        <p>{{ prediction }}</p>
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+function previewImage(event){
+    var image=document.getElementById("preview");
+    image.src=URL.createObjectURL(event.target.files[0]);
+    image.style.display="block";
+}
+</script>
+
+</body>
+</html>
