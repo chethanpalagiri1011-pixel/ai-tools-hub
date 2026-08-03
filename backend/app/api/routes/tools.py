@@ -47,55 +47,76 @@ def save_history(db: Session, user_id: int, type_: str, prompt: str, result: str
     db.add(entry)
     db.commit()
 
+# ── Prompt Enhancer Helper ───────────────────────────────────────────────────
+def enhance_image_prompt(raw_prompt: str, style: str) -> str:
+    cleaned = raw_prompt.strip()
+    
+    # 1. Remove conversational prefixes like "give me the image of..."
+    prefixes = [
+        r"^(give\s+me\s+(a|an|the)?\s*(image|photo|picture|pic)\s+of\s+)",
+        r"^(generate\s+(a|an|the)?\s*(image|photo|picture|pic)\s+of\s+)",
+        r"^(create\s+(a|an|the)?\s*(image|photo|picture|pic)\s+of\s+)",
+        r"^(draw\s+(a|an|the)?\s*(image|photo|picture|pic)\s+of\s+)",
+        r"^(show\s+me\s+(a|an|the)?\s*(image|photo|picture|pic)\s+of\s+)",
+        r"^(image\s+of\s+)",
+        r"^(photo\s+of\s+)",
+        r"^(picture\s+of\s+)",
+    ]
+    for pattern in prefixes:
+        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE).strip()
+
+    # 2. Famous Celebrities & Public Figures Likeness Dictionary
+    celebrities = {
+        "virat kohli": "photograph of Indian cricket legend Virat Kohli, authentic detailed facial features, sharp beard, wearing official Indian cricket team blue jersey, high resolution sports portrait, 8k HD, photorealistic, exact facial resemblance, masterpiece",
+        "ms dhoni": "photograph of Indian cricket legend MS Dhoni, authentic facial features, wearing Indian cricket uniform, photorealistic portrait, 8k HD, realistic skin details",
+        "sachin tendulkar": "photograph of cricket legend Sachin Tendulkar, realistic face, wearing Indian cricket jersey, 8k HD, authentic portrait",
+        "rohit sharma": "photograph of Indian cricket captain Rohit Sharma, realistic facial features, Indian cricket jersey, 8k resolution, authentic portrait",
+        "narendra modi": "photograph of Indian Prime Minister Narendra Modi, realistic facial likeness, white beard, traditional Indian attire, 8k resolution, photorealistic portrait",
+        "shah rukh khan": "photograph of Bollywood actor Shah Rukh Khan, realistic face, cinematic portrait, 8k HD resolution, photorealistic",
+        "elon musk": "photograph of tech entrepreneur Elon Musk, authentic facial features, professional portrait, 8k HD, photorealistic",
+        "cristiano ronaldo": "photograph of football legend Cristiano Ronaldo, authentic face, athletic pose, 8k HD, photorealistic portrait",
+        "lionel messi": "photograph of football legend Lionel Messi, authentic face, Argentina team jersey, 8k HD, photorealistic portrait",
+    }
+
+    lowered = cleaned.lower()
+    for celeb, enhanced_desc in celebrities.items():
+        if celeb in lowered:
+            return enhanced_desc
+
+    # 3. Standard Style Enhancements if not a celebrity
+    style_descriptors = {
+        "photorealistic": "photograph, highly detailed, 8k resolution, photorealistic, professional photography, dramatic lighting, sharp focus",
+        "digital-art": "digital art, highly detailed, vibrant colors, trending on artstation, concept art, 8k resolution",
+        "anime": "anime style, high quality anime art, detailed features, vibrant colors, masterpiece",
+        "painting": "oil painting, masterpiece, artistic brushstrokes, rich textures, fine art",
+        "sketch": "detailed pencil sketch, fine lines, artistic shading, high quality hand drawn",
+    }
+
+    enhancement = style_descriptors.get(style, style_descriptors["photorealistic"])
+    return f"{cleaned}, {enhancement}"
+
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.post("/image")
 async def generate_image(data: ImageRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     await deduct_credits(user, db, 10)
-    await asyncio.sleep(0.3)
+    await asyncio.sleep(0.5)
 
-    import urllib.parse, re
-
-    raw_prompt = data.prompt.strip()
-
-    # 1. Clean conversational filler prefixes ("give me an image of", "picture of", etc.)
-    clean_prompt = re.sub(
-        r'^(give\s+me\s+(an?|the)?\s*image\s+of|give\s+me\s+(an?|the)?\s*picture\s+of|generate\s+(an?|the)?\s*image\s+of|generate\s+(an?|the)?\s*picture\s+of|create\s+(an?|the)?\s*image\s+of|create\s+(an?|the)?\s*picture\s+of|draw\s+(an?|the)?\s*picture\s+of|show\s+me\s+(an?|the)?\s*image\s+of|show\s+me\s+(an?|the)?\s*picture\s+of|image\s+of|picture\s+of|photo\s+of)\s+',
-        '',
-        raw_prompt,
-        flags=re.IGNORECASE
-    ).strip()
-
-    if not clean_prompt:
-        clean_prompt = raw_prompt
-
-    # 2. Add style and quality enhancement parameters
-    style_modifiers = {
-        "photorealistic": "photorealistic portrait, 8k resolution, ultra-detailed face, sharp focus, professional studio photography, highly detailed, masterwork",
-        "digital-art": "digital art, highly detailed, vibrant colors, trending on artstation, 8k resolution",
-        "anime": "anime style, highly detailed anime portrait, vibrant, studio ghibli style, clean line art",
-        "painting": "oil painting, masterpiece, textured brushstrokes, rich colors, fine art",
-        "sketch": "pencil sketch, highly detailed pencil drawing, fine line art, graphite shading",
-    }
-    
-    modifier = style_modifiers.get(data.style, style_modifiers["photorealistic"])
-    
-    enhanced_prompt = f"{clean_prompt}, {modifier}"
-
-    # Aspect ratio dimensions
-    dimensions = {
-        "16:9": "width=1280&height=720",
-        "1:1":  "width=1024&height=1024",
-        "9:16": "width=720&height=1280",
-    }
-    dim_str = dimensions.get(data.aspect_ratio, "width=1024&height=1024")
-
+    import urllib.parse
     seed = random.randint(1, 999999)
-    encoded_prompt = urllib.parse.quote(enhanced_prompt)
-    url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?seed={seed}&{dim_str}&model=flux&nologo=true"
+    enhanced_p = enhance_image_prompt(data.prompt, data.style)
+    encoded_prompt = urllib.parse.quote(enhanced_p)
 
-    result = {"url": url, "seed": seed, "style": data.style, "prompt": raw_prompt, "enhanced_prompt": enhanced_prompt}
-    save_history(db, user.id, "image", raw_prompt, json.dumps(result), 10)
+    dimensions = {
+        "16:9": (1280, 720),
+        "1:1": (1024, 1024),
+        "9:16": (720, 1280),
+    }
+    width, height = dimensions.get(data.aspect_ratio, (1024, 1024))
+
+    url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={width}&height={height}&seed={seed}&model=flux&nologo=true"
+    result = {"url": url, "seed": seed, "style": data.style, "prompt": data.prompt, "enhanced_prompt": enhanced_p}
+    save_history(db, user.id, "image", data.prompt, json.dumps(result), 10)
     return result
 
 @router.post("/summarize")
