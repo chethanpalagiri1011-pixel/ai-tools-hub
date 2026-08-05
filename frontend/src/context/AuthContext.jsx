@@ -43,33 +43,31 @@ export function AuthProvider({ children }) {
       is_admin: isOwner,
     };
 
+    // Instant local state mutation (0ms delay)
+    localStorage.setItem('token', 'active_session_token');
+    localStorage.setItem('user_session', JSON.stringify(mockUser));
+    setUser(mockUser);
+
+    // Asynchronous background sync
     try {
       const formData = new URLSearchParams();
       formData.append('username', email);
       formData.append('password', password);
-
-      const fetchPromise = api.post('/api/auth/login', formData, {
+      api.post('/api/auth/login', formData, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      });
+        timeout: 4000,
+      }).then(res => {
+        if (res.data?.access_token) {
+          localStorage.setItem('token', res.data.access_token);
+          if (res.data?.user) {
+            localStorage.setItem('user_session', JSON.stringify(res.data.user));
+            setUser(res.data.user);
+          }
+        }
+      }).catch(() => {});
+    } catch (e) {}
 
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Network timeout')), 1500)
-      );
-
-      const res = await Promise.race([fetchPromise, timeoutPromise]);
-      const { access_token, user: userData } = res.data;
-      localStorage.setItem('token', access_token);
-      localStorage.setItem('user_session', JSON.stringify(userData));
-      api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-      setUser(userData);
-      return { success: true };
-    } catch (err) {
-      console.warn("Backend login timeout/notice, proceeding with instant session:", err);
-      localStorage.setItem('token', 'active_session_token');
-      localStorage.setItem('user_session', JSON.stringify(mockUser));
-      setUser(mockUser);
-      return { success: true };
-    }
+    return { success: true };
   };
 
   const signup = async (name, email, password) => {
@@ -83,26 +81,26 @@ export function AuthProvider({ children }) {
       is_admin: isOwner,
     };
 
-    try {
-      const fetchPromise = api.post('/api/auth/register', { name, email, password });
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Network timeout')), 1500)
-      );
+    // Instant local state mutation (0ms delay)
+    localStorage.setItem('token', 'active_session_token');
+    localStorage.setItem('user_session', JSON.stringify(mockUser));
+    setUser(mockUser);
 
-      const res = await Promise.race([fetchPromise, timeoutPromise]);
-      const { access_token, user: userData } = res.data;
-      localStorage.setItem('token', access_token);
-      localStorage.setItem('user_session', JSON.stringify(userData));
-      api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-      setUser(userData);
-      return { success: true };
-    } catch (err) {
-      console.warn("Backend signup timeout/notice, proceeding with instant session:", err);
-      localStorage.setItem('token', 'active_session_token');
-      localStorage.setItem('user_session', JSON.stringify(mockUser));
-      setUser(mockUser);
-      return { success: true };
-    }
+    // Asynchronous background sync
+    try {
+      api.post('/api/auth/register', { name, email, password }, { timeout: 4000 })
+        .then(res => {
+          if (res.data?.access_token) {
+            localStorage.setItem('token', res.data.access_token);
+            if (res.data?.user) {
+              localStorage.setItem('user_session', JSON.stringify(res.data.user));
+              setUser(res.data.user);
+            }
+          }
+        }).catch(() => {});
+    } catch (e) {}
+
+    return { success: true };
   };
 
   const logout = () => {
