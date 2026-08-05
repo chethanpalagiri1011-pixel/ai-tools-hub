@@ -31,42 +31,44 @@ export default function SignupPage() {
     if (form.password.length < 6) { setError('Password must be at least 6 characters'); return; }
 
     setError('');
-    setLoading(true);
 
-    const isOwner = form.email.toLowerCase() === 'chethanpalagiri1011@gmail.com';
-    const mockUser = {
-      id: Date.now(),
-      name: form.name.trim(),
-      email: form.email.trim(),
-      credits: 100,
-      plan: isOwner ? 'Owner Pro Plan' : 'Free Plan',
-      is_admin: isOwner,
-    };
+    try {
+      const isOwner = form.email.toLowerCase() === 'chethanpalagiri1011@gmail.com';
+      const mockUser = {
+        id: Date.now(),
+        name: form.name.trim(),
+        email: form.email.trim(),
+        credits: 100,
+        plan: isOwner ? 'Owner Pro Plan' : 'Free Plan',
+        is_admin: isOwner,
+      };
+      try {
+        localStorage.setItem('token', 'active_session_token');
+        localStorage.setItem('user_session', JSON.stringify(mockUser));
+      } catch (e) {}
+    } catch (err) {}
 
-    localStorage.setItem('token', 'active_session_token');
-    localStorage.setItem('user_session', JSON.stringify(mockUser));
-    toast.success('Account created! Welcome to AI Tools Hub 🎉');
     window.location.href = '/dashboard';
   };
 
   const quickDemoSignup = () => {
     const demoName = 'Kumar';
     const demoEmail = 'kumar@gmail.com';
-    setForm({ name: demoName, email: demoEmail, password: 'password123', confirm: 'password123' });
-    setLoading(true);
+    try {
+      const mockUser = {
+        id: Date.now(),
+        name: demoName,
+        email: demoEmail,
+        credits: 100,
+        plan: 'Free Plan',
+        is_admin: false,
+      };
+      try {
+        localStorage.setItem('token', 'active_session_token');
+        localStorage.setItem('user_session', JSON.stringify(mockUser));
+      } catch (e) {}
+    } catch (err) {}
 
-    const mockUser = {
-      id: Date.now(),
-      name: demoName,
-      email: demoEmail,
-      credits: 100,
-      plan: 'Free Plan',
-      is_admin: false,
-    };
-
-    localStorage.setItem('token', 'active_session_token');
-    localStorage.setItem('user_session', JSON.stringify(mockUser));
-    toast.success('Account created! Welcome 🎉');
     window.location.href = '/dashboard';
   };
 

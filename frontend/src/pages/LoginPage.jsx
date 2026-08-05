@@ -16,41 +16,43 @@ export default function LoginPage() {
     e.preventDefault();
     if (!form.email || !form.password) { setError('Please fill all fields'); return; }
     setError('');
-    setLoading(true);
 
-    const isOwner = form.email.toLowerCase() === 'chethanpalagiri1011@gmail.com';
-    const mockUser = {
-      id: 1,
-      name: isOwner ? 'Chethan Palagiri (Owner)' : (form.email.split('@')[0] || 'User'),
-      email: form.email,
-      credits: 100,
-      plan: isOwner ? 'Owner Pro Plan' : 'Free Plan',
-      is_admin: isOwner,
-    };
+    try {
+      const isOwner = form.email.toLowerCase() === 'chethanpalagiri1011@gmail.com';
+      const mockUser = {
+        id: 1,
+        name: isOwner ? 'Chethan Palagiri (Owner)' : (form.email.split('@')[0] || 'User'),
+        email: form.email,
+        credits: 100,
+        plan: isOwner ? 'Owner Pro Plan' : 'Free Plan',
+        is_admin: isOwner,
+      };
+      try {
+        localStorage.setItem('token', 'active_session_token');
+        localStorage.setItem('user_session', JSON.stringify(mockUser));
+      } catch (e) {}
+    } catch (err) {}
 
-    localStorage.setItem('token', 'active_session_token');
-    localStorage.setItem('user_session', JSON.stringify(mockUser));
-    toast.success('Welcome back! 🎉');
     window.location.href = '/dashboard';
   };
 
   const loginAsOwner = () => {
     const ownerEmail = 'chethanpalagiri1011@gmail.com';
-    setForm({ email: ownerEmail, password: 'password123' });
-    setLoading(true);
+    try {
+      const mockUser = {
+        id: 1,
+        name: 'Chethan Palagiri (Owner)',
+        email: ownerEmail,
+        credits: 100,
+        plan: 'Owner Pro Plan',
+        is_admin: true,
+      };
+      try {
+        localStorage.setItem('token', 'active_session_token');
+        localStorage.setItem('user_session', JSON.stringify(mockUser));
+      } catch (e) {}
+    } catch (err) {}
 
-    const mockUser = {
-      id: 1,
-      name: 'Chethan Palagiri (Owner)',
-      email: ownerEmail,
-      credits: 100,
-      plan: 'Owner Pro Plan',
-      is_admin: true,
-    };
-
-    localStorage.setItem('token', 'active_session_token');
-    localStorage.setItem('user_session', JSON.stringify(mockUser));
-    toast.success('Welcome Chethan! Logged in as Owner 👑');
     window.location.href = '/dashboard';
   };
 
