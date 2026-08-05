@@ -139,6 +139,11 @@ export default function CinematicIntro({ onComplete, autoPlay = true }) {
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start(now); osc.stop(now + 1.0);
+      }
+    } catch (e) {
+      console.warn('Sound error:', e);
+    }
+  };
   const audioTrackRef = useRef(null);
 
   const MUSIC_TRACKS = {
