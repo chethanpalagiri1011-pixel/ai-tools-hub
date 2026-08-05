@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import api from '../utils/api';
 
+const AuthContext = createContext(null);
+
 const DEFAULT_USER = {
   id: 1,
   name: 'Chethan Palagiri (Owner)',
