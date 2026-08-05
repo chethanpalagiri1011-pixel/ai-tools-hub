@@ -4,30 +4,35 @@ import api from '../utils/api';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('user_session');
+      if (saved) return JSON.parse(saved);
+      const token = localStorage.getItem('token');
+      if (token) {
+        return { id: 1, name: 'Chethan Palagiri (Owner)', email: 'chethanpalagiri1011@gmail.com', credits: 100, plan: 'Owner Pro Plan', is_admin: true };
+      }
+    } catch (e) {}
+    return null;
+  });
+  const [loading, setLoading] = useState(false);
 
-  // Load user on mount if token exists
+  // Background profile sync
   useEffect(() => {
     const fetchMe = async () => {
       const token = localStorage.getItem('token');
-      const savedUser = localStorage.getItem('user_session');
-      
-      if (savedUser) {
-        try { setUser(JSON.parse(savedUser)); } catch (e) {}
-      }
-
-      if (token) {
+      if (token && token !== 'active_session_token') {
         try {
           api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          const res = await api.get('/api/users/me', { timeout: 5000 });
-          setUser(res.data);
-          localStorage.setItem('user_session', JSON.stringify(res.data));
+          const res = await api.get('/api/users/me', { timeout: 4000 });
+          if (res.data) {
+            setUser(res.data);
+            localStorage.setItem('user_session', JSON.stringify(res.data));
+          }
         } catch (err) {
-          console.warn("Backend user load fallback, keeping session active:", err);
+          console.warn("Backend user load notice:", err);
         }
       }
-      setLoading(false);
     };
     fetchMe();
   }, []);

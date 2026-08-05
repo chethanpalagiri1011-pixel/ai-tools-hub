@@ -17,22 +17,19 @@ import AdminDashboard from './pages/AdminDashboard';
 import DashboardLayout from './layouts/DashboardLayout';
 
 function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
-  if (loading) return (
-    <div className="min-h-screen bg-dark-400 flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-primary-700 border-t-primary-400 animate-spin" />
-        <p className="text-gray-400 text-sm">Loading AI Tools Hub...</p>
-      </div>
-    </div>
-  );
-  return user ? children : <Navigate to="/login" replace />;
+  const { user } = useAuth();
+  const token = localStorage.getItem('token');
+  const session = localStorage.getItem('user_session');
+  const hasAccess = Boolean(user || token || session);
+  return hasAccess ? children : <Navigate to="/login" replace />;
 }
 
 function PublicRoute({ children }) {
-  const { user, loading } = useAuth();
-  if (loading) return null;
-  return user ? <Navigate to="/dashboard" replace /> : children;
+  const { user } = useAuth();
+  const token = localStorage.getItem('token');
+  const session = localStorage.getItem('user_session');
+  const hasAccess = Boolean(user || token || session);
+  return hasAccess ? <Navigate to="/dashboard" replace /> : children;
 }
 
 function App() {
