@@ -27,6 +27,7 @@ export default function ImageGenerator() {
   const [ratio, setRatio]         = useState('16:9');
   const [loading, setLoading]     = useState(false);
   const [result, setResult]       = useState(null);
+  const [imgLoaded, setImgLoaded] = useState(false);
   const [saved, setSaved]         = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isListening, setIsListening]   = useState(false);
@@ -114,7 +115,7 @@ export default function ImageGenerator() {
     if (!prompt.trim()) { toast.error('Please enter a prompt'); return; }
     if ((user?.credits || 0) < 10) { toast.error('Not enough credits! Image generation costs 10 credits.'); return; }
 
-    setLoading(true); setSaved(false); setResult(null);
+    setLoading(true); setSaved(false); setResult(null); setImgLoaded(false);
     try {
       const data = await generateImage({ prompt: prompt.trim(), style, aspectRatio: ratio });
       setResult(data);
@@ -250,11 +251,11 @@ export default function ImageGenerator() {
           <label className="block text-sm text-gray-400 mb-2 font-medium">Preview</label>
           <div className="relative rounded-xl overflow-hidden border border-white/8 min-h-64 flex items-center justify-center"
                style={{ background: 'rgba(255,255,255,0.02)', aspectRatio: ratio === '9:16' ? '9/16' : ratio === '1:1' ? '1/1' : '16/9' }}>
-            {loading && (
+          {loading && (
               <div className="text-center">
                 <div className="w-12 h-12 mx-auto mb-3 rounded-full border-2 border-purple-700 border-t-purple-400 animate-spin" />
                 <p className="text-gray-500 text-sm">Generating your image...</p>
-                <p className="text-gray-700 text-xs mt-1">This takes a few seconds</p>
+                <p className="text-gray-700 text-xs mt-1">Usually takes 10–20 seconds</p>
               </div>
             )}
             {!loading && !result && (
@@ -264,7 +265,25 @@ export default function ImageGenerator() {
               </div>
             )}
             {result && !loading && (
-              <img src={result.url} alt={prompt} className="w-full h-full object-cover" />
+              <>
+                {!imgLoaded && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <div className="w-10 h-10 mb-3 rounded-full border-2 border-purple-700 border-t-purple-400 animate-spin" />
+                    <p className="text-gray-500 text-xs">Loading image preview...</p>
+                  </div>
+                )}
+                <img
+                  src={result.url}
+                  alt={prompt}
+                  className="w-full h-full object-cover"
+                  style={{ display: imgLoaded ? 'block' : 'none' }}
+                  onLoad={() => setImgLoaded(true)}
+                  onError={() => {
+                    setImgLoaded(true); // show broken state
+                    toast.error('Image preview failed to load. Try downloading directly.');
+                  }}
+                />
+              </>
             )}
           </div>
 
