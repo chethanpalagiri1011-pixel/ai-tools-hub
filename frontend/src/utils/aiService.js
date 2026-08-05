@@ -21,7 +21,7 @@ export const generateImage = async ({ prompt, style = 'photorealistic', aspectRa
   const { w, h } = dimMap[aspectRatio] || dimMap['16:9'];
   const seed = Math.floor(Math.random() * 999999);
   const encoded = encodeURIComponent(fullPrompt);
-  const url = `https://image.pollinations.ai/prompt/${encoded}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true`;
+  const url = `https://image.pollinations.ai/prompt/${encoded}?width=${w}&height=${h}&seed=${seed}&nologo=true`;
 
   // Small artificial delay so loading spinner shows
   await new Promise(r => setTimeout(r, 1000));

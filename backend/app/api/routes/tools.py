@@ -114,7 +114,7 @@ async def generate_image(data: ImageRequest, db: Session = Depends(get_db), user
     }
     width, height = dimensions.get(data.aspect_ratio, (1024, 1024))
 
-    url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={width}&height={height}&seed={seed}&model=flux&nologo=true"
+    url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={width}&height={height}&seed={seed}&nologo=true"
     result = {"url": url, "seed": seed, "style": data.style, "prompt": data.prompt, "enhanced_prompt": enhanced_p}
     save_history(db, user.id, "image", data.prompt, json.dumps(result), 10)
     return result
