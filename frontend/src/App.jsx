@@ -4,8 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 
 import LandingPage    from './pages/LandingPage';
-import LoginPage      from './pages/LoginPage';
-import SignupPage     from './pages/SignupPage';
+
 import Dashboard      from './pages/Dashboard';
 import AIToolsPage    from './pages/AIToolsPage';
 import ProfilePage    from './pages/ProfilePage';

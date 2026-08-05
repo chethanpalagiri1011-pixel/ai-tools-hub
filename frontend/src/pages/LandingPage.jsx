@@ -1,4 +1,4 @@
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Zap, ArrowRight, Star, ImageIcon, FileText, MessageSquare,
   Sparkles, Shield, Globe, BarChart3, CheckCircle2, ChevronRight,
@@ -121,12 +121,9 @@ export default function LandingPage() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-purple-300 bg-purple-500/10 border border-purple-500/20 hover:bg-purple-500/20 transition-all cursor-pointer">
             <Play size={12} className="fill-purple-300" /> Watch Intro
           </button>
-          <Link to="/login" className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors font-medium">
-            Sign in
-          </Link>
-          <button onClick={() => navigate('/signup')}
+          <button onClick={() => navigate('/dashboard')}
             className="btn-primary py-2 px-5 text-sm font-bold shadow-lg shadow-purple-500/25 cursor-pointer">
-            Get Started Free
+            Go to Dashboard
           </button>
         </div>
 
@@ -143,10 +140,9 @@ export default function LandingPage() {
              style={{ background: 'rgba(5,5,20,0.98)', backdropFilter: 'blur(20px)' }}>
           <a href="#features" className="py-3 border-b border-white/5 text-gray-300" onClick={() => setMobileMenuOpen(false)}>Features</a>
           <a href="#pricing"  className="py-3 border-b border-white/5 text-gray-300" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
-          <Link to="/login" className="py-3 border-b border-white/5 text-gray-300 font-medium" onClick={() => setMobileMenuOpen(false)}>Sign in</Link>
-          <button onClick={() => { navigate('/signup'); setMobileMenuOpen(false); }}
+          <button onClick={() => { navigate('/dashboard'); setMobileMenuOpen(false); }}
             className="btn-primary w-full mt-2 py-3 font-bold flex items-center justify-center gap-2">
-            <span>Get Started Free</span>
+            <span>Go to Dashboard</span>
             <ArrowRight size={16} />
           </button>
         </div>
