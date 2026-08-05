@@ -21,8 +21,7 @@ function ProtectedRoute({ children }) {
 }
 
 function PublicRoute({ children }) {
-  const { user } = useAuth();
-  return user ? <Navigate to="/dashboard" replace /> : children;
+  return <Navigate to="/dashboard" replace />;
 }
 
 function App() {
@@ -49,8 +48,8 @@ function App() {
           <Routes>
             {/* Public */}
             <Route path="/"       element={<LandingPage />} />
-            <Route path="/login"  element={<PublicRoute><LoginPage /></PublicRoute>} />
-            <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
+            <Route path="/login"  element={<Navigate to="/dashboard" replace />} />
+            <Route path="/signup" element={<Navigate to="/dashboard" replace />} />
 
             {/* Protected — wrapped in DashboardLayout */}
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
