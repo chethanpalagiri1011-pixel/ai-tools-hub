@@ -17,23 +17,11 @@ import AdminDashboard from './pages/AdminDashboard';
 import DashboardLayout from './layouts/DashboardLayout';
 
 function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-dark-400 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
-          <p className="text-gray-400 text-sm font-medium">Loading AI Tools Hub...</p>
-        </div>
-      </div>
-    );
-  }
-  return user ? children : <Navigate to="/login" replace />;
+  return children;
 }
 
 function PublicRoute({ children }) {
-  const { user, loading } = useAuth();
-  if (loading) return null;
+  const { user } = useAuth();
   return user ? <Navigate to="/dashboard" replace /> : children;
 }
 

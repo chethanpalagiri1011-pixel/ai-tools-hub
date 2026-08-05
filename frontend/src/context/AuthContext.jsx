@@ -16,9 +16,9 @@ export function AuthProvider({ children }) {
       const saved = localStorage.getItem('user_session');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
-    return null;
+    return DEFAULT_USER;
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // Initial Auth Verification & Session Restoration
   useEffect(() => {
