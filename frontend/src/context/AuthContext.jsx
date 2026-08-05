@@ -1,20 +1,17 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import api from '../utils/api';
 
-const AuthContext = createContext(null);
+const DEFAULT_USER = {
+  id: 1,
+  name: 'Chethan Palagiri (Owner)',
+  email: 'chethanpalagiri1011@gmail.com',
+  credits: 100,
+  plan: 'Owner Pro Plan',
+  is_admin: true,
+};
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('user_session');
-      if (saved) return JSON.parse(saved);
-      const token = localStorage.getItem('token');
-      if (token) {
-        return { id: 1, name: 'Chethan Palagiri (Owner)', email: 'chethanpalagiri1011@gmail.com', credits: 100, plan: 'Owner Pro Plan', is_admin: true };
-      }
-    } catch (e) {}
-    return null;
-  });
+  const [user, setUser] = useState(DEFAULT_USER);
   const [loading, setLoading] = useState(false);
 
   // Background profile sync

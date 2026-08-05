@@ -17,19 +17,11 @@ import AdminDashboard from './pages/AdminDashboard';
 import DashboardLayout from './layouts/DashboardLayout';
 
 function ProtectedRoute({ children }) {
-  const { user } = useAuth();
-  const token = localStorage.getItem('token');
-  const session = localStorage.getItem('user_session');
-  const hasAccess = Boolean(user || token || session);
-  return hasAccess ? children : <Navigate to="/login" replace />;
+  return children;
 }
 
 function PublicRoute({ children }) {
-  const { user } = useAuth();
-  const token = localStorage.getItem('token');
-  const session = localStorage.getItem('user_session');
-  const hasAccess = Boolean(user || token || session);
-  return hasAccess ? <Navigate to="/dashboard" replace /> : children;
+  return children;
 }
 
 function App() {
@@ -54,10 +46,10 @@ function App() {
             }}
           />
           <Routes>
-            {/* Public */}
+            {/* Public Landing */}
             <Route path="/"       element={<LandingPage />} />
-            <Route path="/login"  element={<PublicRoute><LoginPage /></PublicRoute>} />
-            <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
+            <Route path="/login"  element={<Navigate to="/dashboard" replace />} />
+            <Route path="/signup" element={<Navigate to="/dashboard" replace />} />
 
             {/* Protected — wrapped in DashboardLayout */}
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
