@@ -17,11 +17,24 @@ import AdminDashboard from './pages/AdminDashboard';
 import DashboardLayout from './layouts/DashboardLayout';
 
 function ProtectedRoute({ children }) {
-  return children;
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-dark-400 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
+          <p className="text-gray-400 text-sm font-medium">Loading AI Tools Hub...</p>
+        </div>
+      </div>
+    );
+  }
+  return user ? children : <Navigate to="/login" replace />;
 }
 
 function PublicRoute({ children }) {
-  return children;
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  return user ? <Navigate to="/dashboard" replace /> : children;
 }
 
 function App() {
@@ -46,10 +59,10 @@ function App() {
             }}
           />
           <Routes>
-            {/* Public Landing */}
+            {/* Public */}
             <Route path="/"       element={<LandingPage />} />
-            <Route path="/login"  element={<Navigate to="/dashboard" replace />} />
-            <Route path="/signup" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/login"  element={<PublicRoute><LoginPage /></PublicRoute>} />
+            <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
 
             {/* Protected — wrapped in DashboardLayout */}
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>

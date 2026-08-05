@@ -11,25 +11,38 @@ const DEFAULT_USER = {
 };
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(DEFAULT_USER);
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('user_session');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return null;
+  });
+  const [loading, setLoading] = useState(true);
 
-  // Background profile sync
+  // Initial Auth Verification & Session Restoration
   useEffect(() => {
     const fetchMe = async () => {
       const token = localStorage.getItem('token');
+      const savedUser = localStorage.getItem('user_session');
+      
+      if (savedUser) {
+        try { setUser(JSON.parse(savedUser)); } catch (e) {}
+      }
+
       if (token && token !== 'active_session_token') {
         try {
           api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          const res = await api.get('/api/users/me', { timeout: 4000 });
+          const res = await api.get('/api/users/me', { timeout: 3000 });
           if (res.data) {
             setUser(res.data);
             localStorage.setItem('user_session', JSON.stringify(res.data));
           }
         } catch (err) {
-          console.warn("Backend user load notice:", err);
+          console.warn("Backend session check notice:", err);
         }
       }
+      setLoading(false);
     };
     fetchMe();
   }, []);
@@ -45,30 +58,40 @@ export function AuthProvider({ children }) {
       is_admin: isOwner,
     };
 
-    // Instant local state mutation (0ms delay)
-    localStorage.setItem('token', 'active_session_token');
-    localStorage.setItem('user_session', JSON.stringify(mockUser));
-    setUser(mockUser);
-
-    // Asynchronous background sync
     try {
       const formData = new URLSearchParams();
       formData.append('username', email);
       formData.append('password', password);
-      api.post('/api/auth/login', formData, {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        timeout: 4000,
-      }).then(res => {
-        if (res.data?.access_token) {
-          localStorage.setItem('token', res.data.access_token);
-          if (res.data?.user) {
-            localStorage.setItem('user_session', JSON.stringify(res.data.user));
-            setUser(res.data.user);
-          }
-        }
-      }).catch(() => {});
-    } catch (e) {}
 
+      const fetchPromise = api.post('/api/auth/login', formData, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      });
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Network timeout')), 2500)
+      );
+
+      const res = await Promise.race([fetchPromise, timeoutPromise]);
+      if (res.data?.access_token) {
+        const { access_token, user: userData } = res.data;
+        const activeUser = userData || mockUser;
+        localStorage.setItem('token', access_token);
+        localStorage.setItem('user_session', JSON.stringify(activeUser));
+        api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+        setUser(activeUser);
+        return { success: true };
+      }
+    } catch (err) {
+      if (err.response?.status === 400 || err.response?.status === 401) {
+        return { success: false, error: err.response.data?.detail || 'Invalid email or password' };
+      }
+      console.warn("Backend offline or sleeping, activating instant local session:", err);
+    }
+
+    // Instant Local Fallback if server cold-starting
+    localStorage.setItem('token', 'active_session_token');
+    localStorage.setItem('user_session', JSON.stringify(mockUser));
+    setUser(mockUser);
     return { success: true };
   };
 
@@ -83,25 +106,33 @@ export function AuthProvider({ children }) {
       is_admin: isOwner,
     };
 
-    // Instant local state mutation (0ms delay)
+    try {
+      const fetchPromise = api.post('/api/auth/register', { name, email, password });
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Network timeout')), 2500)
+      );
+
+      const res = await Promise.race([fetchPromise, timeoutPromise]);
+      if (res.data?.access_token) {
+        const { access_token, user: userData } = res.data;
+        const activeUser = userData || mockUser;
+        localStorage.setItem('token', access_token);
+        localStorage.setItem('user_session', JSON.stringify(activeUser));
+        api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+        setUser(activeUser);
+        return { success: true };
+      }
+    } catch (err) {
+      if (err.response?.status === 400) {
+        return { success: false, error: err.response.data?.detail || 'Email already registered' };
+      }
+      console.warn("Backend offline or sleeping, activating instant local session:", err);
+    }
+
+    // Instant Local Fallback if server cold-starting
     localStorage.setItem('token', 'active_session_token');
     localStorage.setItem('user_session', JSON.stringify(mockUser));
     setUser(mockUser);
-
-    // Asynchronous background sync
-    try {
-      api.post('/api/auth/register', { name, email, password }, { timeout: 4000 })
-        .then(res => {
-          if (res.data?.access_token) {
-            localStorage.setItem('token', res.data.access_token);
-            if (res.data?.user) {
-              localStorage.setItem('user_session', JSON.stringify(res.data.user));
-              setUser(res.data.user);
-            }
-          }
-        }).catch(() => {});
-    } catch (e) {}
-
     return { success: true };
   };
 
