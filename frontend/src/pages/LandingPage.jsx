@@ -115,20 +115,16 @@ export default function LandingPage() {
           <a href="#pricing"   className="hover:text-white transition-colors">Pricing</a>
           <a href="#about"     className="hover:text-white transition-colors">About</a>
         </div>
-
         <div className="hidden md:flex items-center gap-3">
           <button 
             onClick={() => setShowIntro(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-purple-300 bg-purple-500/10 border border-purple-500/20 hover:bg-purple-500/20 transition-all cursor-pointer">
-            <Play size={12} className="fill-purple-300" /> Watch Cinematic Intro
+            <Play size={12} className="fill-purple-300" /> Watch Intro
           </button>
-          <Link to="/login"
-            className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors">
-            Sign in
-          </Link>
-          <button onClick={() => navigate('/signup')}
-            className="btn-primary py-2 px-5 text-sm">
-            Get Started Free
+          <button onClick={() => navigate('/dashboard')}
+            className="btn-primary py-2 px-6 text-sm flex items-center gap-2 shadow-lg shadow-purple-500/25 cursor-pointer">
+            <span>🚀 Launch AI Tools Hub</span>
+            <ArrowRight size={16} />
           </button>
         </div>
 
@@ -145,9 +141,11 @@ export default function LandingPage() {
              style={{ background: 'rgba(5,5,20,0.98)', backdropFilter: 'blur(20px)' }}>
           <a href="#features" className="py-3 border-b border-white/5 text-gray-300" onClick={() => setMobileMenuOpen(false)}>Features</a>
           <a href="#pricing"  className="py-3 border-b border-white/5 text-gray-300" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
-          <Link to="/login"  className="py-3 border-b border-white/5 text-gray-300" onClick={() => setMobileMenuOpen(false)}>Sign in</Link>
-          <button onClick={() => { navigate('/signup'); setMobileMenuOpen(false); }}
-            className="btn-primary w-full mt-2">Get Started Free</button>
+          <button onClick={() => { navigate('/dashboard'); setMobileMenuOpen(false); }}
+            className="btn-primary w-full mt-2 py-3 font-bold flex items-center justify-center gap-2">
+            <span>🚀 Launch AI Tools Hub</span>
+            <ArrowRight size={16} />
+          </button>
         </div>
       )}
 
@@ -173,23 +171,23 @@ export default function LandingPage() {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up delay-200">
-          <button onClick={() => navigate('/signup')}
-            className="btn-primary flex items-center gap-2 text-base px-8 py-3.5 w-full sm:w-auto justify-center">
-            Start Creating Free
+          <button onClick={() => navigate('/dashboard')}
+            className="btn-primary flex items-center gap-2 text-base px-8 py-3.5 w-full sm:w-auto justify-center cursor-pointer shadow-xl shadow-purple-500/25 font-bold">
+            <span>🚀 Launch AI Tools Hub</span>
             <ArrowRight size={18} />
           </button>
-          <button onClick={() => navigate('/login')}
-            className="btn-secondary flex items-center gap-2 text-base px-8 py-3.5 w-full sm:w-auto justify-center">
-            See Demo
+          <button onClick={() => navigate('/dashboard/tools')}
+            className="btn-secondary flex items-center gap-2 text-base px-8 py-3.5 w-full sm:w-auto justify-center cursor-pointer font-bold">
+            <span>Explore 4 AI Tools</span>
             <ChevronRight size={18} />
           </button>
         </div>
 
         {/* Trust badges */}
         <div className="flex items-center justify-center gap-6 mt-10 text-xs text-gray-600 animate-fade-in-up delay-300">
-          <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-500" /> No credit card</span>
-          <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-500" /> 50 free credits</span>
-          <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-500" /> Cancel anytime</span>
+          <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-500" /> No Login Required</span>
+          <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-500" /> 100 Pro Credits Pre-Activated</span>
+          <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-500" /> Instant Access</span>
         </div>
 
         {/* Hero Image mockup */}
@@ -209,24 +207,22 @@ export default function LandingPage() {
               </div>
             </div>
             {/* Dashboard preview */}
-            <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4 cursor-pointer" onClick={() => navigate('/dashboard')}>
               {FEATURES.map((f, i) => (
                 <div key={f.title}
-                  className="p-4 rounded-xl border border-white/5 text-left"
+                  className="p-4 rounded-xl border border-white/5 text-left hover:border-purple-500/40 transition-all"
                   style={{ background: 'rgba(255,255,255,0.03)', animationDelay: `${i * 0.1}s` }}>
                   <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${f.color} flex items-center justify-center mb-3`}>
                     <f.icon size={16} className="text-white" />
                   </div>
                   <p className="text-white text-xs font-semibold">{f.title}</p>
-                  <p className="text-gray-600 text-xs mt-1 hidden md:block">AI-powered</p>
+                  <p className="text-purple-400 text-xs mt-1 hidden md:block">Launch Tool →</p>
                 </div>
               ))}
             </div>
           </div>
         </div>
       </section>
-
-
 
       {/* FEATURES */}
       <section id="features" className="py-24 px-6">
@@ -244,6 +240,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-6">
             {FEATURES.map((f, i) => (
               <div key={f.title}
+                onClick={() => navigate('/dashboard/tools')}
                 className="relative p-6 rounded-2xl border border-white/8 group hover:border-purple-500/30 transition-all duration-300 cursor-pointer overflow-hidden"
                 style={{ background: 'rgba(255,255,255,0.02)' }}>
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -268,7 +265,7 @@ export default function LandingPage() {
                 </div>
 
                 <div className="relative mt-4 flex items-center gap-1 text-xs font-medium text-purple-400 group-hover:gap-2 transition-all">
-                  <span>Try it free</span>
+                  <span>Open Tool</span>
                   <ArrowRight size={12} />
                 </div>
               </div>
@@ -314,7 +311,7 @@ export default function LandingPage() {
             <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-4">
               Simple, <span className="gradient-text">transparent</span> pricing
             </h2>
-            <p className="text-gray-400">Start for free. Upgrade when you need more.</p>
+            <p className="text-gray-400">All tools are pre-activated and free to use.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
@@ -352,10 +349,10 @@ export default function LandingPage() {
                   ))}
                 </ul>
 
-                <button onClick={() => navigate('/signup')}
-                  className={`w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300
+                <button onClick={() => navigate('/dashboard')}
+                  className={`w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 cursor-pointer
                     ${plan.highlight ? 'btn-primary' : 'btn-secondary'}`}>
-                  {plan.cta}
+                  <span>🚀 Open Workspace</span>
                 </button>
               </div>
             ))}
@@ -372,10 +369,10 @@ export default function LandingPage() {
             <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4">
               Ready to build something <span className="gradient-text">amazing</span>?
             </h2>
-            <p className="text-gray-400 mb-8">Join 50,000+ creators already using AI Tools Hub.</p>
-            <button onClick={() => navigate('/signup')}
-              className="btn-primary flex items-center gap-2 mx-auto">
-              Get Started — It's Free
+            <p className="text-gray-400 mb-8">No registration or login needed. Start building now.</p>
+            <button onClick={() => navigate('/dashboard')}
+              className="btn-primary flex items-center gap-2 mx-auto px-8 py-3.5 text-base font-bold shadow-xl shadow-purple-500/30 cursor-pointer">
+              <span>🚀 Open AI Tools Workspace</span>
               <ArrowRight size={18} />
             </button>
           </div>
