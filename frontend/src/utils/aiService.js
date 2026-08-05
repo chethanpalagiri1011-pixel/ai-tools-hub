@@ -25,12 +25,12 @@ export const generateImage = async ({ prompt, style = 'photorealistic', aspectRa
   const { w, h } = dimMap[aspectRatio] || dimMap['16:9'];
   const seed = Math.floor(Math.random() * 999999);
   const encoded = encodeURIComponent(enhanced);
-  const url = `https://image.pollinations.ai/prompt/${encoded}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true&enhance=true`;
+  const url = `https://image.pollinations.ai/prompt/${encoded}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true`;
 
-  // Preload to confirm image is ready
+  // Preload to confirm image is ready (40s timeout)
   await new Promise((resolve) => {
     const img = new Image();
-    const timeout = setTimeout(() => resolve(), 12000);
+    const timeout = setTimeout(() => resolve(), 40000);
     img.onload  = () => { clearTimeout(timeout); resolve(); };
     img.onerror = () => { clearTimeout(timeout); resolve(); };
     img.src = url;

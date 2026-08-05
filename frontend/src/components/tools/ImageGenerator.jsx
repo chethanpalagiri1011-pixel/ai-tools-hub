@@ -287,6 +287,19 @@ export default function ImageGenerator() {
             )}
           </div>
 
+          {/* View Full Image link — always show when result exists */}
+          {result && !loading && (
+            <a
+              href={result.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 flex items-center justify-center gap-2 w-full py-2 rounded-xl text-xs font-semibold text-purple-300 border border-purple-500/30 hover:bg-purple-500/10 transition-all"
+              style={{ background: 'rgba(124,58,237,0.05)' }}
+            >
+              🔗 View Full Image in New Tab
+            </a>
+          )}
+
           {result && !loading && (
             <div className="flex gap-2 mt-3">
               <button onClick={handleDownload}
