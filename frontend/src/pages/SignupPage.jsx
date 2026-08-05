@@ -35,6 +35,8 @@ export default function SignupPage() {
       if (result.success) {
         toast.success('Account created! Welcome to AI Tools Hub 🎉');
         navigate('/dashboard');
+        window.location.href = '/dashboard';
+        return;
       } else {
         setError(result.error || 'Failed to create account.');
       }

@@ -26,6 +26,8 @@ export default function LoginPage() {
       if (result.success) {
         toast.success('Welcome back! 🎉');
         navigate('/dashboard');
+        window.location.href = '/dashboard';
+        return;
       } else {
         setError(result.error || 'Login failed. Please check your credentials.');
       }
