@@ -266,52 +266,13 @@ export default function ImageGenerator() {
               </div>
             )}
             {result && !loading && (
-              <>
-                {!imgLoaded && !imgError && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div className="w-10 h-10 mb-3 rounded-full border-2 border-purple-700 border-t-purple-400 animate-spin" />
-                    <p className="text-gray-500 text-xs">Loading image preview...</p>
-                  </div>
-                )}
-                {imgError && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                    <div className="text-4xl mb-3">🎨</div>
-                    <p className="text-green-400 font-semibold text-sm mb-1">Image Generated Successfully!</p>
-                    <p className="text-gray-500 text-xs mb-4">Preview blocked by browser. Click below to view.</p>
-                    <a
-                      href={result.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-primary py-2.5 px-6 text-sm font-bold flex items-center gap-2"
-                    >
-                      🔗 Open Image in New Tab
-                    </a>
-                  </div>
-                )}
-                <img
-                  src={result.url}
-                  alt={prompt}
-                  className="w-full h-full object-cover"
-                  style={{ display: imgLoaded && !imgError ? 'block' : 'none' }}
-                  onLoad={() => setImgLoaded(true)}
-                  onError={() => { setImgError(true); }}
-                />
-              </>
+              <img
+                src={result.url}
+                alt={prompt}
+                className="w-full h-full object-cover rounded-xl"
+              />
             )}
           </div>
-
-          {/* View Full Image link — always show when result exists */}
-          {result && !loading && (
-            <a
-              href={result.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-2 flex items-center justify-center gap-2 w-full py-2 rounded-xl text-xs font-semibold text-purple-300 border border-purple-500/30 hover:bg-purple-500/10 transition-all"
-              style={{ background: 'rgba(124,58,237,0.05)' }}
-            >
-              🔗 View Full Image in New Tab
-            </a>
-          )}
 
           {result && !loading && (
             <div className="flex gap-2 mt-3">
