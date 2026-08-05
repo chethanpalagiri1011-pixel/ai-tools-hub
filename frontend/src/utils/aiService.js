@@ -1,46 +1,42 @@
 import api from './api';
 
-// ── Image Generator — Generates via Pollinations.ai FLUX Model ─────────────────
+// ── Image Generator — Direct Pollinations.ai FLUX Model (instant, no backend needed) ─
 export const generateImage = async ({ prompt, style = 'photorealistic', aspectRatio = '16:9' }) => {
-  try {
-    const res = await api.post('/api/tools/image', {
-      prompt,
-      style,
-      aspect_ratio: aspectRatio
-    });
+  const cleanPrompt = prompt.replace(/^(give me (the )?image of|generate (an )?image of|show me (the )?image of|picture of)\s+/i, '').trim();
 
-    const data = res.data;
+  // Style enhancers
+  const styleMap = {
+    'photorealistic': 'ultra photorealistic, 8k resolution, sharp focus, professional photography',
+    'digital-art':    'digital art, vibrant colors, detailed illustration, artstation trending',
+    'anime':          'anime style, manga art, Studio Ghibli inspired, beautiful detailed anime',
+    'painting':       'oil painting, classical art style, painterly brush strokes, museum quality',
+    'sketch':         'pencil sketch, detailed hand-drawn, fine line art, professional sketch',
+  };
 
-    try {
-      await new Promise((resolve) => {
-        const img = new Image();
-        const timeout = setTimeout(() => resolve(), 8000);
-        img.onload = () => { clearTimeout(timeout); resolve(); };
-        img.onerror = () => { clearTimeout(timeout); resolve(); };
-        img.src = data.url;
-      });
-    } catch (preloadError) {
-      console.warn("Image preloading notice:", preloadError);
-    }
+  const styleTag = styleMap[style] || styleMap['photorealistic'];
+  const enhanced = `${cleanPrompt}, ${styleTag}`;
 
-    return { url: data.url, seed: data.seed, style: data.style, prompt: data.prompt };
-  } catch (error) {
-    console.warn("Backend image endpoint fallback, generating client FLUX image:", error);
-    
-    // Client-side FLUX fallback engine if backend API fails
-    const cleanPrompt = prompt.replace(/^(give me (the )?image of|generate (an )?image of|show me (the )?image of|picture of)\s+/i, '').trim();
-    let enhanced = cleanPrompt;
-    if (cleanPrompt.toLowerCase().includes('virat kohli')) {
-      enhanced = 'photograph of Indian cricket legend Virat Kohli, authentic facial features, sharp beard, wearing official Indian cricket team blue jersey, 8k HD resolution, high quality portrait, photorealistic, exact facial likeness';
-    } else {
-      enhanced = `${cleanPrompt}, highly detailed 8k resolution photograph, photorealistic portrait, sharp focus`;
-    }
-    const seed = Math.floor(Math.random() * 999999);
-    const encoded = encodeURIComponent(enhanced);
-    const url = `https://image.pollinations.ai/prompt/${encoded}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;
+  // Aspect ratio to dimensions
+  const dimMap = {
+    '16:9': { w: 1344, h: 768 },
+    '1:1':  { w: 1024, h: 1024 },
+    '9:16': { w: 768,  h: 1344 },
+  };
+  const { w, h } = dimMap[aspectRatio] || dimMap['16:9'];
+  const seed = Math.floor(Math.random() * 999999);
+  const encoded = encodeURIComponent(enhanced);
+  const url = `https://image.pollinations.ai/prompt/${encoded}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true&enhance=true`;
 
-    return { url, seed, style, prompt };
-  }
+  // Preload to confirm image is ready
+  await new Promise((resolve) => {
+    const img = new Image();
+    const timeout = setTimeout(() => resolve(), 12000);
+    img.onload  = () => { clearTimeout(timeout); resolve(); };
+    img.onerror = () => { clearTimeout(timeout); resolve(); };
+    img.src = url;
+  });
+
+  return { url, seed, style, prompt };
 };
 
 // ── Text Summarizer ──────────────────────────────────────────────────────────
