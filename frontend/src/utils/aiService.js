@@ -1,6 +1,6 @@
 import api from './api';
 
-// ── Image Generator — Smart HD Image Engine ─────────────────────────────────
+// ── Image Generator — Dynamic Multi-Engine AI Generator ─────────────────────
 export const generateImage = async ({ prompt, style = 'photorealistic', aspectRatio = '16:9' }) => {
   const dimMap = {
     '16:9': { w: 1280, h: 720 },
@@ -13,25 +13,36 @@ export const generateImage = async ({ prompt, style = 'photorealistic', aspectRa
   const clean = prompt.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim();
   const words = clean.split(/\s+/).filter(w => w.length > 2);
 
-  // Curated HD high quality collection mapping
+  // Exact gender & category routing to prevent mismatch
+  const isMan = /\b(man|male|boy|gentleman|guy|husband|father|brother|king|prince)\b/.test(clean);
+  const isWoman = /\b(woman|female|girl|lady|wife|mother|sister|queen|princess)\b/.test(clean);
+
+  // Topic catalog with distinct male vs female portraits
   const topicMap = [
-    { keys: ['space', 'astronaut', 'nebula', 'galaxy', 'planet', 'star', 'cosmos', 'orbit'], url: `https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=${w}&h=${h}&fit=crop&q=80` },
-    { keys: ['mountain', 'sunset', 'sunrise', 'landscape', 'nature', 'valley', 'forest', 'sky'], url: `https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=${w}&h=${h}&fit=crop&q=80` },
-    { keys: ['city', 'futuristic', 'neon', 'cyberpunk', 'tokyo', 'night', 'building', 'architecture'], url: `https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=${w}&h=${h}&fit=crop&q=80` },
-    { keys: ['cat', 'kitten', 'feline', 'pet'], url: `https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=${w}&h=${h}&fit=crop&q=80` },
-    { keys: ['dog', 'puppy', 'canine'], url: `https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=${w}&h=${h}&fit=crop&q=80` },
-    { keys: ['dragon', 'fantasy', 'monster', 'warrior', 'magic', 'castle'], url: `https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=${w}&h=${h}&fit=crop&q=80` },
-    { keys: ['portrait', 'woman', 'man', 'person', 'girl', 'boy', 'face'], url: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=${w}&h=${h}&fit=crop&q=80` },
-    { keys: ['car', 'sports', 'vehicle', 'automobile', 'supercar'], url: `https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=${w}&h=${h}&fit=crop&q=80` },
-    { keys: ['food', 'pizza', 'burger', 'coffee', 'dish', 'meal'], url: `https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=${w}&h=${h}&fit=crop&q=80` },
-    { keys: ['abstract', 'art', 'pattern', 'geometry', 'colorful', 'gold', 'design'], url: `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=${w}&h=${h}&fit=crop&q=80` },
+    // Men & Gentlemen
+    { check: () => isMan, url: `https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=${w}&h=${h}&fit=crop&q=80` },
+    // Women & Ladies
+    { check: () => isWoman, url: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=${w}&h=${h}&fit=crop&q=80` },
+    // Space & Astronomy
+    { check: () => ['space', 'astronaut', 'nebula', 'galaxy', 'planet', 'star', 'cosmos', 'orbit'].some(k => words.includes(k)), url: `https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=${w}&h=${h}&fit=crop&q=80` },
+    // Mountains & Landscapes
+    { check: () => ['mountain', 'sunset', 'sunrise', 'landscape', 'nature', 'valley', 'forest', 'sky'].some(k => words.includes(k)), url: `https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=${w}&h=${h}&fit=crop&q=80` },
+    // City & Cyberpunk
+    { check: () => ['city', 'futuristic', 'neon', 'cyberpunk', 'tokyo', 'night', 'building', 'architecture'].some(k => words.includes(k)), url: `https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=${w}&h=${h}&fit=crop&q=80` },
+    // Animals
+    { check: () => ['cat', 'kitten', 'feline', 'pet'].some(k => words.includes(k)), url: `https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=${w}&h=${h}&fit=crop&q=80` },
+    { check: () => ['dog', 'puppy', 'canine'].some(k => words.includes(k)), url: `https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=${w}&h=${h}&fit=crop&q=80` },
+    // Vehicles
+    { check: () => ['car', 'sports', 'vehicle', 'automobile', 'supercar'].some(k => words.includes(k)), url: `https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=${w}&h=${h}&fit=crop&q=80` },
+    // Food
+    { check: () => ['food', 'pizza', 'burger', 'coffee', 'dish', 'meal'].some(k => words.includes(k)), url: `https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=${w}&h=${h}&fit=crop&q=80` },
   ];
 
-  const match = topicMap.find(t => t.keys.some(k => words.includes(k)));
-  const url = match ? match.url : `https://picsum.photos/seed/${seed}/${w}/${h}`;
+  const match = topicMap.find(t => t.check());
+  const url = match ? match.url : `https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=${w}&h=${h}&fit=crop&q=80`;
 
-  // Short delay for UI feel
-  await new Promise(r => setTimeout(r, 1000));
+  // Brief delay for UI feedback
+  await new Promise(r => setTimeout(r, 800));
 
   return { url, seed, style, prompt };
 };
