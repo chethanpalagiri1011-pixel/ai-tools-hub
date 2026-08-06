@@ -37,21 +37,6 @@ function ProtectedRoute({ children }) {
 }
 
 function PublicRoute({ children }) {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#050510] flex items-center justify-center flex-col text-white">
-        <div className="w-12 h-12 rounded-full border-2 border-purple-600 border-t-transparent animate-spin mb-4" />
-        <p className="text-sm font-medium text-purple-300">Loading...</p>
-      </div>
-    );
-  }
-
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
   return children;
 }
 

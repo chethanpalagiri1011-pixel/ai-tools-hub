@@ -124,22 +124,21 @@ export default function LandingPage() {
             <Play size={12} className="fill-purple-300" /> Watch Intro
           </button>
           
+          <button onClick={() => navigate('/login')}
+            className="px-4 py-2 text-sm font-semibold text-gray-300 hover:text-white transition-colors cursor-pointer">
+            Sign In
+          </button>
+          
           {user ? (
             <button onClick={() => navigate('/dashboard')}
               className="btn-primary py-2 px-5 text-sm font-bold shadow-lg shadow-purple-500/25 cursor-pointer">
               Go to Dashboard
             </button>
           ) : (
-            <>
-              <button onClick={() => navigate('/login')}
-                className="px-4 py-2 text-sm font-semibold text-gray-300 hover:text-white transition-colors cursor-pointer">
-                Sign In
-              </button>
-              <button onClick={() => navigate('/signup')}
-                className="btn-primary py-2 px-5 text-sm font-bold shadow-lg shadow-purple-500/25 cursor-pointer">
-                Get Started Free
-              </button>
-            </>
+            <button onClick={() => navigate('/signup')}
+              className="btn-primary py-2 px-5 text-sm font-bold shadow-lg shadow-purple-500/25 cursor-pointer">
+              Get Started Free
+            </button>
           )}
         </div>
 
@@ -156,24 +155,17 @@ export default function LandingPage() {
              style={{ background: 'rgba(5,5,20,0.98)', backdropFilter: 'blur(20px)' }}>
           <a href="#features" className="py-3 border-b border-white/5 text-gray-300" onClick={() => setMobileMenuOpen(false)}>Features</a>
           <a href="#pricing"  className="py-3 border-b border-white/5 text-gray-300" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
-          {user ? (
+          <div className="space-y-2 pt-2">
+            <button onClick={() => { navigate('/login'); setMobileMenuOpen(false); }}
+              className="btn-secondary w-full py-3 font-semibold text-center">
+              Sign In
+            </button>
             <button onClick={() => { navigate('/dashboard'); setMobileMenuOpen(false); }}
-              className="btn-primary w-full mt-2 py-3 font-bold flex items-center justify-center gap-2">
+              className="btn-primary w-full py-3 font-bold text-center flex items-center justify-center gap-2">
               <span>Go to Dashboard</span>
               <ArrowRight size={16} />
             </button>
-          ) : (
-            <div className="space-y-2 pt-2">
-              <button onClick={() => { navigate('/login'); setMobileMenuOpen(false); }}
-                className="btn-secondary w-full py-3 font-semibold text-center">
-                Sign In
-              </button>
-              <button onClick={() => { navigate('/signup'); setMobileMenuOpen(false); }}
-                className="btn-primary w-full py-3 font-bold text-center">
-                Get Started Free
-              </button>
-            </div>
-          )}
+          </div>
         </div>
       )}
 
@@ -200,11 +192,18 @@ export default function LandingPage() {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up delay-200">
           {user ? (
-            <button onClick={() => navigate('/dashboard')}
-              className="btn-primary flex items-center gap-2 text-base px-8 py-3.5 w-full sm:w-auto justify-center cursor-pointer shadow-xl shadow-purple-500/25 font-bold">
-              <span>🚀 Open Dashboard</span>
-              <ArrowRight size={18} />
-            </button>
+            <>
+              <button onClick={() => navigate('/dashboard')}
+                className="btn-primary flex items-center gap-2 text-base px-8 py-3.5 w-full sm:w-auto justify-center cursor-pointer shadow-xl shadow-purple-500/25 font-bold">
+                <span>🚀 Open Dashboard</span>
+                <ArrowRight size={18} />
+              </button>
+              <button onClick={() => navigate('/login')}
+                className="btn-secondary flex items-center gap-2 text-base px-8 py-3.5 w-full sm:w-auto justify-center cursor-pointer font-bold border border-white/10 hover:border-purple-500/30">
+                <span>🔑 Sign In / Switch Account</span>
+                <ChevronRight size={18} />
+              </button>
+            </>
           ) : (
             <>
               <button onClick={() => navigate('/signup')}
