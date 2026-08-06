@@ -75,16 +75,18 @@ export default function LandingPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showIntro, setShowIntro] = useState(() => {
-    return !sessionStorage.getItem('intro_seen');
-  });
+  const [showIntro, setShowIntro] = useState(true);
 
   if (showIntro) {
     return (
       <CinematicIntro 
         onComplete={() => {
           setShowIntro(false);
-          sessionStorage.setItem('intro_seen', 'true');
+          if (user) {
+            navigate('/dashboard');
+          } else {
+            navigate('/login');
+          }
         }} 
       />
     );
