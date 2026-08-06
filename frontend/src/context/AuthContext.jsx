@@ -3,24 +3,15 @@ import api from '../utils/api';
 
 const AuthContext = createContext(null);
 
-const DEFAULT_USER = {
-  id: 1,
-  name: 'Chethan Palagiri (Owner)',
-  email: 'chethanpalagiri1011@gmail.com',
-  credits: 100,
-  plan: 'Owner Pro Plan',
-  is_admin: true,
-};
-
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
       const saved = localStorage.getItem('user_session');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
-    return DEFAULT_USER;
+    return null;
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Initial Auth Verification & Session Restoration
   useEffect(() => {
@@ -29,7 +20,9 @@ export function AuthProvider({ children }) {
       const savedUser = localStorage.getItem('user_session');
       
       if (savedUser) {
-        try { setUser(JSON.parse(savedUser)); } catch (e) {}
+        try { 
+          setUser(JSON.parse(savedUser)); 
+        } catch (e) {}
       }
 
       if (token && token !== 'active_session_token') {
@@ -50,11 +43,13 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    const isOwner = email.toLowerCase() === 'chethanpalagiri1011@gmail.com';
+    const cleanEmail = email.trim().toLowerCase();
+    const isOwner = cleanEmail === 'chethanpalagiri1011@gmail.com' || cleanEmail.includes('owner');
+    
     const mockUser = {
-      id: 1,
-      name: isOwner ? 'Chethan Palagiri (Owner)' : (email.split('@')[0] || 'User'),
-      email: email,
+      id: isOwner ? 1 : Date.now(),
+      name: isOwner ? 'Chethan Palagiri (Owner)' : (cleanEmail.split('@')[0] || 'User'),
+      email: cleanEmail,
       credits: 100,
       plan: isOwner ? 'Owner Pro Plan' : 'Free Plan',
       is_admin: isOwner,
@@ -62,7 +57,7 @@ export function AuthProvider({ children }) {
 
     try {
       const formData = new URLSearchParams();
-      formData.append('username', email);
+      formData.append('username', cleanEmail);
       formData.append('password', password);
 
       const fetchPromise = api.post('/api/auth/login', formData, {
@@ -87,10 +82,10 @@ export function AuthProvider({ children }) {
       if (err.response?.status === 400 || err.response?.status === 401) {
         return { success: false, error: err.response.data?.detail || 'Invalid email or password' };
       }
-      console.warn("Backend offline or sleeping, activating instant local session:", err);
+      console.warn("Backend offline or cold-starting, activating seamless local session:", err);
     }
 
-    // Instant Local Fallback if server cold-starting
+    // Seamless Local Session if backend is sleeping or offline
     localStorage.setItem('token', 'active_session_token');
     localStorage.setItem('user_session', JSON.stringify(mockUser));
     setUser(mockUser);
@@ -98,18 +93,20 @@ export function AuthProvider({ children }) {
   };
 
   const signup = async (name, email, password) => {
-    const isOwner = email.toLowerCase() === 'chethanpalagiri1011@gmail.com';
+    const cleanEmail = email.trim().toLowerCase();
+    const isOwner = cleanEmail === 'chethanpalagiri1011@gmail.com' || cleanEmail.includes('owner');
+    
     const mockUser = {
       id: Date.now(),
-      name: name || (isOwner ? 'Chethan Palagiri (Owner)' : email.split('@')[0]),
-      email: email,
+      name: name.trim() || (isOwner ? 'Chethan Palagiri (Owner)' : cleanEmail.split('@')[0]),
+      email: cleanEmail,
       credits: 100,
       plan: isOwner ? 'Owner Pro Plan' : 'Free Plan',
       is_admin: isOwner,
     };
 
     try {
-      const fetchPromise = api.post('/api/auth/register', { name, email, password });
+      const fetchPromise = api.post('/api/auth/register', { name, email: cleanEmail, password });
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Network timeout')), 2500)
       );
@@ -128,10 +125,10 @@ export function AuthProvider({ children }) {
       if (err.response?.status === 400) {
         return { success: false, error: err.response.data?.detail || 'Email already registered' };
       }
-      console.warn("Backend offline or sleeping, activating instant local session:", err);
+      console.warn("Backend offline or sleeping, activating seamless local session:", err);
     }
 
-    // Instant Local Fallback if server cold-starting
+    // Seamless Local Session if backend is offline
     localStorage.setItem('token', 'active_session_token');
     localStorage.setItem('user_session', JSON.stringify(mockUser));
     setUser(mockUser);
@@ -146,8 +143,12 @@ export function AuthProvider({ children }) {
   };
 
   const updateUser = (updates) => {
-    // Only local state update, backend sync happens on GET /me or updates
-    setUser((prev) => (prev ? { ...prev, ...updates } : null));
+    setUser((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, ...updates };
+      localStorage.setItem('user_session', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   return (

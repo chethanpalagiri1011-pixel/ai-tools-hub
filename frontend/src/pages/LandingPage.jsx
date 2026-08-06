@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import CinematicIntro from '../components/CinematicIntro';
+import { useAuth } from '../context/AuthContext';
 
 const FEATURES = [
   {
@@ -71,6 +72,7 @@ const PLANS = [
 ];
 
 export default function LandingPage() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showIntro, setShowIntro] = useState(() => {
@@ -121,10 +123,24 @@ export default function LandingPage() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-purple-300 bg-purple-500/10 border border-purple-500/20 hover:bg-purple-500/20 transition-all cursor-pointer">
             <Play size={12} className="fill-purple-300" /> Watch Intro
           </button>
-          <button onClick={() => navigate('/dashboard')}
-            className="btn-primary py-2 px-5 text-sm font-bold shadow-lg shadow-purple-500/25 cursor-pointer">
-            Go to Dashboard
-          </button>
+          
+          {user ? (
+            <button onClick={() => navigate('/dashboard')}
+              className="btn-primary py-2 px-5 text-sm font-bold shadow-lg shadow-purple-500/25 cursor-pointer">
+              Go to Dashboard
+            </button>
+          ) : (
+            <>
+              <button onClick={() => navigate('/login')}
+                className="px-4 py-2 text-sm font-semibold text-gray-300 hover:text-white transition-colors cursor-pointer">
+                Sign In
+              </button>
+              <button onClick={() => navigate('/signup')}
+                className="btn-primary py-2 px-5 text-sm font-bold shadow-lg shadow-purple-500/25 cursor-pointer">
+                Get Started Free
+              </button>
+            </>
+          )}
         </div>
 
         {/* Mobile menu toggle */}
@@ -140,11 +156,24 @@ export default function LandingPage() {
              style={{ background: 'rgba(5,5,20,0.98)', backdropFilter: 'blur(20px)' }}>
           <a href="#features" className="py-3 border-b border-white/5 text-gray-300" onClick={() => setMobileMenuOpen(false)}>Features</a>
           <a href="#pricing"  className="py-3 border-b border-white/5 text-gray-300" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
-          <button onClick={() => { navigate('/dashboard'); setMobileMenuOpen(false); }}
-            className="btn-primary w-full mt-2 py-3 font-bold flex items-center justify-center gap-2">
-            <span>Go to Dashboard</span>
-            <ArrowRight size={16} />
-          </button>
+          {user ? (
+            <button onClick={() => { navigate('/dashboard'); setMobileMenuOpen(false); }}
+              className="btn-primary w-full mt-2 py-3 font-bold flex items-center justify-center gap-2">
+              <span>Go to Dashboard</span>
+              <ArrowRight size={16} />
+            </button>
+          ) : (
+            <div className="space-y-2 pt-2">
+              <button onClick={() => { navigate('/login'); setMobileMenuOpen(false); }}
+                className="btn-secondary w-full py-3 font-semibold text-center">
+                Sign In
+              </button>
+              <button onClick={() => { navigate('/signup'); setMobileMenuOpen(false); }}
+                className="btn-primary w-full py-3 font-bold text-center">
+                Get Started Free
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -170,22 +199,32 @@ export default function LandingPage() {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up delay-200">
-          <button onClick={() => navigate('/dashboard')}
-            className="btn-primary flex items-center gap-2 text-base px-8 py-3.5 w-full sm:w-auto justify-center cursor-pointer shadow-xl shadow-purple-500/25 font-bold">
-            <span>🚀 Launch AI Tools Hub</span>
-            <ArrowRight size={18} />
-          </button>
-          <button onClick={() => navigate('/dashboard/tools')}
-            className="btn-secondary flex items-center gap-2 text-base px-8 py-3.5 w-full sm:w-auto justify-center cursor-pointer font-bold">
-            <span>Explore 4 AI Tools</span>
-            <ChevronRight size={18} />
-          </button>
+          {user ? (
+            <button onClick={() => navigate('/dashboard')}
+              className="btn-primary flex items-center gap-2 text-base px-8 py-3.5 w-full sm:w-auto justify-center cursor-pointer shadow-xl shadow-purple-500/25 font-bold">
+              <span>🚀 Open Dashboard</span>
+              <ArrowRight size={18} />
+            </button>
+          ) : (
+            <>
+              <button onClick={() => navigate('/signup')}
+                className="btn-primary flex items-center gap-2 text-base px-8 py-3.5 w-full sm:w-auto justify-center cursor-pointer shadow-xl shadow-purple-500/25 font-bold">
+                <span>🚀 Get Started Free</span>
+                <ArrowRight size={18} />
+              </button>
+              <button onClick={() => navigate('/login')}
+                className="btn-secondary flex items-center gap-2 text-base px-8 py-3.5 w-full sm:w-auto justify-center cursor-pointer font-bold">
+                <span>Sign In to Your Account</span>
+                <ChevronRight size={18} />
+              </button>
+            </>
+          )}
         </div>
 
         {/* Trust badges */}
         <div className="flex items-center justify-center gap-6 mt-10 text-xs text-gray-600 animate-fade-in-up delay-300">
-          <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-500" /> No Login Required</span>
-          <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-500" /> 100 Pro Credits Pre-Activated</span>
+          <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-500" /> Free Registration</span>
+          <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-500" /> 100 Pro Credits Included</span>
           <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-500" /> Instant Access</span>
         </div>
 

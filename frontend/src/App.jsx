@@ -4,6 +4,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 
 import LandingPage    from './pages/LandingPage';
+import LoginPage      from './pages/LoginPage';
+import SignupPage     from './pages/SignupPage';
 
 import Dashboard      from './pages/Dashboard';
 import AIToolsPage    from './pages/AIToolsPage';
@@ -16,11 +18,41 @@ import AdminDashboard from './pages/AdminDashboard';
 import DashboardLayout from './layouts/DashboardLayout';
 
 function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#050510] flex items-center justify-center flex-col text-white">
+        <div className="w-12 h-12 rounded-full border-2 border-purple-600 border-t-transparent animate-spin mb-4" />
+        <p className="text-sm font-medium text-purple-300">Verifying session...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
   return children;
 }
 
 function PublicRoute({ children }) {
-  return <Navigate to="/dashboard" replace />;
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#050510] flex items-center justify-center flex-col text-white">
+        <div className="w-12 h-12 rounded-full border-2 border-purple-600 border-t-transparent animate-spin mb-4" />
+        <p className="text-sm font-medium text-purple-300">Loading...</p>
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
 }
 
 function App() {
@@ -47,8 +79,8 @@ function App() {
           <Routes>
             {/* Public */}
             <Route path="/"       element={<LandingPage />} />
-            <Route path="/login"  element={<Navigate to="/dashboard" replace />} />
-            <Route path="/signup" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/login"  element={<PublicRoute><LoginPage /></PublicRoute>} />
+            <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
 
             {/* Protected — wrapped in DashboardLayout */}
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
