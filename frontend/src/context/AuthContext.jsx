@@ -144,8 +144,18 @@ export function AuthProvider({ children }) {
 
   const updateUser = (updates) => {
     setUser((prev) => {
-      if (!prev) return null;
-      const updated = { ...prev, ...updates };
+      const baseUser = prev || {
+        id: Date.now(),
+        name: 'Guest User',
+        email: 'user@aitoolshub.com',
+        credits: 100,
+        plan: 'Free Plan',
+        is_admin: false,
+      };
+
+      const patch = typeof updates === 'function' ? updates(baseUser) : updates;
+      const updated = { ...baseUser, ...patch };
+
       localStorage.setItem('user_session', JSON.stringify(updated));
       return updated;
     });

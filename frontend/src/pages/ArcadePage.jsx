@@ -5,25 +5,26 @@ import api from '../utils/api';
 import toast from 'react-hot-toast';
 
 // ── Utility ───────────────────────────────────────────────────────────────────
-async function claimReward(amount, game, updateUser, user) {
+async function claimReward(amount, game, updateUser) {
   const gameName = game ? (game.charAt(0).toUpperCase() + game.slice(1).replace('-', ' ')) : 'Game';
-  const currentCredits = user?.credits ?? 100;
-  const newCredits = currentCredits + amount;
 
+  // 1. Immediately add credits to user balance in state & localStorage
+  updateUser((prev) => {
+    const current = typeof prev?.credits === 'number' ? prev.credits : 100;
+    return { credits: current + amount };
+  });
+
+  toast.success(`🎉 +${amount} Credits earned from ${gameName}!`);
+
+  // 2. Silently sync with backend if available
   try {
     const res = await api.post('/api/users/me/reward', { amount, game });
     if (res.data?.credits !== undefined) {
       updateUser({ credits: res.data.credits });
-      toast.success(`🎉 +${res.data.earned || amount} Credits earned from ${gameName}!`);
-      return;
     }
   } catch (err) {
-    console.warn("Backend reward endpoint offline or sleeping, updating local credits:", err);
+    console.warn("Backend reward endpoint offline or sleeping:", err);
   }
-
-  // Instant local credit update fallback
-  updateUser({ credits: newCredits });
-  toast.success(`🎉 +${amount} Credits earned from ${gameName}!`);
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -510,8 +511,8 @@ export default function ArcadePage() {
   }, [muted]);
 
   const handleWin = useCallback(async (amount) => {
-    await claimReward(amount, activeGame, updateUser, user);
-  }, [activeGame, updateUser, user]);
+    await claimReward(amount, activeGame, updateUser);
+  }, [activeGame, updateUser]);
 
   const openGame = (gameId) => {
     setActiveGame(gameId);
