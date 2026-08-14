@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { 
   ImageIcon, FileText, MessageSquareCode, Code2, 
   Mic, Video, Zap, Sparkles, Play, Volume2, VolumeX, ArrowRight,
-  Layers, Orbit, Cpu, RefreshCw
+  Layers, Orbit, Cpu, RefreshCw, Lock, UserPlus, Shield, X
 } from 'lucide-react';
 
-export default function CinematicIntro({ onComplete, autoPlay = true }) {
+export default function CinematicIntro({ onComplete, onSelectAuth, autoPlay = true }) {
   const canvasRef = useRef(null);
   const audioCtxRef = useRef(null);
 
@@ -14,6 +14,7 @@ export default function CinematicIntro({ onComplete, autoPlay = true }) {
   const [activeIconIndex, setActiveIconIndex] = useState(-1);
   const [taglineVisible, setTaglineVisible] = useState(false);
   const [soundEnabled, setSoundEnabled]   = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // 3 Cinematic Animation Themes
   const [currentTheme, setCurrentTheme]   = useState('quantum'); // 'quantum', 'cosmic', 'cyber'
@@ -522,17 +523,62 @@ export default function CinematicIntro({ onComplete, autoPlay = true }) {
           </div>
         </div>
 
-        {/* BOTTOM ENTER PLATFORM BUTTON */}
-        <div className={`absolute bottom-10 transition-all duration-700 ${phase >= 4 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6 pointer-events-none'}`}>
+        {/* BOTTOM ACTION BUTTONS: SIGN IN OR REGISTER */}
+        <div className={`absolute bottom-8 flex flex-col sm:flex-row items-center gap-3 transition-all duration-700 z-40 ${phase >= 4 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6 pointer-events-none'}`}>
           <button
-            onClick={() => onComplete && onComplete()}
-            className="btn-primary py-3.5 px-9 text-sm font-extrabold flex items-center gap-3 shadow-[0_0_35px_rgba(124,58,237,0.6)] hover:shadow-[0_0_50px_rgba(124,58,237,0.9)] transition-all duration-300 hover:scale-105 cursor-pointer"
+            onClick={() => onSelectAuth ? onSelectAuth('login') : onComplete && onComplete()}
+            className="btn-primary py-3.5 px-7 text-xs sm:text-sm font-extrabold flex items-center gap-2.5 shadow-[0_0_35px_rgba(124,58,237,0.6)] hover:shadow-[0_0_50px_rgba(124,58,237,0.9)] transition-all hover:scale-105 cursor-pointer"
           >
-            <span>Enter AI Tools Hub</span>
-            <ArrowRight size={18} />
+            <Lock size={16} />
+            <span>Sign In to Account</span>
+          </button>
+          
+          <button
+            onClick={() => onSelectAuth ? onSelectAuth('signup') : onComplete && onComplete()}
+            className="py-3.5 px-7 text-xs sm:text-sm font-extrabold flex items-center gap-2.5 rounded-xl border border-cyan-400/50 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 shadow-[0_0_35px_rgba(6,182,212,0.4)] transition-all hover:scale-105 cursor-pointer"
+          >
+            <UserPlus size={16} />
+            <span>Register Account (100 Credits)</span>
           </button>
         </div>
       </div>
+
+      {/* AUTH SELECTION MODAL */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fadeIn">
+          <div className="w-full max-w-sm rounded-3xl border border-white/20 p-6 bg-[#0c0a1d] shadow-2xl relative text-center space-y-4">
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+            >
+              <X size={18} />
+            </button>
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center mx-auto shadow-lg shadow-purple-500/40">
+              <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-white mb-1">Welcome to AI Tools Hub</h3>
+              <p className="text-xs text-gray-400">Choose how you would like to proceed into the toolkit</p>
+            </div>
+            <div className="space-y-2.5 pt-2">
+              <button
+                onClick={() => onSelectAuth ? onSelectAuth('login') : onComplete && onComplete()}
+                className="w-full btn-primary py-3 text-xs font-bold flex items-center justify-center gap-2 rounded-xl"
+              >
+                <Lock size={15} />
+                <span>Existing User: Sign In</span>
+              </button>
+              <button
+                onClick={() => onSelectAuth ? onSelectAuth('signup') : onComplete && onComplete()}
+                className="w-full py-3 text-xs font-bold flex items-center justify-center gap-2 rounded-xl border border-cyan-500/40 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 transition-all"
+              >
+                <UserPlus size={15} />
+                <span>New User: Create Free Account</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

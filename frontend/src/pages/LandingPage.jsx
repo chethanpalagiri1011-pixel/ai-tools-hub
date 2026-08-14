@@ -80,6 +80,16 @@ export default function LandingPage() {
   if (showIntro) {
     return (
       <CinematicIntro 
+        onSelectAuth={(mode) => {
+          setShowIntro(false);
+          if (user) {
+            navigate('/dashboard');
+          } else if (mode === 'signup') {
+            navigate('/signup');
+          } else {
+            navigate('/login');
+          }
+        }}
         onComplete={() => {
           setShowIntro(false);
           if (user) {
