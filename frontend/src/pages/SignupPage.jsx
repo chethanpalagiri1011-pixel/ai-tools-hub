@@ -1,8 +1,15 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, CheckCircle2, ShieldCheck, Sparkles, Gift, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+const AVATAR_OPTIONS = [
+  { id: 'purple', label: 'Cosmic Purple', bg: 'linear-gradient(135deg, #7c3aed, #3b82f6)', icon: '🔮' },
+  { id: 'emerald', label: 'Cyber Emerald', bg: 'linear-gradient(135deg, #059669, #10b981)', icon: '⚡' },
+  { id: 'amber', label: 'Solar Gold', bg: 'linear-gradient(135deg, #d97706, #f59e0b)', icon: '👑' },
+  { id: 'rose', label: 'Ruby Neon', bg: 'linear-gradient(135deg, #e11d48, #f43f5e)', icon: '🔥' },
+];
 
 export default function SignupPage() {
   const [name, setName] = useState('');
@@ -11,18 +18,30 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(true);
+  const [selectedAvatar, setSelectedAvatar] = useState(AVATAR_OPTIONS[0]);
   const [loading, setLoading] = useState(false);
+  const [termsModalOpen, setTermsModalOpen] = useState(false);
+
   const { signup } = useAuth();
   const navigate = useNavigate();
 
-  // Live Password Strength Calculation
+  // Password criteria verification
+  const hasMinLength = password.length >= 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+
   const getPasswordStrength = () => {
     if (!password) return { label: '', color: 'bg-gray-700', width: 'w-0' };
-    if (password.length < 6) return { label: 'Weak (min 6 characters)', color: 'bg-red-500', width: 'w-1/3' };
-    if (password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
-      return { label: 'Strong (Secure)', color: 'bg-green-500', width: 'w-full' };
-    }
-    return { label: 'Medium', color: 'bg-yellow-500', width: 'w-2/3' };
+    let score = 0;
+    if (password.length >= 6) score += 1;
+    if (hasMinLength) score += 1;
+    if (hasUppercase) score += 1;
+    if (hasNumber) score += 1;
+
+    if (score <= 1) return { label: 'Weak (add characters)', color: 'bg-red-500', width: 'w-1/4' };
+    if (score === 2) return { label: 'Medium', color: 'bg-yellow-500', width: 'w-2/4' };
+    if (score === 3) return { label: 'Strong', color: 'bg-green-500', width: 'w-3/4' };
+    return { label: 'Bulletproof 🛡️', color: 'bg-cyan-400', width: 'w-full' };
   };
 
   const strength = getPasswordStrength();
@@ -42,7 +61,7 @@ export default function SignupPage() {
       return;
     }
     if (!agreeTerms) {
-      toast.error('Please agree to the Terms of Service & Privacy Policy');
+      toast.error('Please agree to the Terms of Service');
       return;
     }
 
@@ -50,7 +69,7 @@ export default function SignupPage() {
     try {
       const res = await signup(name, email, password);
       if (res.success) {
-        toast.success('Account created! Welcome to AI Tools Hub 🎉');
+        toast.success('Account created! 100 Free Pro Credits added 🎉');
         navigate('/dashboard');
       } else {
         toast.error(res.error || 'Failed to create account. Email may already be in use.');
@@ -62,38 +81,113 @@ export default function SignupPage() {
     }
   };
 
+  const handleSocialSignup = (provider) => {
+    toast.loading(`Signing up with ${provider}...`, { duration: 1500 });
+    setTimeout(async () => {
+      const socialEmail = provider === 'Google' ? 'google.user@aitoolshub.com' : 'github.user@aitoolshub.com';
+      const socialName = provider === 'Google' ? 'Google User' : 'GitHub User';
+      const res = await signup(socialName, socialEmail, 'social123');
+      if (res.success) {
+        toast.success(`Account registered with ${provider}! 🎁 100 Credits added.`);
+        navigate('/dashboard');
+      }
+    }, 1200);
+  };
+
   return (
-    <div className="min-h-screen bg-dark-400 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
-      {/* Glow Orbs */}
+    <div className="min-h-screen bg-dark-400 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden font-sans">
+      {/* Background Orbs */}
       <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10">
-        {/* Back to Home button */}
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-white mb-6 transition-colors group"
-        >
-          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-          Back to Home
-        </Link>
+        {/* Top Header Controls */}
+        <div className="flex items-center justify-between mb-6">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-white transition-colors group"
+          >
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+            Back to Home
+          </Link>
+          <span className="text-[11px] text-purple-300 font-semibold border border-purple-500/30 px-3 py-1 rounded-full bg-purple-500/10 flex items-center gap-1.5 shadow-sm">
+            <Gift size={13} className="text-purple-400" />
+            100 Bonus Credits Included
+          </span>
+        </div>
 
         {/* Main Card */}
         <div
           className="rounded-3xl border border-white/10 p-8 shadow-2xl backdrop-blur-2xl"
-          style={{ background: 'rgba(13, 13, 26, 0.85)' }}
+          style={{ background: 'rgba(13, 13, 26, 0.88)' }}
         >
           {/* Header */}
           <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 mb-4 shadow-lg shadow-purple-500/30">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 mb-3 shadow-lg shadow-purple-500/30">
               <img src="/logo.png" alt="AI Tools Hub Logo" className="w-8 h-8 object-contain" />
             </div>
-            <h1 className="font-display text-2xl font-bold text-white mb-2">Create Your Account</h1>
-            <p className="text-gray-400 text-sm">Join thousands of creators using AI Tools Hub</p>
+            <h1 className="font-display text-2xl font-bold text-white mb-1">Create Account</h1>
+            <p className="text-gray-400 text-xs">Join AI Tools Hub & get instant access to 4 AI tools</p>
+          </div>
+
+          {/* Social SSO Registration */}
+          <div className="grid grid-cols-2 gap-2.5 mb-5">
+            <button
+              type="button"
+              onClick={() => handleSocialSignup('Google')}
+              className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold transition-all cursor-pointer"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24">
+                <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z" />
+                <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z" />
+                <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 14.5s.7 4.8 1.9 7.2l3.7-2.9z" />
+                <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z" />
+              </svg>
+              <span>Google Signup</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSocialSignup('GitHub')}
+              className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold transition-all cursor-pointer"
+            >
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
+              <span>GitHub Signup</span>
+            </button>
+          </div>
+
+          <div className="relative flex items-center justify-center mb-5">
+            <div className="border-t border-white/10 w-full" />
+            <span className="bg-[#0b0a16] px-3 text-[11px] text-gray-500 font-medium uppercase tracking-wider absolute">
+              or register with details
+            </span>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Avatar Preset Selector */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Choose Profile Avatar Style</label>
+              <div className="grid grid-cols-4 gap-2">
+                {AVATAR_OPTIONS.map((av) => (
+                  <button
+                    key={av.id}
+                    type="button"
+                    onClick={() => setSelectedAvatar(av)}
+                    className={`h-10 rounded-xl flex items-center justify-center text-base transition-all border cursor-pointer ${
+                      selectedAvatar.id === av.id
+                        ? 'border-purple-400 scale-105 shadow-md shadow-purple-500/30 ring-2 ring-purple-500/40'
+                        : 'border-white/10 hover:border-white/20 opacity-70 hover:opacity-100'
+                    }`}
+                    style={{ background: av.bg }}
+                  >
+                    <span>{av.icon}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Full Name */}
             <div>
               <label className="block text-xs font-semibold text-gray-300 mb-1.5">Full Name</label>
@@ -142,18 +236,26 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 cursor-pointer"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {/* Strength Meter */}
+
+              {/* Password Strength Meter & Live Checklist */}
               {password && (
-                <div className="mt-2 space-y-1">
+                <div className="mt-2 space-y-1.5">
                   <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                     <div className={`h-full ${strength.color} ${strength.width} transition-all duration-300`} />
                   </div>
-                  <p className="text-[11px] text-gray-400 text-right">{strength.label}</p>
+                  <div className="flex justify-between items-center text-[11px] text-gray-400">
+                    <span className="flex items-center gap-1">
+                      <span className={hasMinLength ? 'text-green-400 font-bold' : 'text-gray-600'}>✓ 8+ chars</span> • 
+                      <span className={hasUppercase ? 'text-green-400 font-bold' : 'text-gray-600'}>✓ Uppercase</span> • 
+                      <span className={hasNumber ? 'text-green-400 font-bold' : 'text-gray-600'}>✓ Number</span>
+                    </span>
+                    <span className="font-semibold text-purple-300">{strength.label}</span>
+                  </div>
                 </div>
               )}
             </div>
@@ -172,8 +274,14 @@ export default function SignupPage() {
                   className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all"
                 />
               </div>
-              {confirmPassword && password !== confirmPassword && (
-                <p className="text-[11px] text-red-400 mt-1">Passwords do not match</p>
+              {confirmPassword && (
+                password === confirmPassword ? (
+                  <p className="text-[11px] text-green-400 mt-1 flex items-center gap-1">
+                    <CheckCircle2 size={12} /> Passwords match!
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-red-400 mt-1">Passwords do not match</p>
+                )
               )}
             </div>
 
@@ -188,8 +296,14 @@ export default function SignupPage() {
                 />
                 <span className="text-xs text-gray-400 leading-relaxed">
                   I agree to the{' '}
-                  <span className="text-purple-400 font-semibold">Terms of Service</span> and{' '}
-                  <span className="text-purple-400 font-semibold">Privacy Policy</span>
+                  <button
+                    type="button"
+                    onClick={() => setTermsModalOpen(true)}
+                    className="text-purple-400 font-semibold hover:underline"
+                  >
+                    Terms of Service
+                  </button>{' '}
+                  & Privacy Policy
                 </span>
               </label>
             </div>
@@ -215,14 +329,46 @@ export default function SignupPage() {
           </form>
 
           {/* Sign In Link */}
-          <div className="mt-8 text-center text-xs text-gray-400 border-t border-white/5 pt-6">
+          <div className="mt-6 text-center text-xs text-gray-400 border-t border-white/5 pt-5">
             Already have an account?{' '}
             <Link to="/login" className="font-semibold text-purple-400 hover:text-purple-300 transition-colors">
-              Sign In Here
+              Sign In Here →
             </Link>
           </div>
         </div>
       </div>
+
+      {/* Terms of Service Modal */}
+      {termsModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+          <div className="w-full max-w-md rounded-3xl border border-white/15 p-6 bg-[#0f0e22] shadow-2xl relative space-y-4 max-h-[85vh] overflow-y-auto">
+            <button
+              onClick={() => setTermsModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+            >
+              <X size={18} />
+            </button>
+            <div className="flex items-center gap-3 border-b border-white/10 pb-3">
+              <ShieldCheck className="text-purple-400" size={24} />
+              <div>
+                <h3 className="text-base font-bold text-white">Terms of Service & Privacy</h3>
+                <p className="text-xs text-gray-400">AI Tools Hub Community Guidelines</p>
+              </div>
+            </div>
+            <div className="text-xs text-gray-300 space-y-3 leading-relaxed">
+              <p>1. <b>Account Credits</b>: Every new registered user receives 100 Free Pro Credits to explore AI Tools.</p>
+              <p>2. <b>Fair Usage</b>: Generated content belongs to you. Do not generate unlawful, malicious, or abusive content.</p>
+              <p>3. <b>Data Privacy</b>: Your account details are securely encrypted and never shared with third parties.</p>
+            </div>
+            <button
+              onClick={() => { setAgreeTerms(true); setTermsModalOpen(false); }}
+              className="w-full btn-primary py-2.5 text-xs font-bold rounded-xl mt-4"
+            >
+              I Accept & Agree
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

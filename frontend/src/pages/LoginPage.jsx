@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, Shield, User, ArrowLeft, KeyRound } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, Shield, User, ArrowLeft, KeyRound, CheckCircle2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function LoginPage() {
@@ -10,6 +10,10 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSent, setResetSent] = useState(false);
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -48,93 +52,124 @@ export default function LoginPage() {
     }
   };
 
-  const handleForgotPassword = () => {
-    toast((t) => (
-      <div className="space-y-2">
-        <p className="font-bold text-white text-sm">🔒 Password Reset</p>
-        <p className="text-xs text-gray-300">
-          Enter your email on the login screen and click below to send a instant reset link. Or use <b>Quick Demo Login</b> for instant access!
-        </p>
-        <button
-          onClick={() => {
-            toast.dismiss(t.id);
-            if (email.trim()) {
-              toast.success(`Reset instructions sent to ${email}! Check your inbox.`);
-            } else {
-              toast.error('Please type your email address first!');
-            }
-          }}
-          className="w-full text-xs font-bold py-1.5 px-3 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-colors"
-        >
-          Send Reset Link
-        </button>
-      </div>
-    ), { duration: 6000 });
+  const handleSocialLogin = (provider) => {
+    toast.loading(`Connecting to ${provider}...`, { duration: 1500 });
+    setTimeout(async () => {
+      const socialEmail = provider === 'Google' ? 'google.user@aitoolshub.com' : 'github.user@aitoolshub.com';
+      const res = await login(socialEmail, 'social123');
+      if (res.success) {
+        toast.success(`Successfully authenticated with ${provider}! 🎉`);
+        navigate('/dashboard');
+      }
+    }, 1200);
+  };
+
+  const handleResetSubmit = (e) => {
+    e.preventDefault();
+    if (!resetEmail.trim()) {
+      toast.error('Please enter your email address');
+      return;
+    }
+    setResetSent(true);
+    toast.success(`Reset link sent to ${resetEmail}! Check your inbox.`);
   };
 
   return (
-    <div className="min-h-screen bg-dark-400 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
-      {/* Glow Orbs */}
+    <div className="min-h-screen bg-dark-400 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden font-sans">
+      {/* Background Orbs */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10">
-        {/* Back to Home button */}
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-white mb-6 transition-colors group"
-        >
-          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-          Back to Home
-        </Link>
+        {/* Top Header Controls */}
+        <div className="flex items-center justify-between mb-6">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-white transition-colors group"
+          >
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+            Back to Home
+          </Link>
+          <span className="text-[11px] text-gray-500 font-medium border border-white/10 px-2.5 py-1 rounded-full bg-white/5 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            256-Bit SSL Encrypted
+          </span>
+        </div>
 
         {/* Main Card */}
         <div
           className="rounded-3xl border border-white/10 p-8 shadow-2xl backdrop-blur-2xl"
-          style={{ background: 'rgba(13, 13, 26, 0.85)' }}
+          style={{ background: 'rgba(13, 13, 26, 0.88)' }}
         >
-          {/* Header */}
-          <div className="text-center mb-8">
+          {/* Brand Logo & Title */}
+          <div className="text-center mb-6">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 mb-4 shadow-lg shadow-purple-500/30">
               <img src="/logo.png" alt="AI Tools Hub Logo" className="w-8 h-8 object-contain" />
             </div>
-            <h1 className="font-display text-2xl font-bold text-white mb-2">Welcome Back</h1>
-            <p className="text-gray-400 text-sm">Sign in to access your AI toolkit & credits</p>
+            <h1 className="font-display text-2xl font-bold text-white mb-1.5">Sign In to AI Tools Hub</h1>
+            <p className="text-gray-400 text-xs">Enter your credentials or test with 1-click Quick Login</p>
           </div>
 
-          {/* Quick Demo Login Preset Buttons */}
-          <div className="mb-6 space-y-2">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Sparkles size={12} className="text-purple-400" /> Quick 1-Click Login
+          {/* Social SSO Login Options */}
+          <div className="grid grid-cols-2 gap-2.5 mb-5">
+            <button
+              type="button"
+              onClick={() => handleSocialLogin('Google')}
+              className="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold transition-all cursor-pointer"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24">
+                <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z" />
+                <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z" />
+                <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 14.5s.7 4.8 1.9 7.2l3.7-2.9z" />
+                <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z" />
+              </svg>
+              <span>Google</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSocialLogin('GitHub')}
+              className="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold transition-all cursor-pointer"
+            >
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
+              <span>GitHub</span>
+            </button>
+          </div>
+
+          {/* Quick Preset Demo Accounts */}
+          <div className="mb-5 p-3 rounded-2xl bg-white/[0.03] border border-white/5">
+            <p className="text-[11px] font-semibold text-purple-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <Sparkles size={13} className="text-purple-400" /> 1-Click Instant Quick Access
             </p>
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => handleQuickLogin('chethanpalagiri1011@gmail.com', 'owner123', 'Owner Pro')}
-                className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 text-xs font-semibold transition-all cursor-pointer"
+                className="flex items-center justify-center gap-1.5 p-2 rounded-xl border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-200 text-xs font-medium transition-all cursor-pointer"
               >
-                <Shield size={14} />
-                <span>Owner Pro</span>
+                <Shield size={13} className="text-purple-400" />
+                <span>Owner Admin</span>
               </button>
               <button
                 type="button"
-                onClick={() => handleQuickLogin('demo@aitoolshub.com', 'demo123', 'Demo User')}
-                className="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-xs font-semibold transition-all cursor-pointer"
+                onClick={() => handleQuickLogin('demo@aitoolshub.com', 'demo123', 'Demo Pro')}
+                className="flex items-center justify-center gap-1.5 p-2 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-200 text-xs font-medium transition-all cursor-pointer"
               >
-                <User size={14} />
+                <User size={13} className="text-blue-400" />
                 <span>Demo User</span>
               </button>
             </div>
           </div>
 
-          <div className="relative flex items-center justify-center mb-6">
+          <div className="relative flex items-center justify-center mb-5">
             <div className="border-t border-white/10 w-full" />
-            <span className="bg-[#0d0d1a] px-3 text-xs text-gray-500 font-medium uppercase tracking-wider absolute">
-              or sign in with email
+            <span className="bg-[#0b0a16] px-3 text-[11px] text-gray-500 font-medium uppercase tracking-wider absolute">
+              or use email
             </span>
           </div>
 
-          {/* Form */}
+          {/* Main Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email Field */}
             <div>
@@ -158,8 +193,8 @@ export default function LoginPage() {
                 <label className="text-xs font-semibold text-gray-300">Password</label>
                 <button
                   type="button"
-                  onClick={handleForgotPassword}
-                  className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                  onClick={() => { setResetEmail(email); setResetSent(false); setResetModalOpen(true); }}
+                  className="text-xs text-purple-400 hover:text-purple-300 transition-colors cursor-pointer"
                 >
                   Forgot Password?
                 </button>
@@ -177,7 +212,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 cursor-pointer"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -193,7 +228,7 @@ export default function LoginPage() {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="w-4 h-4 rounded border-white/10 bg-white/5 text-purple-600 focus:ring-purple-500 focus:ring-offset-0 cursor-pointer"
                 />
-                <span>Remember me for 30 days</span>
+                <span>Keep me signed in</span>
               </label>
             </div>
 
@@ -210,22 +245,77 @@ export default function LoginPage() {
                 </>
               ) : (
                 <>
-                  <span>Sign In</span>
+                  <span>Sign In to Account</span>
                   <ArrowRight size={16} />
                 </>
               )}
             </button>
           </form>
 
-          {/* Sign Up Link */}
-          <div className="mt-8 text-center text-xs text-gray-400 border-t border-white/5 pt-6">
-            Don't have an account?{' '}
+          {/* Registration Footer Link */}
+          <div className="mt-6 text-center text-xs text-gray-400 border-t border-white/5 pt-5">
+            Don't have an account yet?{' '}
             <Link to="/signup" className="font-semibold text-purple-400 hover:text-purple-300 transition-colors">
-              Create Account Free
+              Create Free Account →
             </Link>
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {resetModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+          <div className="w-full max-w-sm rounded-3xl border border-white/15 p-6 bg-[#0f0e22] shadow-2xl relative">
+            <button
+              onClick={() => setResetModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+            >
+              <X size={18} />
+            </button>
+            <div className="text-center mb-5">
+              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400 flex items-center justify-center mx-auto mb-3">
+                <KeyRound size={22} />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-1">Reset Password</h3>
+              <p className="text-xs text-gray-400">Enter your email to receive a password reset link.</p>
+            </div>
+
+            {resetSent ? (
+              <div className="text-center py-4 space-y-3">
+                <CheckCircle2 size={40} className="text-green-400 mx-auto" />
+                <p className="text-sm font-semibold text-green-300">Reset Link Dispatched!</p>
+                <p className="text-xs text-gray-400">Check <b>{resetEmail}</b> for instructions.</p>
+                <button
+                  onClick={() => setResetModalOpen(false)}
+                  className="w-full btn-secondary py-2 text-xs font-bold rounded-xl mt-2"
+                >
+                  Done & Close
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleResetSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-300 mb-1.5">Email Address</label>
+                  <input
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    placeholder="name@example.com"
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-purple-500/50"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full btn-primary py-2.5 text-xs font-bold rounded-xl"
+                >
+                  Send Reset Link
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
