@@ -74,6 +74,7 @@ export function AuthProvider({ children }) {
         const activeUser = userData || mockUser;
         localStorage.setItem('token', access_token);
         localStorage.setItem('user_session', JSON.stringify(activeUser));
+        localStorage.setItem('has_registered', 'true');
         api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
         setUser(activeUser);
         return { success: true };
@@ -88,6 +89,7 @@ export function AuthProvider({ children }) {
     // Seamless Local Session if backend is sleeping or offline
     localStorage.setItem('token', 'active_session_token');
     localStorage.setItem('user_session', JSON.stringify(mockUser));
+    localStorage.setItem('has_registered', 'true');
     setUser(mockUser);
     return { success: true };
   };
@@ -117,6 +119,7 @@ export function AuthProvider({ children }) {
         const activeUser = userData || mockUser;
         localStorage.setItem('token', access_token);
         localStorage.setItem('user_session', JSON.stringify(activeUser));
+        localStorage.setItem('has_registered', 'true');
         api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
         setUser(activeUser);
         return { success: true };
@@ -131,6 +134,7 @@ export function AuthProvider({ children }) {
     // Seamless Local Session if backend is offline
     localStorage.setItem('token', 'active_session_token');
     localStorage.setItem('user_session', JSON.stringify(mockUser));
+    localStorage.setItem('has_registered', 'true');
     setUser(mockUser);
     return { success: true };
   };

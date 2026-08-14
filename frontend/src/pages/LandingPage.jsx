@@ -84,8 +84,12 @@ export default function LandingPage() {
           setShowIntro(false);
           if (user) {
             navigate('/dashboard');
-          } else {
+          } else if (localStorage.getItem('has_registered')) {
+            // Returning user -> Direct to Sign In / Login
             navigate('/login');
+          } else {
+            // New user -> Direct to Registration / Sign Up
+            navigate('/signup');
           }
         }} 
       />
