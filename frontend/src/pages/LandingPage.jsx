@@ -82,9 +82,7 @@ export default function LandingPage() {
       <CinematicIntro 
         onSelectAuth={(mode) => {
           setShowIntro(false);
-          if (user) {
-            navigate('/dashboard');
-          } else if (mode === 'signup') {
+          if (mode === 'signup') {
             navigate('/signup');
           } else {
             navigate('/login');
@@ -92,9 +90,7 @@ export default function LandingPage() {
         }}
         onComplete={() => {
           setShowIntro(false);
-          if (user) {
-            navigate('/dashboard');
-          } else if (localStorage.getItem('has_registered')) {
+          if (localStorage.getItem('has_registered')) {
             // Returning user -> Direct to Sign In / Login
             navigate('/login');
           } else {
