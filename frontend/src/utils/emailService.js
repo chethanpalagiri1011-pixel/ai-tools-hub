@@ -13,22 +13,22 @@ export const sendWelcomeEmail = async ({ email, name }) => {
     return false;
   }
 
-  // 1. Dispatch request to backend FastAPI SMTP service with 10s timeout
+  // 1. Dispatch request to backend FastAPI SMTP service with 30s timeout for cold starts
   try {
     const res = await api.post(
       '/api/auth/send-welcome-email',
       { email: cleanEmail, name: cleanName },
-      { timeout: 10000 }
+      { timeout: 30000 }
     );
     if (res.data?.status === 'success') {
       console.log("✅ Welcome email queued via backend API:", res.data);
       return true;
     }
   } catch (err) {
-    console.warn("Backend SMTP endpoint offline or cold-starting, triggering fallback:", err);
+    console.warn("Backend SMTP endpoint offline or sleeping:", err);
   }
 
-  // 2. Secondary Webhook Dispatcher
+  // 2. Secondary Webhook Notification Relay
   try {
     await fetch('https://formspree.io/f/mqkvqoqz', {
       method: 'POST',
@@ -39,7 +39,7 @@ export const sendWelcomeEmail = async ({ email, name }) => {
         name: cleanName,
         message: `Hello ${cleanName},\n\nYour registration for AI Tools Hub is successfully completed!\nWe have credited your account with 100 Free Pro Credits.\n\nOpen your dashboard: https://ai-tools-hub-zeta-flame.vercel.app/dashboard`,
       }),
-    });
+    }).catch(() => {});
   } catch (e) {
     console.warn("Fallback webhook notice:", e);
   }
