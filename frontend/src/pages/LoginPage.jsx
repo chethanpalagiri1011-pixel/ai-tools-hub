@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { sendWelcomeEmail } from '../utils/emailService';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, User, ArrowLeft, KeyRound, CheckCircle2, X, Plus, ShieldAlert } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -74,10 +75,13 @@ export default function LoginPage() {
     setLoading(true);
     toast.loading(`Authenticating ${selectedEmail} with ${providerName}...`, { duration: 1000 });
 
+    // Trigger automated registration/login email confirmation
+    sendWelcomeEmail({ email: selectedEmail, name: selectedName || selectedEmail.split('@')[0] });
+
     try {
       const res = await login(selectedEmail, 'social_sso_pass');
       if (res.success) {
-        toast.success(`Signed in with ${providerName} as ${selectedEmail}! 🎉`);
+        toast.success(`Signed in with ${providerName}! 📧 Welcome confirmation email sent to ${selectedEmail}.`);
         navigate('/dashboard');
       } else {
         toast.error('Authentication failed. Please try again.');

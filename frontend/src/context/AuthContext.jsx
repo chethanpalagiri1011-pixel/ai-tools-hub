@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import api from '../utils/api';
+import { sendWelcomeEmail } from '../utils/emailService';
 
 const AuthContext = createContext(null);
 
@@ -108,7 +109,7 @@ export function AuthProvider({ children }) {
     };
 
     // Trigger automated email confirmation notification
-    api.post('/api/auth/send-welcome-email', { email: cleanEmail, name: cleanName }).catch(() => {});
+    sendWelcomeEmail({ email: cleanEmail, name: cleanName });
 
     try {
       const fetchPromise = api.post('/api/auth/register', { name: cleanName, email: cleanEmail, password });
