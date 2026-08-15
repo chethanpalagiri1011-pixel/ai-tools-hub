@@ -5,7 +5,7 @@ from pydantic import BaseModel, EmailStr
 from app.db.database import get_db
 from app.models.models import User
 from app.core.security import verify_password, get_password_hash, create_access_token
-from app.core.email_service import send_welcome_email
+from app.core.email_service import send_welcome_email, send_login_notification_email
 
 router = APIRouter()
 
@@ -23,10 +23,20 @@ class WelcomeEmailRequest(BaseModel):
     email: EmailStr
     name: str = "User"
 
+class LoginEmailRequest(BaseModel):
+    email: EmailStr
+    name: str = "User"
+    provider: str = "Google OAuth"
+
 @router.post("/send-welcome-email")
 async def trigger_welcome_email(req: WelcomeEmailRequest, background_tasks: BackgroundTasks):
     background_tasks.add_task(send_welcome_email, req.email, req.name)
     return {"status": "success", "message": f"Welcome email dispatch queued for {req.email}"}
+
+@router.post("/send-login-email")
+async def trigger_login_email(req: LoginEmailRequest, background_tasks: BackgroundTasks):
+    background_tasks.add_task(send_login_notification_email, req.email, req.name, req.provider)
+    return {"status": "success", "message": f"Login alert email dispatch queued for {req.email}"}
 
 @router.post("/register", response_model=TokenResponse)
 async def register(user_in: UserCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):

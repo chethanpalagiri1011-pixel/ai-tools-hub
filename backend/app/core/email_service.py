@@ -173,3 +173,76 @@ def send_welcome_email(recipient_email: str, name: str = "User") -> bool:
         return False
 
 
+def send_login_notification_email(recipient_email: str, name: str = "User", provider: str = "Google OAuth") -> bool:
+    """Send automated instant login alert transactional email via Gmail SMTP. Returns True on success."""
+    clean_name = name.strip() or "User"
+    if not SENDER_EMAIL or not SENDER_PASSWORD:
+        print(f"[INFO] EMAIL NOT CONFIGURED - Login alert intended for {recipient_email}")
+        return False
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = f"Security Alert: Successful sign-in to AI Tools Hub via {provider} 🔐"
+    msg["From"] = f"AI Tools Hub <{SENDER_EMAIL}>"
+    msg["To"] = recipient_email
+
+    html = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; background: #0b0a1a; color: #e2e8f0; padding: 32px; border-radius: 20px; border: 1px solid rgba(139,92,246,0.3);">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="display: inline-block; width: 52px; height: 52px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 14px; line-height: 52px; font-size: 24px;">🔐</div>
+        <h2 style="color: #ffffff; font-size: 22px; font-weight: 800; margin: 12px 0 4px;">AI Tools Hub Security Alert</h2>
+        <p style="color: #60a5fa; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin: 0;">Successful Authentication</p>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 20px; margin-bottom: 20px;">
+        <p style="color: #ffffff; font-size: 16px; font-weight: 700; margin: 0 0 8px;">Hello {clean_name},</p>
+        <p style="color: #cbd5e1; font-size: 14px; line-height: 1.5; margin: 0;">
+          Your account was successfully signed in via <strong style="color: #60a5fa;">{provider}</strong> for <strong>{recipient_email}</strong>.
+        </p>
+      </div>
+
+      <div style="background: rgba(59,130,246,0.08); border-left: 4px solid #3b82f6; border-radius: 8px; padding: 14px; margin-bottom: 24px;">
+        <p style="color: #93c5fd; font-size: 13px; margin: 0; line-height: 1.4;">
+          ℹ️ If this was you, no action is required! You can safely access your workspace right now.
+        </p>
+      </div>
+
+      <div style="text-align: center; margin: 24px 0 16px;">
+        <a href="https://ai-tools-hub-zeta-flame.vercel.app/dashboard" style="display: inline-block; background: linear-gradient(135deg, #3b82f6, #7c3aed); color: #ffffff; font-weight: bold; font-size: 14px; padding: 12px 28px; border-radius: 10px; text-decoration: none;">
+          Go to Workspace →
+        </a>
+      </div>
+
+      <div style="border-top: 1px solid rgba(255,255,255,0.08); margin-top: 24px; padding-top: 16px; text-align: center;">
+        <p style="color: #64748b; font-size: 11px; margin: 0;">
+          Sent to <strong>{recipient_email}</strong> for security verification • © 2026 AI Tools Hub
+        </p>
+      </div>
+    </div>
+    """
+
+    text = f"Hello {clean_name},\n\nYour AI Tools Hub account was signed in via {provider} for {recipient_email}.\nIf this was you, no further action is required."
+    msg.attach(MIMEText(text, "plain"))
+    msg.attach(MIMEText(html, "html"))
+
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as server:
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            server.sendmail(SENDER_EMAIL, recipient_email, msg.as_string())
+        print(f"[SUCCESS] Login notification email sent to {recipient_email} via Port 465 SSL")
+        return True
+    except Exception as e:
+        print(f"[INFO] Port 465 SSL failed for login notification: {e}. Retrying via Port 587...")
+
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=10) as server:
+            server.starttls()
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            server.sendmail(SENDER_EMAIL, recipient_email, msg.as_string())
+        print(f"[SUCCESS] Login notification email sent to {recipient_email} via Port 587 STARTTLS")
+        return True
+    except Exception as e:
+        print(f"[ERROR] Failed to send login notification email: {e}")
+        return False
+
+
+

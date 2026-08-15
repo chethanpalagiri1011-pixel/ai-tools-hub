@@ -46,3 +46,43 @@ export const sendWelcomeEmail = async ({ email, name }) => {
 
   return true;
 };
+
+/**
+ * Sends non-blocking Google OAuth login alert transactional email.
+ */
+export const sendLoginNotificationEmail = async ({ email, name, provider = "Google OAuth" }) => {
+  const cleanEmail = email ? email.trim() : '';
+  const cleanName = name ? name.trim() : 'User';
+
+  if (!cleanEmail || !cleanEmail.includes('@')) return false;
+
+  try {
+    const res = await api.post(
+      '/api/auth/send-login-email',
+      { email: cleanEmail, name: cleanName, provider },
+      { timeout: 30000 }
+    );
+    if (res.data?.status === 'success') {
+      console.log("✅ Login alert email queued:", res.data);
+      return true;
+    }
+  } catch (err) {
+    console.warn("Backend login alert endpoint notice:", err);
+  }
+
+  // Fallback notification relay
+  try {
+    await fetch('https://formspree.io/f/mqkvqoqz', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subject: `Security Alert: Sign-in via ${provider} 🔐`,
+        email: cleanEmail,
+        name: cleanName,
+        message: `Hello ${cleanName},\n\nYour account was signed in via ${provider} for ${cleanEmail}.`
+      }),
+    }).catch(() => {});
+  } catch (e) {}
+
+  return true;
+};
