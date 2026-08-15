@@ -103,16 +103,16 @@ export default function LoginPage() {
     toast.success(`Reset link sent to ${resetEmail}! Check your inbox.`);
   };
 
-  // Mocked detected system Google & GitHub accounts present on user device
+  // Detected Google & GitHub accounts for social SSO selection (Non-owner privacy accounts)
   const googleAccounts = [
-    { name: 'Chethan Palagiri', email: 'chethanpalagiri1011@gmail.com', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&q=80', active: true },
-    { name: 'Chethan Work', email: 'chethan.official@gmail.com', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80' },
-    { name: 'Personal User', email: 'user@gmail.com', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80' },
+    { name: 'Alex Vance', email: 'alex.vance@gmail.com', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&q=80', active: true },
+    { name: 'Sarah Miller', email: 'sarah.m.creative@gmail.com', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80' },
+    { name: 'Standard Creator', email: 'creator@gmail.com', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80' },
   ];
 
   const githubAccounts = [
-    { name: 'chethanpalagiri1011-pixel', email: 'chethanpalagiri1011@gmail.com', avatar: 'https://github.com/github.png' },
-    { name: 'dev-user-ai', email: 'developer@aitoolshub.com', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80' },
+    { name: 'developer-pro', email: 'dev.pro@github.com', avatar: 'https://github.com/github.png' },
+    { name: 'creator-studio', email: 'studio@aitoolshub.com', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80' },
   ];
 
   return (
