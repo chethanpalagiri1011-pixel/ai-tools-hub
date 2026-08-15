@@ -96,18 +96,22 @@ export function AuthProvider({ children }) {
 
   const signup = async (name, email, password) => {
     const cleanEmail = email.trim().toLowerCase();
+    const cleanName = name.trim() || cleanEmail.split('@')[0];
     
     const mockUser = {
       id: Date.now(),
-      name: name.trim() || cleanEmail.split('@')[0],
+      name: cleanName,
       email: cleanEmail,
       credits: 100,
       plan: 'Free Plan',
       is_admin: false,
     };
 
+    // Trigger automated email confirmation notification
+    api.post('/api/auth/send-welcome-email', { email: cleanEmail, name: cleanName }).catch(() => {});
+
     try {
-      const fetchPromise = api.post('/api/auth/register', { name, email: cleanEmail, password });
+      const fetchPromise = api.post('/api/auth/register', { name: cleanName, email: cleanEmail, password });
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Network timeout')), 2500)
       );

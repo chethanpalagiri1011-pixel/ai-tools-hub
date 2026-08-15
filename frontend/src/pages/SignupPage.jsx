@@ -74,7 +74,7 @@ export default function SignupPage() {
     try {
       const res = await signup(name, email, password);
       if (res.success) {
-        toast.success('Account created! 100 Free Pro Credits added 🎉');
+        toast.success(`Registration completed! Confirmation email sent to ${email} 📧`);
         navigate('/dashboard');
       } else {
         toast.error(res.error || 'Failed to create account. Email may already be in use.');
@@ -106,7 +106,7 @@ export default function SignupPage() {
     try {
       const res = await signup(selectedName || selectedEmail.split('@')[0], selectedEmail, 'social123');
       if (res.success) {
-        toast.success(`Registered with ${providerName} as ${selectedEmail}! 🎁 100 Credits added.`);
+        toast.success(`Registered with ${providerName}! 📧 Welcome confirmation email sent to ${selectedEmail}.`);
         navigate('/dashboard');
       } else {
         toast.error('Registration failed. Please try again.');
