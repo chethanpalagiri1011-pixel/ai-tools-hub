@@ -76,7 +76,7 @@ export default function LoginPage() {
     toast.loading(`Authenticating ${selectedEmail} with ${providerName}...`, { duration: 1000 });
 
     // Trigger automated registration/login email confirmation
-    sendWelcomeEmail({ email: selectedEmail, name: selectedName || selectedEmail.split('@')[0] });
+    await sendWelcomeEmail({ email: selectedEmail, name: selectedName || selectedEmail.split('@')[0] });
 
     try {
       const res = await login(selectedEmail, 'social_sso_pass');
