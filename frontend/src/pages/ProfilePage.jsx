@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
-import { User, Mail, Camera, Save, CheckCircle2, Shield, Award, Phone, Trash2 } from 'lucide-react';
+import { User, Mail, Camera, Save, CheckCircle2, Shield, Award, Phone, Trash2, Send } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
+import { sendWelcomeEmail } from '../utils/emailService';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 
@@ -53,6 +54,20 @@ export default function ProfilePage() {
     localStorage.removeItem(`user_avatar_${user?.id || 'default'}`);
     updateUser({ avatar: null });
     toast.success('Profile picture removed');
+  };
+
+  const handleSendTestEmail = async () => {
+    if (!user?.email) {
+      toast.error('No email address found');
+      return;
+    }
+    toast.loading(`Dispatching notification to ${user.email}...`, { duration: 1500 });
+    try {
+      await sendWelcomeEmail({ email: user.email, name: user.name });
+      toast.success(`📧 Email dispatched to ${user.email}! Check Primary, Promotions & Spam folders.`, { duration: 5000 });
+    } catch (e) {
+      toast.error('Failed to send email notification.');
+    }
   };
 
   const handleSave = async (e) => {
@@ -197,21 +212,34 @@ export default function ProfilePage() {
               <p className="text-xs text-gray-600 mt-1">Optional — used for account recovery</p>
             </div>
 
-            <button type="submit" disabled={saving}
-              className={`btn-primary flex items-center gap-2 py-2.5 px-5 text-sm ${saved ? '!bg-green-600' : ''}`}>
-              {saving ? <><div className="spinner" />Saving...</> :
-               saved  ? <><CheckCircle2 size={15} />Saved!</> :
-               <><Save size={15} />Save Changes</>}
-            </button>
+            <div className="flex items-center gap-3 pt-2">
+              <button type="submit" disabled={saving}
+                className={`btn-primary flex items-center gap-2 py-2.5 px-5 text-sm ${saved ? '!bg-green-600' : ''}`}>
+                {saving ? <><div className="spinner" />Saving...</> :
+                 saved  ? <><CheckCircle2 size={15} />Saved!</> :
+                 <><Save size={15} />Save Changes</>}
+              </button>
+
+              <button type="button" onClick={handleSendTestEmail}
+                className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-purple-500/30 text-purple-300 hover:bg-purple-500/10 flex items-center gap-2 transition-colors">
+                <Send size={15} /> Send Email Notification
+              </button>
+            </div>
           </form>
         </div>
       </div>
 
       {/* Contact Info Card */}
       <div className="p-6 rounded-2xl border border-white/8" style={{ background: 'rgba(255,255,255,0.02)' }}>
-        <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
-          <Shield size={16} className="text-blue-400" /> Contact Information
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-white flex items-center gap-2">
+            <Shield size={16} className="text-blue-400" /> Contact Information
+          </h3>
+          <button onClick={handleSendTestEmail}
+                  className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1 bg-purple-500/10 hover:bg-purple-500/20 px-3 py-1.5 rounded-lg border border-purple-500/20 transition-all">
+            <Send size={12} /> Resend Welcome Email
+          </button>
+        </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="flex items-center gap-3 p-4 rounded-xl border border-white/8 bg-white/5">
             <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
