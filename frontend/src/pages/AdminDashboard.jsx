@@ -13,13 +13,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
 
-  const isOwner = user?.email?.toLowerCase() === 'chethanpalagiri1011@gmail.com' ||
-                  user?.email?.toLowerCase().includes('chethan') || 
-                  user?.email?.toLowerCase().includes('palagiri') || 
-                  user?.name?.toLowerCase().includes('karthik') ||
-                  user?.email?.toLowerCase().includes('karthik') || 
-                  user?.is_admin === true ||
-                  user?.id === 1;
+  const isOwner = user?.email?.toLowerCase() === 'chethanpalagiri1011@gmail.com' && user?.is_admin === true;
 
   const fetchStats = async () => {
     setLoading(true);

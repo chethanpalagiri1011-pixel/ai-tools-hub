@@ -44,7 +44,7 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const cleanEmail = email.trim().toLowerCase();
-    const isOwner = cleanEmail === 'chethanpalagiri1011@gmail.com' || cleanEmail.includes('owner');
+    const isOwner = cleanEmail === 'chethanpalagiri1011@gmail.com';
     
     const mockUser = {
       id: isOwner ? 1 : Date.now(),
@@ -96,15 +96,14 @@ export function AuthProvider({ children }) {
 
   const signup = async (name, email, password) => {
     const cleanEmail = email.trim().toLowerCase();
-    const isOwner = cleanEmail === 'chethanpalagiri1011@gmail.com' || cleanEmail.includes('owner');
     
     const mockUser = {
       id: Date.now(),
-      name: name.trim() || (isOwner ? 'Chethan Palagiri (Owner)' : cleanEmail.split('@')[0]),
+      name: name.trim() || cleanEmail.split('@')[0],
       email: cleanEmail,
       credits: 100,
-      plan: isOwner ? 'Owner Pro Plan' : 'Free Plan',
-      is_admin: isOwner,
+      plan: 'Free Plan',
+      is_admin: false,
     };
 
     try {

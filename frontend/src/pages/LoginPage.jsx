@@ -137,29 +137,19 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* Quick Preset Demo Accounts */}
+          {/* Quick Preset Demo Account */}
           <div className="mb-5 p-3 rounded-2xl bg-white/[0.03] border border-white/5">
-            <p className="text-[11px] font-semibold text-purple-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Sparkles size={13} className="text-purple-400" /> 1-Click Instant Quick Access
+            <p className="text-[11px] font-semibold text-blue-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <Sparkles size={13} className="text-blue-400" /> 1-Click Instant Demo Access
             </p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('chethanpalagiri1011@gmail.com', 'owner123', 'Owner Pro')}
-                className="flex items-center justify-center gap-1.5 p-2 rounded-xl border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-200 text-xs font-medium transition-all cursor-pointer"
-              >
-                <Shield size={13} className="text-purple-400" />
-                <span>Owner Admin</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('demo@aitoolshub.com', 'demo123', 'Demo Pro')}
-                className="flex items-center justify-center gap-1.5 p-2 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-200 text-xs font-medium transition-all cursor-pointer"
-              >
-                <User size={13} className="text-blue-400" />
-                <span>Demo User</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => handleQuickLogin('demo@aitoolshub.com', 'demo123', 'Demo User')}
+              className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-200 text-xs font-semibold transition-all cursor-pointer"
+            >
+              <User size={14} className="text-blue-400" />
+              <span>Try Demo Account (Standard Member)</span>
+            </button>
           </div>
 
           <div className="relative flex items-center justify-center mb-5">

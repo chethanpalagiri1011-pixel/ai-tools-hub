@@ -29,13 +29,7 @@ export default function Sidebar({ open, onClose }) {
   const { setActiveTool } = useApp();
   const navigate = useNavigate();
 
-  const isOwner = user?.email?.toLowerCase() === 'chethanpalagiri1011@gmail.com' ||
-                  user?.email?.toLowerCase().includes('chethan') || 
-                  user?.email?.toLowerCase().includes('palagiri') || 
-                  user?.name?.toLowerCase().includes('karthik') ||
-                  user?.email?.toLowerCase().includes('karthik') || 
-                  user?.is_admin === true ||
-                  user?.id === 1;
+  const isOwner = user?.email?.toLowerCase() === 'chethanpalagiri1011@gmail.com' && user?.is_admin === true;
 
   const visibleNavItems = navItems.filter(item => item.to !== '/dashboard/admin' || isOwner);
 
