@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, Shield, User, ArrowLeft, KeyRound, CheckCircle2, X } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, User, ArrowLeft, KeyRound, CheckCircle2, X, Plus, ShieldAlert } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function LoginPage() {
@@ -13,6 +13,11 @@ export default function LoginPage() {
   const [resetModalOpen, setResetModalOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetSent, setResetSent] = useState(false);
+
+  // Social Account Selector Modal State
+  const [socialModalProvider, setSocialModalProvider] = useState(null); // 'Google' | 'GitHub' | null
+  const [customSocialEmail, setCustomSocialEmail] = useState('');
+  const [showCustomInput, setShowCustomInput] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -52,16 +57,36 @@ export default function LoginPage() {
     }
   };
 
-  const handleSocialLogin = (provider) => {
-    toast.loading(`Connecting to ${provider}...`, { duration: 1500 });
-    setTimeout(async () => {
-      const socialEmail = provider === 'Google' ? 'google.user@aitoolshub.com' : 'github.user@aitoolshub.com';
-      const res = await login(socialEmail, 'social123');
+  const openSocialPicker = (provider) => {
+    setSocialModalProvider(provider);
+    setShowCustomInput(false);
+    setCustomSocialEmail('');
+  };
+
+  const executeSocialLogin = async (selectedEmail, selectedName) => {
+    if (!selectedEmail || !selectedEmail.includes('@')) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    const providerName = socialModalProvider || 'Google';
+    setSocialModalProvider(null);
+    setLoading(true);
+    toast.loading(`Authenticating ${selectedEmail} with ${providerName}...`, { duration: 1000 });
+
+    try {
+      const res = await login(selectedEmail, 'social_sso_pass');
       if (res.success) {
-        toast.success(`Successfully authenticated with ${provider}! 🎉`);
+        toast.success(`Signed in with ${providerName} as ${selectedEmail}! 🎉`);
         navigate('/dashboard');
+      } else {
+        toast.error('Authentication failed. Please try again.');
       }
-    }, 1200);
+    } catch (err) {
+      toast.error('An error occurred during social authentication.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleResetSubmit = (e) => {
@@ -73,6 +98,18 @@ export default function LoginPage() {
     setResetSent(true);
     toast.success(`Reset link sent to ${resetEmail}! Check your inbox.`);
   };
+
+  // Mocked detected system Google & GitHub accounts present on user device
+  const googleAccounts = [
+    { name: 'Chethan Palagiri', email: 'chethanpalagiri1011@gmail.com', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&q=80', active: true },
+    { name: 'Chethan Work', email: 'chethan.official@gmail.com', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80' },
+    { name: 'Personal User', email: 'user@gmail.com', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80' },
+  ];
+
+  const githubAccounts = [
+    { name: 'chethanpalagiri1011-pixel', email: 'chethanpalagiri1011@gmail.com', avatar: 'https://github.com/github.png' },
+    { name: 'dev-user-ai', email: 'developer@aitoolshub.com', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80' },
+  ];
 
   return (
     <div className="min-h-screen bg-dark-400 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden font-sans">
@@ -107,15 +144,15 @@ export default function LoginPage() {
               <img src="/logo.png" alt="AI Tools Hub Logo" className="w-8 h-8 object-contain" />
             </div>
             <h1 className="font-display text-2xl font-bold text-white mb-1.5">Sign In to AI Tools Hub</h1>
-            <p className="text-gray-400 text-xs">Enter your credentials or test with 1-click Quick Login</p>
+            <p className="text-gray-400 text-xs">Enter your credentials or choose your Google / GitHub account</p>
           </div>
 
           {/* Social SSO Login Options */}
           <div className="grid grid-cols-2 gap-2.5 mb-5">
             <button
               type="button"
-              onClick={() => handleSocialLogin('Google')}
-              className="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold transition-all cursor-pointer"
+              onClick={() => openSocialPicker('Google')}
+              className="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold transition-all cursor-pointer hover:border-purple-500/40"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z" />
@@ -127,8 +164,8 @@ export default function LoginPage() {
             </button>
             <button
               type="button"
-              onClick={() => handleSocialLogin('GitHub')}
-              className="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold transition-all cursor-pointer"
+              onClick={() => openSocialPicker('GitHub')}
+              className="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold transition-all cursor-pointer hover:border-purple-500/40"
             >
               <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
@@ -251,6 +288,110 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
+      {/* OFFICIAL GOOGLE / GITHUB ACCOUNT PICKER MODAL */}
+      {socialModalProvider && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-sm rounded-3xl border border-white/15 p-6 bg-[#0f0e22] shadow-2xl relative font-sans">
+            <button
+              onClick={() => setSocialModalProvider(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+            >
+              <X size={18} />
+            </button>
+
+            {/* Header */}
+            <div className="text-center mb-5">
+              <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center mx-auto mb-3 shadow-lg">
+                {socialModalProvider === 'Google' ? (
+                  <svg className="w-6 h-6" viewBox="0 0 24 24">
+                    <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z" />
+                    <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z" />
+                    <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 14.5s.7 4.8 1.9 7.2l3.7-2.9z" />
+                    <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z" />
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 fill-white" viewBox="0 0 24 24">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                  </svg>
+                )}
+              </div>
+              <h3 className="text-lg font-bold text-white mb-1">
+                Choose a {socialModalProvider} Account
+              </h3>
+              <p className="text-xs text-gray-400">
+                Select an account to sign in to <b>AI Tools Hub</b>
+              </p>
+            </div>
+
+            {/* List of Detected System Accounts */}
+            <div className="space-y-2 mb-4 max-h-60 overflow-y-auto">
+              {(socialModalProvider === 'Google' ? googleAccounts : githubAccounts).map((acc, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => executeSocialLogin(acc.email, acc.name)}
+                  className="w-full flex items-center gap-3 p-3 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-purple-500/40 text-left transition-all cursor-pointer group"
+                >
+                  <img src={acc.avatar} alt={acc.name} className="w-9 h-9 rounded-full object-cover border border-white/20" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors truncate">
+                      {acc.name}
+                    </p>
+                    <p className="text-[11px] text-gray-400 truncate">{acc.email}</p>
+                  </div>
+                  {acc.active && (
+                    <span className="text-[10px] text-green-400 font-semibold px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/30">
+                      Active
+                    </span>
+                  )}
+                </button>
+              ))}
+
+              {/* Custom Email Input Option */}
+              {showCustomInput ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    executeSocialLogin(customSocialEmail, customSocialEmail.split('@')[0]);
+                  }}
+                  className="mt-3 space-y-2"
+                >
+                  <div className="relative">
+                    <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <input
+                      type="email"
+                      value={customSocialEmail}
+                      onChange={(e) => setCustomSocialEmail(e.target.value)}
+                      placeholder={`Enter your ${socialModalProvider} email...`}
+                      required
+                      autoFocus
+                      className="w-full bg-white/5 border border-white/15 rounded-xl py-2.5 pl-9 pr-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full btn-primary py-2 text-xs font-bold rounded-xl"
+                  >
+                    Continue with {customSocialEmail || 'this email'}
+                  </button>
+                </form>
+              ) : (
+                <button
+                  onClick={() => setShowCustomInput(true)}
+                  className="w-full flex items-center justify-center gap-2 p-2.5 rounded-2xl border border-dashed border-white/20 bg-white/[0.02] hover:bg-white/5 text-gray-300 text-xs font-semibold transition-all cursor-pointer mt-2"
+                >
+                  <Plus size={14} className="text-purple-400" />
+                  <span>Use another {socialModalProvider} account...</span>
+                </button>
+              )}
+            </div>
+
+            <p className="text-[10px] text-gray-500 text-center leading-relaxed">
+              To continue, {socialModalProvider} will share your name, email address, and language preference with AI Tools Hub.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Forgot Password Modal */}
       {resetModalOpen && (
