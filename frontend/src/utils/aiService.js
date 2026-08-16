@@ -1,7 +1,11 @@
 import api from './api';
 
-// ── Image Generator — Dynamic Multi-Engine AI Generator ─────────────────────
+// ── Image Generator — Dynamic AI Prompt-to-Image Generator ───────────────────
 export const generateImage = async ({ prompt, style = 'photorealistic', aspectRatio = '16:9' }) => {
+  if (!prompt || !prompt.trim()) {
+    throw new Error('Please enter a description for your image.');
+  }
+
   const dimMap = {
     '16:9': { w: 1280, h: 720 },
     '1:1':  { w: 1024, h: 1024 },
@@ -10,41 +14,72 @@ export const generateImage = async ({ prompt, style = 'photorealistic', aspectRa
   const { w, h } = dimMap[aspectRatio] || dimMap['16:9'];
   const seed = Math.floor(Math.random() * 999999);
 
-  const clean = prompt.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim();
-  const words = clean.split(/\s+/).filter(w => w.length > 2);
+  // Style-based prompt enhancement
+  const styleEnhancements = {
+    'photorealistic': 'highly detailed photorealistic, 8k resolution, professional photography, dramatic lighting, sharp focus, masterpiece',
+    'digital-art': 'digital art, highly detailed, vibrant colors, concept art, trending on artstation, 8k resolution',
+    'anime': 'anime style art, high quality anime illustration, vivid colors, masterpiece',
+    'painting': 'oil painting, masterpiece, artistic brushstrokes, rich textures, fine art',
+    'sketch': 'detailed pencil sketch, fine line art, artistic shading, graphite drawing, high quality',
+  };
 
-  // Exact gender & category routing to prevent mismatch
-  const isMan = /\b(man|male|boy|gentleman|guy|husband|father|brother|king|prince)\b/.test(clean);
-  const isWoman = /\b(woman|female|girl|lady|wife|mother|sister|queen|princess)\b/.test(clean);
+  const enhancement = styleEnhancements[style] || styleEnhancements['photorealistic'];
+  const enhancedPrompt = `${prompt.trim()}, ${enhancement}`;
+  const encodedPrompt = encodeURIComponent(enhancedPrompt);
 
-  // Topic catalog with distinct male vs female portraits
-  const topicMap = [
-    // Men & Gentlemen
-    { check: () => isMan, url: `https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=${w}&h=${h}&fit=crop&q=80` },
-    // Women & Ladies
-    { check: () => isWoman, url: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=${w}&h=${h}&fit=crop&q=80` },
-    // Space & Astronomy
-    { check: () => ['space', 'astronaut', 'nebula', 'galaxy', 'planet', 'star', 'cosmos', 'orbit'].some(k => words.includes(k)), url: `https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=${w}&h=${h}&fit=crop&q=80` },
-    // Mountains & Landscapes
-    { check: () => ['mountain', 'sunset', 'sunrise', 'landscape', 'nature', 'valley', 'forest', 'sky'].some(k => words.includes(k)), url: `https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=${w}&h=${h}&fit=crop&q=80` },
-    // City & Cyberpunk
-    { check: () => ['city', 'futuristic', 'neon', 'cyberpunk', 'tokyo', 'night', 'building', 'architecture'].some(k => words.includes(k)), url: `https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=${w}&h=${h}&fit=crop&q=80` },
-    // Animals
-    { check: () => ['cat', 'kitten', 'feline', 'pet'].some(k => words.includes(k)), url: `https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=${w}&h=${h}&fit=crop&q=80` },
-    { check: () => ['dog', 'puppy', 'canine'].some(k => words.includes(k)), url: `https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=${w}&h=${h}&fit=crop&q=80` },
-    // Vehicles
-    { check: () => ['car', 'sports', 'vehicle', 'automobile', 'supercar'].some(k => words.includes(k)), url: `https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=${w}&h=${h}&fit=crop&q=80` },
-    // Food
-    { check: () => ['food', 'pizza', 'burger', 'coffee', 'dish', 'meal'].some(k => words.includes(k)), url: `https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=${w}&h=${h}&fit=crop&q=80` },
+  // Helper to verify that generated image URL loads successfully from the network
+  const verifyImageUrl = (imageUrl, timeoutMs = 25000) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const timer = setTimeout(() => {
+        img.onload = null;
+        img.onerror = null;
+        reject(new Error('Image generation timed out. Please try again.'));
+      }, timeoutMs);
+
+      img.onload = () => {
+        clearTimeout(timer);
+        resolve(imageUrl);
+      };
+      img.onerror = () => {
+        clearTimeout(timer);
+        reject(new Error('Failed to load generated AI image from server.'));
+      };
+      img.src = imageUrl;
+    });
+  };
+
+  // Candidate AI Generation Endpoints (Primary & Model Fallbacks)
+  const candidateUrls = [
+    `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${w}&height=${h}&seed=${seed}&nologo=true`,
+    `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true`,
+    `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt.trim())}?width=${w}&height=${h}&seed=${seed}&nologo=true`,
   ];
 
-  const match = topicMap.find(t => t.check());
-  const url = match ? match.url : `https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=${w}&h=${h}&fit=crop&q=80`;
+  // Try calling backend FastAPI endpoint first if online
+  try {
+    const res = await api.post('/api/tools/image', { prompt: prompt.trim(), style, aspect_ratio: aspectRatio }, { timeout: 8000 });
+    if (res.data?.url) {
+      const verifiedUrl = await verifyImageUrl(res.data.url, 15000);
+      return { url: verifiedUrl, seed: res.data.seed || seed, style, prompt: prompt.trim() };
+    }
+  } catch (backendErr) {
+    console.warn("Backend image endpoint offline or cold-starting, using direct AI model pipeline:", backendErr.message);
+  }
 
-  // Brief delay for UI feedback
-  await new Promise(r => setTimeout(r, 800));
+  // Iterate over dynamic AI providers
+  let lastError = null;
+  for (const candidateUrl of candidateUrls) {
+    try {
+      const verifiedUrl = await verifyImageUrl(candidateUrl, 25000);
+      return { url: verifiedUrl, seed, style, prompt: prompt.trim() };
+    } catch (err) {
+      console.warn("AI generation attempt failed for URL:", candidateUrl, err.message);
+      lastError = err;
+    }
+  }
 
-  return { url, seed, style, prompt };
+  throw lastError || new Error('Failed to generate AI image for your prompt. Please try again.');
 };
 
 // ── Text Summarizer — Local instant, no backend needed ───────────────────────

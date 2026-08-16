@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ImageIcon, Download, Save, RefreshCw, Wand2, CheckCircle2, MessageSquareHeart } from 'lucide-react';
+import { ImageIcon, Download, Save, RefreshCw, Wand2, CheckCircle2, MessageSquareHeart, AlertCircle } from 'lucide-react';
 import { generateImage } from '../../utils/aiService';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
@@ -27,8 +27,7 @@ export default function ImageGenerator() {
   const [ratio, setRatio]         = useState('16:9');
   const [loading, setLoading]     = useState(false);
   const [result, setResult]       = useState(null);
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [imgError, setImgError]   = useState(false);
+  const [error, setError]         = useState(null);
   const [saved, setSaved]         = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isListening, setIsListening]   = useState(false);
@@ -252,29 +251,46 @@ export default function ImageGenerator() {
           <label className="block text-sm text-gray-400 mb-2 font-medium">Preview</label>
           <div className="relative rounded-xl overflow-hidden border border-white/8 min-h-64 flex items-center justify-center"
                style={{ background: 'rgba(255,255,255,0.02)', aspectRatio: ratio === '9:16' ? '9/16' : ratio === '1:1' ? '1/1' : '16/9' }}>
-          {loading && (
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full border-2 border-purple-700 border-t-purple-400 animate-spin" />
-                <p className="text-gray-500 text-sm">Generating your image...</p>
-                <p className="text-gray-700 text-xs mt-1">Usually takes 10–20 seconds</p>
+            {loading && (
+              <div className="text-center p-6 space-y-3">
+                <div className="w-12 h-12 mx-auto rounded-full border-2 border-purple-700 border-t-purple-400 animate-spin" />
+                <p className="text-white text-sm font-semibold">Generating AI Image...</p>
+                <p className="text-purple-300 text-xs max-w-xs mx-auto line-clamp-2">"{prompt}"</p>
+                <p className="text-gray-600 text-[11px]">Creating high-definition visual matching your prompt</p>
               </div>
             )}
-            {!loading && !result && (
+            {!loading && error && (
+              <div className="text-center p-6 max-w-sm space-y-3">
+                <div className="w-12 h-12 mx-auto rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400">
+                  <AlertCircle size={24} />
+                </div>
+                <h4 className="text-white text-sm font-bold">Image Generation Failed</h4>
+                <p className="text-red-300 text-xs">{error}</p>
+                <button
+                  onClick={handleGenerate}
+                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold flex items-center gap-2 mx-auto transition-all shadow-lg shadow-purple-500/20"
+                >
+                  <RefreshCw size={14} /> Try Again
+                </button>
+              </div>
+            )}
+            {!loading && !error && !result && (
               <div className="text-center p-8">
                 <ImageIcon size={40} className="text-gray-700 mx-auto mb-3" />
-                <p className="text-gray-600 text-sm">Your image will appear here</p>
+                <p className="text-gray-600 text-sm">Your generated image will appear here</p>
               </div>
             )}
-            {result && !loading && (
+            {!loading && !error && result && (
               <img
                 src={result.url}
                 alt={prompt}
+                onError={() => setError('Failed to display generated image.')}
                 className="w-full h-full object-cover rounded-xl"
               />
             )}
           </div>
 
-          {result && !loading && (
+          {!loading && !error && result && (
             <div className="flex gap-2 mt-3">
               <button onClick={handleDownload}
                 className="flex-1 btn-secondary flex items-center justify-center gap-2 py-2.5 text-sm">
