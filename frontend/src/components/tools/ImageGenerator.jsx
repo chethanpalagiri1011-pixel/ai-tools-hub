@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ImageIcon, Download, Save, RefreshCw, Wand2, CheckCircle2, MessageSquareHeart, AlertCircle } from 'lucide-react';
 import { generateImage } from '../../utils/aiService';
 import { useApp } from '../../context/AppContext';
