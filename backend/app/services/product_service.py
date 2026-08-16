@@ -8,6 +8,8 @@ from app.models.category import Category
 from app.models.user import User
 from app.schemas.product import ProductCreate, ProductUpdate, ProductResponse
 
+from sqlalchemy.orm import selectinload
+
 class ProductService:
     @staticmethod
     async def list_products(
@@ -19,7 +21,7 @@ class ProductService:
         skip: int = 0,
         limit: int = 50
     ) -> List[ProductResponse]:
-        query = select(Product).filter(Product.is_active == True)
+        query = select(Product).options(selectinload(Product.category)).filter(Product.is_active == True)
 
         if category and category.lower() != "all":
             # Search by category name or slug
@@ -64,7 +66,7 @@ class ProductService:
 
     @staticmethod
     async def get_product_by_id(db: AsyncSession, product_id: int) -> ProductResponse:
-        result = await db.execute(select(Product).filter(Product.id == product_id))
+        result = await db.execute(select(Product).options(selectinload(Product.category)).filter(Product.id == product_id))
         product = result.scalars().first()
         if not product:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")

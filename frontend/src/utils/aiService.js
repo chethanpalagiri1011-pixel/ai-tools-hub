@@ -49,37 +49,36 @@ export const generateImage = async ({ prompt, style = 'photorealistic', aspectRa
     });
   };
 
-  // Candidate AI Generation Endpoints (Primary & Model Fallbacks)
-  const candidateUrls = [
-    `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${w}&height=${h}&seed=${seed}&nologo=true`,
-    `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true`,
-    `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt.trim())}?width=${w}&height=${h}&seed=${seed}&nologo=true`,
-  ];
+  // Dynamic AI Generation Endpoints
+  const primaryUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${w}&height=${h}&seed=${seed}&nologo=true`;
+  const fallbackUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt.trim())}?width=${w}&height=${h}&seed=${seed}&nologo=true`;
 
-  // Try calling backend FastAPI endpoint first if online
+  // Direct fast AI model generation (no backend cold-start delay)
   try {
-    const res = await api.post('/api/tools/image', { prompt: prompt.trim(), style, aspect_ratio: aspectRatio }, { timeout: 8000 });
+    const verifiedUrl = await verifyImageUrl(primaryUrl, 15000);
+    return { url: verifiedUrl, seed, style, prompt: prompt.trim() };
+  } catch (err1) {
+    console.warn("Primary AI attempt notice:", err1.message);
+    try {
+      const verifiedUrl = await verifyImageUrl(fallbackUrl, 15000);
+      return { url: verifiedUrl, seed, style, prompt: prompt.trim() };
+    } catch (err2) {
+      console.warn("Fallback AI attempt notice:", err2.message);
+    }
+  }
+
+  // Final fallback to backend if online
+  try {
+    const res = await api.post('/api/tools/image', { prompt: prompt.trim(), style, aspect_ratio: aspectRatio }, { timeout: 10000 });
     if (res.data?.url) {
-      const verifiedUrl = await verifyImageUrl(res.data.url, 15000);
+      const verifiedUrl = await verifyImageUrl(res.data.url, 12000);
       return { url: verifiedUrl, seed: res.data.seed || seed, style, prompt: prompt.trim() };
     }
   } catch (backendErr) {
-    console.warn("Backend image endpoint offline or cold-starting, using direct AI model pipeline:", backendErr.message);
+    console.warn("Backend endpoint error:", backendErr.message);
   }
 
-  // Iterate over dynamic AI providers
-  let lastError = null;
-  for (const candidateUrl of candidateUrls) {
-    try {
-      const verifiedUrl = await verifyImageUrl(candidateUrl, 25000);
-      return { url: verifiedUrl, seed, style, prompt: prompt.trim() };
-    } catch (err) {
-      console.warn("AI generation attempt failed for URL:", candidateUrl, err.message);
-      lastError = err;
-    }
-  }
-
-  throw lastError || new Error('Failed to generate AI image for your prompt. Please try again.');
+  throw new Error('Image generation timed out. Please try clicking Generate again.');
 };
 
 // ── Text Summarizer — Local instant, no backend needed ───────────────────────

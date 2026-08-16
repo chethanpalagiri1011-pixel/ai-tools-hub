@@ -1840,7 +1840,10 @@
         </div>
         <div class="nav-icons">
             <button class="dark-mode-btn" onclick="toggleDarkMode()" title="Toggle Dark Mode">🌙</button>
-            <i class="fas fa-user" onclick="showNotification('Login feature coming soon!')"></i>
+            <div id="userAuthBtn" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;" onclick="toggleAuthModal()">
+                <i class="fas fa-user"></i>
+                <span id="userAuthName" style="font-size:14px;font-weight:600;">Login</span>
+            </div>
             <div class="wishlist-icon-nav" onclick="toggleWishlist()">
                 <i class="fas fa-heart"></i>
                 <span class="wishlist-count" id="wishlistCount">0</span>
@@ -2229,6 +2232,70 @@
         </div>
     </div>
 
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal-content" style="max-width:420px;padding:30px;border-radius:15px;background:#fff;">
+            <button class="modal-close" onclick="closeAuthModal()">✕</button>
+            <div id="authLoginForm">
+                <h2 style="margin-bottom:20px;text-align:center;color:#333;">Sign In to ShopEasy</h2>
+                <form onsubmit="handleLoginSubmit(event)">
+                    <div style="margin-bottom:15px;">
+                        <label style="display:block;margin-bottom:5px;font-weight:bold;color:#555;">Email Address</label>
+                        <input type="email" id="loginEmail" required style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;">
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block;margin-bottom:5px;font-weight:bold;color:#555;">Password</label>
+                        <input type="password" id="loginPassword" required style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;">
+                    </div>
+                    <button type="submit" style="width:100%;padding:12px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-weight:bold;cursor:pointer;">Login</button>
+                </form>
+                <p style="text-align:center;margin-top:15px;font-size:14px;color:#666;">
+                    Don't have an account? <a href="#" onclick="switchAuthTab('register')" style="color:var(--primary);font-weight:bold;">Register</a>
+                </p>
+            </div>
+            <div id="authRegisterForm" style="display:none;">
+                <h2 style="margin-bottom:20px;text-align:center;color:#333;">Create an Account</h2>
+                <form onsubmit="handleRegisterSubmit(event)">
+                    <div style="margin-bottom:15px;">
+                        <label style="display:block;margin-bottom:5px;font-weight:bold;color:#555;">Full Name</label>
+                        <input type="text" id="regName" required style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;">
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <label style="display:block;margin-bottom:5px;font-weight:bold;color:#555;">Email Address</label>
+                        <input type="email" id="regEmail" required style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;">
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block;margin-bottom:5px;font-weight:bold;color:#555;">Password</label>
+                        <input type="password" id="regPassword" required style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;">
+                    </div>
+                    <button type="submit" style="width:100%;padding:12px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-weight:bold;cursor:pointer;">Create Account</button>
+                </form>
+                <p style="text-align:center;margin-top:15px;font-size:14px;color:#666;">
+                    Already have an account? <a href="#" onclick="switchAuthTab('login')" style="color:var(--primary);font-weight:bold;">Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chatbot Drawer -->
+    <button id="chatbotToggleBtn" onclick="toggleChatbot()" style="position:fixed;bottom:25px;right:25px;width:55px;height:55px;border-radius:50%;background:var(--primary);color:#fff;border:none;box-shadow:0 4px 15px rgba(0,0,0,0.3);font-size:22px;cursor:pointer;z-index:999;" title="AI Customer Support Assistant">🤖</button>
+
+    <div id="chatbotContainer" style="display:none;position:fixed;bottom:90px;right:25px;width:340px;height:450px;background:#fff;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.2);flex-direction:column;z-index:999;overflow:hidden;border:1px solid #eee;">
+        <div style="background:var(--primary);color:#fff;padding:15px;display:flex;align-items:center;justify-content:space-between;font-weight:bold;">
+            <span>🤖 AI Support Assistant</span>
+            <button onclick="toggleChatbot()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;">✕</button>
+        </div>
+        <div id="chatMessages" style="flex:1;padding:15px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;font-size:14px;background:#f9f9f9;">
+            <div style="background:#e0e0e0;padding:8px 12px;border-radius:10px;align-self:flex-start;max-width:85%;color:#333;">
+                Hi there! 👋 Ask me anything about products, shipping, returns, or your order status!
+            </div>
+        </div>
+        <form onsubmit="handleChatSubmit(event)" style="display:flex;padding:10px;background:#fff;border-top:1px solid #eee;">
+            <input type="text" id="chatInput" placeholder="Ask a question..." style="flex:1;padding:8px 12px;border:1px solid #ccc;border-radius:20px;outline:none;">
+            <button type="submit" style="margin-left:8px;padding:8px 15px;background:var(--primary);color:#fff;border:none;border-radius:20px;cursor:pointer;">Send</button>
+        </form>
+    </div>
+
     <!-- Overlay -->
     <div class="overlay" id="overlay" onclick="closeAll()"></div>
 
@@ -2245,9 +2312,158 @@
 
     <script>
         // =====================
+        // API CONFIG & AUTH MANAGEMENT
+        // =====================
+        const API_BASE_URL = window.location.origin.includes('8000') ? '/api/v1' : 'http://localhost:8000/api/v1';
+
+        function getAuthToken() {
+            return localStorage.getItem('shopeasy_token');
+        }
+
+        function getCurrentUser() {
+            const u = localStorage.getItem('shopeasy_user');
+            return u ? JSON.parse(u) : null;
+        }
+
+        function checkAuthHeader() {
+            const token = getAuthToken();
+            const user = getCurrentUser();
+            const label = document.getElementById('userAuthName');
+            if (token && user) {
+                if (label) label.textContent = user.name ? user.name.split(' ')[0] : 'Account';
+            } else {
+                if (label) label.textContent = 'Login';
+            }
+        }
+
+        function toggleAuthModal() {
+            const token = getAuthToken();
+            if (token) {
+                if (confirm('Do you want to logout?')) {
+                    localStorage.removeItem('shopeasy_token');
+                    localStorage.removeItem('shopeasy_user');
+                    checkAuthHeader();
+                    showNotification('Logged out successfully');
+                }
+                return;
+            }
+            document.getElementById('authModal').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.remove('open');
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        function switchAuthTab(tab) {
+            document.getElementById('authLoginForm').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('authRegisterForm').style.display = tab === 'register' ? 'block' : 'none';
+        }
+
+        async function handleLoginSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            try {
+                const res = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Login failed');
+                localStorage.setItem('shopeasy_token', data.access_token);
+                localStorage.setItem('shopeasy_user', JSON.stringify(data.user));
+                checkAuthHeader();
+                closeAuthModal();
+                showNotification(`Welcome back, ${data.user.name}!`);
+                fetchCartFromApi();
+            } catch (err) {
+                showNotification(`❌ ${err.message}`);
+            }
+        }
+
+        async function handleRegisterSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            try {
+                const res = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Registration failed');
+                localStorage.setItem('shopeasy_token', data.access_token);
+                localStorage.setItem('shopeasy_user', JSON.stringify(data.user));
+                checkAuthHeader();
+                closeAuthModal();
+                showNotification(`🎉 Account created! Welcome, ${data.user.name}!`);
+            } catch (err) {
+                showNotification(`❌ ${err.message}`);
+            }
+        }
+
+        // =====================
+        // AI CHATBOT INTERACTION
+        // =====================
+        function toggleChatbot() {
+            const container = document.getElementById('chatbotContainer');
+            container.style.display = container.style.display === 'none' || !container.style.display ? 'flex' : 'none';
+        }
+
+        async function handleChatSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            // Add user message
+            messagesContainer.innerHTML += `
+                <div style="background:var(--primary);color:#fff;padding:8px 12px;border-radius:10px;align-self:flex-end;max-width:85%;">
+                    ${msg}
+                </div>
+            `;
+            input.value = '';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Fetch AI chatbot response
+            try {
+                const token = getAuthToken();
+                const headers = { 'Content-Type': 'application/json' };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                const res = await fetch(`${API_BASE_URL}/chatbot`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ message: msg })
+                });
+                const data = await res.json();
+                
+                messagesContainer.innerHTML += `
+                    <div style="background:#e0e0e0;padding:8px 12px;border-radius:10px;align-self:flex-start;max-width:85%;color:#333;">
+                        ${data.response}
+                    </div>
+                `;
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } catch (err) {
+                messagesContainer.innerHTML += `
+                    <div style="background:#ffe0e0;padding:8px 12px;border-radius:10px;align-self:flex-start;max-width:85%;color:red;">
+                        Unable to connect to AI Assistant server.
+                    </div>
+                `;
+            }
+        }
+
+        // =====================
         // PRODUCT DATA
         // =====================
-        const products = [
+        let products = [
             { id: 1, name: "Wireless Headphones", category: "Electronics", price: 79.99, oldPrice: 129.99, emoji: "🎧", badge: "Sale", rating: 4.5, reviews: 128, tag: "sale", description: "Premium wireless headphones with noise cancellation and 30-hour battery life.", colors: ["#333", "#e94560", "#4a90d9"] },
             { id: 2, name: "Smart Watch Pro", category: "Electronics", price: 199.99, oldPrice: null, emoji: "⌚", badge: "New", rating: 4.8, reviews: 89, tag: "new", description: "Advanced smartwatch with health tracking, GPS, and 7-day battery.", colors: ["#333", "#silver", "#gold"] },
             { id: 3, name: "Running Sneakers", category: "Fashion", price: 59.99, oldPrice: 89.99, emoji: "👟", badge: "Popular", rating: 4.6, reviews: 245, tag: "popular", description: "Lightweight and comfortable running shoes with advanced cushioning technology.", colors: ["#fff", "#333", "#e94560"] },
@@ -2689,21 +2905,47 @@
         }
 
         // =====================
-        // CHECKOUT
+        // CHECKOUT & BACKEND INTEGRATION
         // =====================
-        function checkout() {
+        async function checkout() {
             if (cart.length === 0) {
                 showNotification('⚠️ Your cart is empty!');
                 return;
             }
-            showNotification('🔒 Redirecting to secure checkout...');
-            setTimeout(() => {
+            const token = getAuthToken();
+            if (!token) {
+                showNotification('🔒 Please log in to proceed to checkout!');
+                toggleAuthModal();
+                return;
+            }
+
+            showNotification('🔒 Processing order checkout...');
+            try {
+                const couponInput = document.getElementById('couponInput');
+                const code = couponInput ? couponInput.value : '';
+                const res = await fetch(`${API_BASE_URL}/orders/checkout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        shipping_address: "Standard Delivery Address",
+                        coupon_code: code,
+                        payment_method: "mock_card"
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Checkout failed');
+
                 cart = [];
                 appliedDiscount = 0;
                 updateCart();
                 toggleCart();
-                showNotification('✅ Order placed successfully! Thank you!');
-            }, 2000);
+                showNotification(`✅ Order #${data.tracking_number} placed successfully! Total: $${data.total.toFixed(2)}`);
+            } catch (err) {
+                showNotification(`❌ ${err.message}`);
+            }
         }
 
         // =====================
@@ -2779,6 +3021,7 @@
         // =====================
         // INIT
         // =====================
+        checkAuthHeader();
         renderProducts();
         startCountdown();
         startCounters();

@@ -26,6 +26,7 @@ export default function ImageGenerator() {
   const [style, setStyle]         = useState('photorealistic');
   const [ratio, setRatio]         = useState('16:9');
   const [loading, setLoading]     = useState(false);
+  const [elapsed, setElapsed]     = useState(0);
   const [result, setResult]       = useState(null);
   const [error, setError]         = useState(null);
   const [saved, setSaved]         = useState(false);
@@ -34,6 +35,15 @@ export default function ImageGenerator() {
   const [isSpeaking, setIsSpeaking]     = useState(false);
   const { addToHistory }          = useApp();
   const { user, updateUser }      = useAuth();
+
+  useEffect(() => {
+    let timer;
+    if (loading) {
+      setElapsed(0);
+      timer = setInterval(() => setElapsed(s => s + 1), 1000);
+    }
+    return () => clearInterval(timer);
+  }, [loading]);
 
   const handleVoiceInput = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -256,7 +266,7 @@ export default function ImageGenerator() {
                 <div className="w-12 h-12 mx-auto rounded-full border-2 border-purple-700 border-t-purple-400 animate-spin" />
                 <p className="text-white text-sm font-semibold">Generating AI Image...</p>
                 <p className="text-purple-300 text-xs max-w-xs mx-auto line-clamp-2">"{prompt}"</p>
-                <p className="text-gray-600 text-[11px]">Creating high-definition visual matching your prompt</p>
+                <p className="text-purple-400/90 text-xs font-mono font-medium">⏱️ Synthesizing visual... {elapsed}s (Usually 3–6s)</p>
               </div>
             )}
             {!loading && error && (
