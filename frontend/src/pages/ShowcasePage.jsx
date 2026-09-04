@@ -72,6 +72,50 @@ const SHOWCASE_SECTIONS = [
   },
 ];
 
+function FullFrameSectionVideo({ videoSources, toolId, isActive }) {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError]   = useState(false);
+  const videoRef            = useRef(null);
+
+  useEffect(() => {
+    if (isActive && videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
+  }, [isActive]);
+
+  return (
+    <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
+      {/* Dark Rolex Overlay for Crisp Text & UI Readability */}
+      <div className="absolute inset-0 bg-[#050510]/50 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#050510] via-transparent to-[#050510]/60 z-10" />
+
+      {/* Full-Frame Looping Video Background */}
+      {!error && (
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          onLoadedData={() => setLoaded(true)}
+          onError={() => setError(true)}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+            loaded ? 'opacity-70 scale-105' : 'opacity-0'
+          }`}
+        >
+          <source src={videoSources[0]} type="video/mp4" />
+          <source src={videoSources[1]} type="video/mp4" />
+        </video>
+      )}
+
+      {/* Canvas Fallback Engine for slow network / loading */}
+      {(!loaded || error) && (
+        <ShowcaseCodeAnimation toolId={toolId} isActive={isActive} />
+      )}
+    </div>
+  );
+}
+
 export default function ShowcasePage() {
   const [activeIdx, setActiveIdx] = useState(0);
   const { user }                  = useAuth();
@@ -149,7 +193,6 @@ export default function ShowcasePage() {
         style={{ scrollSnapType: 'y mandatory' }}
       >
         {SHOWCASE_SECTIONS.map((sec, idx) => {
-          const Icon = sec.icon;
           const isCurrent = activeIdx === idx;
 
           return (
@@ -158,11 +201,12 @@ export default function ShowcasePage() {
               ref={(el) => (sectionRefs.current[idx] = el)}
               className="w-full h-full min-h-[calc(100vh-80px)] snap-start snap-always relative flex items-center justify-center overflow-hidden px-4 md:px-8 py-12"
             >
-              {/* 100% Code-Based Vibrant Animated Background */}
-              <ShowcaseCodeAnimation toolId={sec.id} isActive={isCurrent} />
-
-              {/* Subtle Vignette Gradient for Depth */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#050510]/80 via-transparent to-[#050510]/60 z-1 pointer-events-none" />
+              {/* Full-Frame Looping Video Background */}
+              <FullFrameSectionVideo
+                videoSources={sec.videoSources}
+                toolId={sec.id}
+                isActive={isCurrent}
+              />
 
               {/* Luxury Split 2-Column Showcase Overlay (Matched to Reference Layout) */}
               <div className="relative z-20 w-full flex items-center justify-center">

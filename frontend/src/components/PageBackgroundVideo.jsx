@@ -150,8 +150,8 @@ export default function PageBackgroundVideo() {
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden pointer-events-none z-0">
       {/* Dark Rolex Backdrop Overlays for Crisp Readability */}
-      <div className="absolute inset-0 bg-[#050510]/65 z-10" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050510] via-black/50 to-black/60 z-10 backdrop-blur-[1px]" />
+      <div className="absolute inset-0 bg-[#050510]/50 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#050510] via-black/40 to-black/50 z-10 backdrop-blur-[1px]" />
 
       {/* Full-Frame Looping Video Background per Page */}
       {!videoError && (
@@ -164,7 +164,7 @@ export default function PageBackgroundVideo() {
           onLoadedData={() => setVideoLoaded(true)}
           onError={() => setVideoError(true)}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-            videoLoaded ? 'opacity-40 mix-blend-screen scale-105' : 'opacity-0'
+            videoLoaded ? 'opacity-70 scale-105' : 'opacity-0'
           }`}
         >
           <source src={sources[0]} type="video/mp4" />
