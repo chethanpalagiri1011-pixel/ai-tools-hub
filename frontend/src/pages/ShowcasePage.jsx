@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronDown, ImageIcon, FileText, MessageSquare, Sparkles, LayoutGrid, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import ShowcaseCodeAnimation from '../components/ShowcaseCodeAnimation';
+import DeviceMockupShowcase from '../components/DeviceMockupShowcase';
 
 /**
  * Snap-Scrolling Showcase Page (Post-Login Hero Showcase)
@@ -167,24 +168,20 @@ export default function ShowcasePage() {
               <ShowcaseCodeAnimation toolId={sec.id} isActive={isCurrent} />
 
               {/* Section Content Overlay */}
-              <div className="relative z-20 text-center max-w-2xl px-6 space-y-6 animate-fade-in">
-                <div className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br ${sec.accent} flex items-center justify-center shadow-2xl scale-110 mb-2`}>
-                  <Icon size={32} className="text-white" />
-                </div>
+              <div className="relative z-20 text-center max-w-4xl px-6 space-y-6 animate-fade-in flex flex-col items-center">
+                {/* 100% Code-Based Device Mockup Frame & Animated Text Reveal */}
+                <DeviceMockupShowcase toolId={sec.id} isActive={isCurrent} />
 
-                <div className="space-y-2">
-                  <h2 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight font-display">
-                    {sec.title}
-                  </h2>
-                  <p className="text-gray-300 text-base md:text-lg max-w-xl mx-auto leading-relaxed">
+                <div className="space-y-2 pt-2">
+                  <p className="text-gray-300 text-sm md:text-base max-w-xl mx-auto leading-relaxed">
                     {sec.tagline}
                   </p>
                 </div>
 
-                <div className="pt-2">
+                <div>
                   <button
                     onClick={() => navigate(`/dashboard/tools/${sec.slug}`)}
-                    className={`px-8 py-4 rounded-2xl text-white font-bold text-sm md:text-base flex items-center gap-3 mx-auto transition-all transform hover:scale-105 cursor-pointer shadow-2xl ${sec.btnBg}`}
+                    className={`px-8 py-3.5 rounded-2xl text-white font-bold text-sm md:text-base flex items-center gap-3 mx-auto transition-all transform hover:scale-105 cursor-pointer shadow-2xl ${sec.btnBg}`}
                   >
                     <span>Try {sec.title}</span>
                     <ArrowRight size={18} />
