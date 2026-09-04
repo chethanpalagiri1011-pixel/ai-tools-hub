@@ -137,10 +137,9 @@ export default function CinematicVideoBackdrop({ toolSlug = 'image-gen' }) {
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden pointer-events-none z-0">
-      {/* 1. Rolex-Style Dark Gradient & Radial Backdrop Overlays for Crisp UI Readability */}
-      <div className="absolute inset-0 bg-[#050510]/70 z-10" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050510] via-black/50 to-black/60 z-10 backdrop-blur-[1px]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-[#050510]/50 to-[#050510] z-10" />
+      {/* 1. Backdrop Overlays for UI Readability */}
+      <div className="absolute inset-0 bg-[#050510]/40 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#050510]/60 via-transparent to-[#050510]/40 z-10" />
 
       {/* 2. Full-Frame Looping Video Background */}
       {!isMobile && !videoError && (
@@ -153,21 +152,20 @@ export default function CinematicVideoBackdrop({ toolSlug = 'image-gen' }) {
           onLoadedData={() => setVideoLoaded(true)}
           onError={() => setVideoError(true)}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-            videoLoaded ? 'opacity-40 mix-blend-screen scale-105' : 'opacity-0'
+            videoLoaded ? 'opacity-50 mix-blend-screen scale-105' : 'opacity-0'
           }`}
         >
-          <source src={sources[0]} type="video/mp4" />
-          <source src={sources[1]} type="video/mp4" />
+          {sources.map((src, i) => (
+            <source key={i} src={src} type="video/mp4" />
+          ))}
         </video>
       )}
 
-      {/* 3. 3D Canvas Fallback Renderer for Offline / Slow Connections / Mobile */}
-      {(isMobile || videoError || !videoLoaded) && (
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 w-full h-full object-cover opacity-35 mix-blend-screen"
-        />
-      )}
+      {/* 3. 3D Canvas Procedural Renderer */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full object-cover opacity-70 mix-blend-screen"
+      />
 
       {/* 4. Rolex-Style Audio Mute / Unmute Control Icon Button */}
       {!isMobile && videoLoaded && !videoError && (

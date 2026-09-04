@@ -170,7 +170,7 @@ export default function ShowcasePage() {
               <ShowcaseCodeAnimation toolId={sec.id} isActive={isCurrent} />
 
               {/* Subtle Vignette Gradient for Depth */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#050510]/80 via-transparent to-[#050510]/60 z-1 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#050510]/30 via-transparent to-[#050510]/20 z-1 pointer-events-none" />
 
               {/* Luxury Split 2-Column Showcase Overlay (Matched to Reference Layout) */}
               <div className="relative z-20 w-full flex items-center justify-center">
