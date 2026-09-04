@@ -71,47 +71,47 @@ export default function DeviceMockupShowcase({ toolId = 'image', isActive = true
   }, [isActive]);
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 md:px-8 grid lg:grid-cols-12 gap-6 lg:gap-10 items-center min-h-[70vh]">
+    <div className="w-full max-w-4xl mx-auto px-4 md:px-8 flex flex-col items-center justify-center text-center space-y-6 min-h-[75vh] py-6">
       
-      {/* LEFT COLUMN: Bold Luxury Typography & CTA Button */}
-      <div className={`lg:col-span-6 space-y-5 text-left transition-all duration-700 transform ${
+      {/* TOP: Centered Luxury Typography & Badge & Action */}
+      <div className={`space-y-4 max-w-2xl mx-auto transition-all duration-700 transform ${
         isActive ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
       }`}>
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-xl shadow-lg">
           <Sparkles size={14} className={data.textColor} />
-          <span className={`text-xs font-bold uppercase tracking-wider ${data.textColor}`}>
+          <span className={`text-xs font-bold uppercase tracking-widest ${data.textColor}`}>
             {data.badge}
           </span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight font-display leading-[1.1]">
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight font-display leading-[1.15] drop-shadow-2xl">
           {data.headline}
         </h1>
 
-        <p className="text-gray-300 text-sm sm:text-base max-w-md leading-relaxed font-normal">
+        <p className="text-gray-200 text-sm sm:text-base max-w-lg mx-auto leading-relaxed font-medium">
           {data.sub}
         </p>
 
-        <div className="pt-2 flex items-center gap-4 flex-wrap">
+        <div className="pt-1 flex items-center justify-center gap-4">
           <button
             onClick={() => navigate(`/dashboard/tools/${data.slug}`)}
-            className={`px-7 py-3.5 rounded-2xl text-white font-bold text-sm sm:text-base flex items-center gap-3 transition-all transform hover:scale-105 cursor-pointer shadow-2xl ${data.btnColor}`}
+            className={`px-8 py-3.5 rounded-2xl text-white font-bold text-sm sm:text-base flex items-center gap-3 transition-all transform hover:scale-105 cursor-pointer shadow-2xl ${data.btnColor}`}
           >
-            <span>Try {data.title}</span>
+            <span>Launch {data.title}</span>
             <ArrowRight size={18} />
           </button>
         </div>
       </div>
 
-      {/* RIGHT COLUMN: Sleek 3D Levitating Glassmorphic Device Frame */}
-      <div className={`lg:col-span-6 flex justify-center relative transition-all duration-1000 transform ${
-        isActive ? 'scale-100 opacity-100 translate-x-0' : 'scale-90 opacity-0 translate-x-8'
+      {/* CENTER: Floating 3D Levitating Glassmorphic Preview Card */}
+      <div className={`w-full max-w-lg relative transition-all duration-1000 transform ${
+        isActive ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 translate-y-8'
       }`}>
-        {/* Floating Accent Radial Aura Orb behind object */}
-        <div className={`absolute -inset-10 rounded-full bg-gradient-to-tr ${data.accentOrb} blur-3xl opacity-70 animate-pulse pointer-events-none`} />
+        {/* Floating Ambient Radial Aura Glow */}
+        <div className={`absolute -inset-10 rounded-full bg-gradient-to-tr ${data.accentOrb} blur-3xl opacity-80 animate-pulse pointer-events-none`} />
 
-        {/* 3D Floating Glassmorphism Tablet/Smartphone Frame Container */}
-        <div className="relative w-full max-w-sm sm:max-w-md rounded-[28px] border-2 border-white/20 bg-gradient-to-b from-white/10 via-black/85 to-black/95 backdrop-blur-2xl shadow-[0_25px_60px_rgba(0,0,0,0.9),_0_0_30px_rgba(139,92,246,0.25)] overflow-hidden transition-all duration-500 hover:rotate-1 animate-float">
+        {/* 3D Levitating Glassmorphism Container Card */}
+        <div className="relative w-full rounded-[28px] border-2 border-white/25 bg-gradient-to-b from-white/15 via-black/85 to-black/95 backdrop-blur-2xl shadow-[0_30px_70px_rgba(0,0,0,0.9),_0_0_50px_rgba(168,85,247,0.3)] overflow-hidden transition-all duration-500 hover:rotate-1 animate-float">
           
           {/* Top Window Bar */}
           <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-white/5">
@@ -120,27 +120,27 @@ export default function DeviceMockupShowcase({ toolId = 'image', isActive = true
               <span className="w-3 h-3 rounded-full bg-yellow-500/80 inline-block shadow" />
               <span className="w-3 h-3 rounded-full bg-green-500/80 inline-block shadow" />
             </div>
-            <span className="text-[11px] font-mono text-gray-400 bg-black/40 px-3 py-0.5 rounded-full border border-white/5">
+            <span className="text-[11px] font-mono text-gray-300 bg-black/50 px-3 py-0.5 rounded-full border border-white/10">
               ai-tools.hub/{data.slug}
             </span>
           </div>
 
           {/* Interactive Tool Preview Content */}
-          <div className="p-6 min-h-[260px] flex flex-col justify-center relative">
+          <div className="p-6 min-h-[240px] flex flex-col justify-center relative">
             
             {/* Tool 1 Preview: AI Image Generator */}
             {toolId === 'image' && (
               <div className="space-y-4">
-                <div className="relative h-44 rounded-2xl overflow-hidden border border-purple-500/30 bg-purple-950/30 flex items-center justify-center shadow-inner">
+                <div className="relative h-44 rounded-2xl overflow-hidden border border-purple-500/40 bg-purple-950/40 flex items-center justify-center shadow-inner">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/20 to-transparent animate-shimmer" />
                   
                   <div className={`transition-all duration-1000 ${frameStep > 0 ? 'scale-100 opacity-100 blur-0' : 'scale-90 opacity-20 blur-md'}`}>
-                    <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-400 flex items-center justify-center shadow-2xl shadow-purple-500/40">
+                    <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-400 flex items-center justify-center shadow-2xl shadow-purple-500/50">
                       <Sparkles size={44} className="text-white animate-spin-slow" />
                     </div>
                   </div>
 
-                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-purple-200 bg-black/70 px-3.5 py-1.5 rounded-xl backdrop-blur-md border border-white/10">
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-purple-200 bg-black/80 px-3.5 py-1.5 rounded-xl backdrop-blur-md border border-white/15">
                     <span>Prompt: Lord Ganesha 8K</span>
                     <span className="text-green-400 font-bold">100% Generated ✨</span>
                   </div>
@@ -150,7 +150,7 @@ export default function DeviceMockupShowcase({ toolId = 'image', isActive = true
 
             {/* Tool 2 Preview: Document Summarizer */}
             {toolId === 'summary' && (
-              <div className="p-5 rounded-2xl border border-blue-500/30 bg-blue-950/30 space-y-3 shadow-inner">
+              <div className="p-5 rounded-2xl border border-blue-500/40 bg-blue-950/40 space-y-3 shadow-inner text-left">
                 <div className="flex items-center justify-between text-xs text-blue-300 font-bold border-b border-blue-500/20 pb-2">
                   <span>Executive Summary</span>
                   <span className="text-cyan-400 font-mono">0.4s AI Fast</span>
@@ -178,15 +178,15 @@ export default function DeviceMockupShowcase({ toolId = 'image', isActive = true
 
             {/* Tool 3 Preview: Social Caption Generator */}
             {toolId === 'caption' && (
-              <div className="p-5 rounded-2xl border border-teal-500/30 bg-teal-950/30 space-y-3.5 shadow-inner">
+              <div className="p-5 rounded-2xl border border-teal-500/40 bg-teal-950/40 space-y-3.5 shadow-inner text-left">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-teal-500/30 flex items-center justify-center text-teal-300 font-bold text-xs shadow">
+                  <div className="w-8 h-8 rounded-full bg-teal-500/40 flex items-center justify-center text-teal-300 font-bold text-xs shadow">
                     AI
                   </div>
                   <span className="text-xs font-bold text-white">@aitoolshub</span>
                 </div>
 
-                <p className="text-xs text-gray-200 leading-relaxed font-mono bg-black/30 p-3 rounded-xl border border-white/5">
+                <p className="text-xs text-gray-200 leading-relaxed font-mono bg-black/40 p-3 rounded-xl border border-white/10">
                   "Creating magic with AI Tools Hub! ✨ Multi-tone captions & viral hashtags generated in seconds."
                 </p>
 
@@ -194,7 +194,7 @@ export default function DeviceMockupShowcase({ toolId = 'image', isActive = true
                   {['#viral', '#trending', '#aitools', '#creative'].map((tag, idx) => (
                     <span
                       key={tag}
-                      className={`px-3 py-1 rounded-full text-xs font-semibold bg-teal-500/20 border border-teal-500/40 text-teal-300 transition-all duration-300 ${
+                      className={`px-3 py-1 rounded-full text-xs font-semibold bg-teal-500/25 border border-teal-500/50 text-teal-300 transition-all duration-300 ${
                         frameStep >= idx ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
                       }`}
                     >
@@ -207,10 +207,10 @@ export default function DeviceMockupShowcase({ toolId = 'image', isActive = true
 
             {/* Tool 4 Preview: AI Prompt Enhancer */}
             {toolId === 'prompt' && (
-              <div className="p-5 rounded-2xl border border-amber-500/30 bg-amber-950/30 space-y-3 shadow-inner">
+              <div className="p-5 rounded-2xl border border-amber-500/40 bg-amber-950/40 space-y-3 shadow-inner text-left">
                 <div className="text-xs text-amber-400/80 font-mono">Input: "A cat in a chair"</div>
                 
-                <div className="p-3.5 rounded-xl bg-black/50 border border-amber-500/40 space-y-1.5 relative overflow-hidden">
+                <div className="p-3.5 rounded-xl bg-black/60 border border-amber-500/40 space-y-1.5 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent animate-shimmer" />
                   <div className="text-xs text-amber-300 font-bold flex items-center gap-1.5">
                     <Flame size={15} className="text-amber-400" />
