@@ -7,9 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 
 const navItems = [
-  { to: '/dashboard',              icon: Sparkles,         label: 'Showcase ✨',   end: true },
-  { to: '/dashboard/overview',     icon: LayoutGrid,       label: 'Dashboard Grid' },
-  { to: '/dashboard/tools',        icon: Wand2,            label: 'AI Tools Suite' },
+  { to: '/dashboard',              icon: LayoutDashboard, label: 'Dashboard',    end: true },
+  { to: '/dashboard/tools',        icon: Wand2,            label: 'AI Tools' },
   { to: '/dashboard/my-images',    icon: Images,           label: 'My Images 🖼️' },
   { to: '/dashboard/arcade',       icon: Gamepad2,         label: '🎮 Earn Credits' },
   { to: '/dashboard/admin',        icon: ShieldCheck,      label: '👑 Owner Panel' },
@@ -19,10 +18,10 @@ const navItems = [
 ];
 
 const tools = [
-  { id: 'image',   slug: 'image-gen',   icon: ImageIcon,     label: 'Image Gen',    color: 'text-purple-400' },
-  { id: 'summary', slug: 'summarizer',  icon: FileText,      label: 'Summarizer',   color: 'text-blue-400' },
-  { id: 'caption', slug: 'captions',    icon: MessageSquare, label: 'Captions',     color: 'text-teal-400' },
-  { id: 'prompt',  slug: 'prompt-plus', icon: Sparkles,      label: 'Prompt Boost', color: 'text-yellow-400' },
+  { id: 'image',   icon: ImageIcon,     label: 'Image Gen',    color: 'text-purple-400' },
+  { id: 'summary', icon: FileText,      label: 'Summarizer',   color: 'text-blue-400' },
+  { id: 'caption', icon: MessageSquare, label: 'Captions',     color: 'text-teal-400' },
+  { id: 'prompt',  icon: Sparkles,      label: 'Prompt Boost', color: 'text-yellow-400' },
 ];
 
 export default function Sidebar({ open, onClose }) {
@@ -79,8 +78,8 @@ export default function Sidebar({ open, onClose }) {
         {/* Quick Tool Access */}
         <div className="pt-4 pb-2">
           <p className="px-4 text-xs text-gray-600 uppercase tracking-wider mb-2">Quick Tools</p>
-          {tools.map(({ id, slug, icon: Icon, label, color }) => (
-            <NavLink key={label} to={`/dashboard/tools/${slug}`}
+          {tools.map(({ id, icon: Icon, label, color }) => (
+            <NavLink key={label} to="/dashboard/tools"
               className="flex items-center gap-3 px-4 py-2 rounded-xl text-sm text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all duration-200"
               onClick={() => {
                 setActiveTool(id);

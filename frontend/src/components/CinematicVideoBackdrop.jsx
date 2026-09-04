@@ -28,14 +28,6 @@ const TOOL_VIDEOS = {
   ],
 };
 
-const drawRoundRect = (ctx, x, y, w, h, r = 4) => {
-  if (typeof ctx.roundRect === 'function') {
-    ctx.roundRect(x, y, w, h, r);
-  } else {
-    ctx.rect(x, y, w, h);
-  }
-};
-
 export default function CinematicVideoBackdrop({ toolSlug = 'image-gen' }) {
   const [isMuted, setIsMuted]         = useState(true);
   const [videoLoaded, setVideoLoaded] = useState(false);
@@ -90,9 +82,7 @@ export default function CinematicVideoBackdrop({ toolSlug = 'image-gen' }) {
           const y = Math.floor(i / 5) * (canvas.height / 5) + Math.cos(frame * 0.03 + i) * 30;
           const size = 60 * progress;
           ctx.fillStyle = `rgba(${147 + i * 4}, 51, ${234 - i * 3}, ${0.15 + progress * 0.25})`;
-          ctx.beginPath();
-          drawRoundRect(ctx, x, y, size, size, 12);
-          ctx.fill();
+          ctx.fillRect(x, y, size, size);
         }
       } else if (toolSlug === 'summarizer') {
         // Lines of text collapsing into key bullet points
@@ -101,17 +91,13 @@ export default function CinematicVideoBackdrop({ toolSlug = 'image-gen' }) {
         for (let i = 0; i < 6; i++) {
           const width = (canvas.width * 0.4) - (i * 30) * collapse;
           const y = (canvas.height * 0.2) + i * (50 - collapse * 15);
-          ctx.beginPath();
-          drawRoundRect(ctx, canvas.width * 0.3, y, width, 10, 5);
-          ctx.fill();
+          ctx.fillRect(canvas.width * 0.3, y, width, 10);
         }
       } else if (toolSlug === 'captions') {
         // Floating 3D chat bubbles & social hashtag pops
         const pop = Math.sin(frame * 0.04) * 15;
         ctx.fillStyle = 'rgba(20, 184, 166, 0.2)';
-        ctx.beginPath();
-        drawRoundRect(ctx, canvas.width * 0.2, canvas.height * 0.3 + pop, 280, 120, 24);
-        ctx.fill();
+        ctx.fillRect(canvas.width * 0.2, canvas.height * 0.3 + pop, 280, 120);
         ctx.fillStyle = 'rgba(52, 211, 153, 0.7)';
         ctx.font = 'bold 24px sans-serif';
         ctx.fillText('#viral #captions ✨', canvas.width * 0.22, canvas.height * 0.37 + pop);
