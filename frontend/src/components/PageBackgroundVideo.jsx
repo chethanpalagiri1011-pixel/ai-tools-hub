@@ -11,56 +11,67 @@ import { Volume2, VolumeX } from 'lucide-react';
 
 const PAGE_VIDEO_MAP = {
   '/dashboard': [
+    '/videos/tool-showcase.mp4',
     'https://cdn.pixabay.com/video/2021/04/12/70868-536480579_tiny.mp4',
     'https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-and-code-41539-large.mp4',
   ],
   '/dashboard/grid': [
+    '/videos/tool-showcase.mp4',
     'https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-and-code-41539-large.mp4',
     'https://cdn.pixabay.com/video/2022/11/07/138122-768560124_tiny.mp4',
   ],
   '/dashboard/tools': [
+    '/videos/tool-showcase.mp4',
     'https://assets.mixkit.co/videos/preview/mixkit-digital-nodes-connecting-in-a-network-41551-large.mp4',
     'https://cdn.pixabay.com/video/2021/04/12/70868-536480579_tiny.mp4',
   ],
   '/dashboard/tools/image-gen': [
+    '/videos/tool-showcase.mp4',
+    '/videos/image-gen.mp4',
     'https://cdn.pixabay.com/video/2021/04/12/70868-536480579_tiny.mp4',
     'https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-and-code-41539-large.mp4',
   ],
   '/dashboard/tools/summarizer': [
+    '/videos/tool-showcase.mp4',
+    '/videos/summarizer.mp4',
     'https://cdn.pixabay.com/video/2020/05/25/40149-425170366_tiny.mp4',
     'https://assets.mixkit.co/videos/preview/mixkit-text-on-a-computer-screen-43284-large.mp4',
   ],
   '/dashboard/tools/captions': [
+    '/videos/tool-showcase.mp4',
+    '/videos/captions.mp4',
     'https://cdn.pixabay.com/video/2023/04/18/159493-819198642_tiny.mp4',
     'https://assets.mixkit.co/videos/preview/mixkit-social-media-icons-floating-in-the-air-42887-large.mp4',
   ],
   '/dashboard/tools/prompt-plus': [
+    '/videos/tool-showcase.mp4',
+    '/videos/prompt-plus.mp4',
     'https://cdn.pixabay.com/video/2022/11/07/138122-768560124_tiny.mp4',
     'https://assets.mixkit.co/videos/preview/mixkit-digital-nodes-connecting-in-a-network-41551-large.mp4',
   ],
   '/dashboard/my-images': [
+    '/videos/tool-showcase.mp4',
     'https://cdn.pixabay.com/video/2021/04/12/70868-536480579_tiny.mp4',
-    'https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-and-code-41539-large.mp4',
   ],
   '/dashboard/arcade': [
+    '/videos/tool-showcase.mp4',
     'https://cdn.pixabay.com/video/2023/04/18/159493-819198642_tiny.mp4',
-    'https://assets.mixkit.co/videos/preview/mixkit-social-media-icons-floating-in-the-air-42887-large.mp4',
   ],
   '/dashboard/history': [
+    '/videos/tool-showcase.mp4',
     'https://cdn.pixabay.com/video/2020/05/25/40149-425170366_tiny.mp4',
-    'https://assets.mixkit.co/videos/preview/mixkit-text-on-a-computer-screen-43284-large.mp4',
   ],
   '/dashboard/profile': [
+    '/videos/tool-showcase.mp4',
     'https://cdn.pixabay.com/video/2022/11/07/138122-768560124_tiny.mp4',
-    'https://assets.mixkit.co/videos/preview/mixkit-digital-nodes-connecting-in-a-network-41551-large.mp4',
   ],
   '/dashboard/settings': [
+    '/videos/tool-showcase.mp4',
     'https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-and-code-41539-large.mp4',
-    'https://cdn.pixabay.com/video/2020/05/25/40149-425170366_tiny.mp4',
   ],
   '/dashboard/admin': [
+    '/videos/tool-showcase.mp4',
     'https://assets.mixkit.co/videos/preview/mixkit-digital-nodes-connecting-in-a-network-41551-large.mp4',
-    'https://cdn.pixabay.com/video/2022/11/07/138122-768560124_tiny.mp4',
   ],
 };
 
@@ -150,8 +161,8 @@ export default function PageBackgroundVideo() {
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden pointer-events-none z-0">
       {/* Dark Rolex Backdrop Overlays for Crisp Readability */}
-      <div className="absolute inset-0 bg-[#050510]/50 z-10" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050510] via-black/40 to-black/50 z-10 backdrop-blur-[1px]" />
+      <div className="absolute inset-0 bg-[#050510]/65 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#050510] via-black/50 to-black/60 z-10 backdrop-blur-[1px]" />
 
       {/* Full-Frame Looping Video Background per Page */}
       {!videoError && (
@@ -164,7 +175,7 @@ export default function PageBackgroundVideo() {
           onLoadedData={() => setVideoLoaded(true)}
           onError={() => setVideoError(true)}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-            videoLoaded ? 'opacity-70 scale-105' : 'opacity-0'
+            videoLoaded ? 'opacity-40 mix-blend-screen scale-105' : 'opacity-0'
           }`}
         >
           <source src={sources[0]} type="video/mp4" />

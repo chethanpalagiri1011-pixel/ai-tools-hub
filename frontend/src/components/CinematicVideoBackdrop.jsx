@@ -11,18 +11,26 @@ import { Volume2, VolumeX } from 'lucide-react';
 
 const TOOL_VIDEOS = {
   'image-gen': [
+    '/videos/tool-showcase.mp4',
+    '/videos/image-gen.mp4',
     'https://cdn.pixabay.com/video/2021/04/12/70868-536480579_tiny.mp4',
     'https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-and-code-41539-large.mp4',
   ],
   'summarizer': [
+    '/videos/tool-showcase.mp4',
+    '/videos/summarizer.mp4',
     'https://cdn.pixabay.com/video/2020/05/25/40149-425170366_tiny.mp4',
     'https://assets.mixkit.co/videos/preview/mixkit-text-on-a-computer-screen-43284-large.mp4',
   ],
   'captions': [
+    '/videos/tool-showcase.mp4',
+    '/videos/captions.mp4',
     'https://cdn.pixabay.com/video/2023/04/18/159493-819198642_tiny.mp4',
     'https://assets.mixkit.co/videos/preview/mixkit-social-media-icons-floating-in-the-air-42887-large.mp4',
   ],
   'prompt-plus': [
+    '/videos/tool-showcase.mp4',
+    '/videos/prompt-plus.mp4',
     'https://cdn.pixabay.com/video/2022/11/07/138122-768560124_tiny.mp4',
     'https://assets.mixkit.co/videos/preview/mixkit-digital-nodes-connecting-in-a-network-41551-large.mp4',
   ],
@@ -32,8 +40,17 @@ export default function CinematicVideoBackdrop({ toolSlug = 'image-gen' }) {
   const [isMuted, setIsMuted]         = useState(true);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError]   = useState(false);
+  const [isMobile, setIsMobile]       = useState(false);
   const videoRef                      = useRef(null);
   const canvasRef                     = useRef(null);
+
+  // Check mobile screen to optimize bandwidth
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Sync mute state with video element
   const toggleMute = () => {
@@ -65,6 +82,7 @@ export default function CinematicVideoBackdrop({ toolSlug = 'image-gen' }) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (toolSlug === 'image-gen') {
+        // Particles assembling into glowing photo grid
         ctx.fillStyle = 'rgba(168, 85, 247, 0.15)';
         for (let i = 0; i < 25; i++) {
           const progress = (frame * 0.02 + i * 0.2) % 1;
@@ -75,6 +93,7 @@ export default function CinematicVideoBackdrop({ toolSlug = 'image-gen' }) {
           ctx.fillRect(x, y, size, size);
         }
       } else if (toolSlug === 'summarizer') {
+        // Lines of text collapsing into key bullet points
         const collapse = (Math.sin(frame * 0.03) + 1) / 2;
         ctx.fillStyle = 'rgba(59, 130, 246, 0.25)';
         for (let i = 0; i < 6; i++) {
@@ -83,6 +102,7 @@ export default function CinematicVideoBackdrop({ toolSlug = 'image-gen' }) {
           ctx.fillRect(canvas.width * 0.3, y, width, 10);
         }
       } else if (toolSlug === 'captions') {
+        // Floating 3D chat bubbles & social hashtag pops
         const pop = Math.sin(frame * 0.04) * 15;
         ctx.fillStyle = 'rgba(20, 184, 166, 0.2)';
         ctx.fillRect(canvas.width * 0.2, canvas.height * 0.3 + pop, 280, 120);
@@ -90,6 +110,7 @@ export default function CinematicVideoBackdrop({ toolSlug = 'image-gen' }) {
         ctx.font = 'bold 24px sans-serif';
         ctx.fillText('#viral #captions ✨', canvas.width * 0.22, canvas.height * 0.37 + pop);
       } else if (toolSlug === 'prompt-plus') {
+        // Glowing text expanding into 3D network nodes
         const expand = (Math.sin(frame * 0.04) + 1) / 2;
         ctx.strokeStyle = `rgba(245, 158, 11, ${0.2 + expand * 0.3})`;
         ctx.lineWidth = 3;
@@ -116,12 +137,13 @@ export default function CinematicVideoBackdrop({ toolSlug = 'image-gen' }) {
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden pointer-events-none z-0">
-      {/* 1. Rolex-Style Dark Backdrop Overlays for High UI Contrast */}
-      <div className="absolute inset-0 bg-[#050510]/50 z-10" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050510] via-black/40 to-black/50 z-10 backdrop-blur-[1px]" />
+      {/* 1. Rolex-Style Dark Gradient & Radial Backdrop Overlays for Crisp UI Readability */}
+      <div className="absolute inset-0 bg-[#050510]/70 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#050510] via-black/50 to-black/60 z-10 backdrop-blur-[1px]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-[#050510]/50 to-[#050510] z-10" />
 
       {/* 2. Full-Frame Looping Video Background */}
-      {!videoError && (
+      {!isMobile && !videoError && (
         <video
           ref={videoRef}
           autoPlay
@@ -131,7 +153,7 @@ export default function CinematicVideoBackdrop({ toolSlug = 'image-gen' }) {
           onLoadedData={() => setVideoLoaded(true)}
           onError={() => setVideoError(true)}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-            videoLoaded ? 'opacity-70 scale-105' : 'opacity-0'
+            videoLoaded ? 'opacity-40 mix-blend-screen scale-105' : 'opacity-0'
           }`}
         >
           <source src={sources[0]} type="video/mp4" />
@@ -139,16 +161,16 @@ export default function CinematicVideoBackdrop({ toolSlug = 'image-gen' }) {
         </video>
       )}
 
-      {/* 3. 3D Canvas Fallback Renderer for Offline / Slow Connections */}
-      {(videoError || !videoLoaded) && (
+      {/* 3. 3D Canvas Fallback Renderer for Offline / Slow Connections / Mobile */}
+      {(isMobile || videoError || !videoLoaded) && (
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-screen"
+          className="absolute inset-0 w-full h-full object-cover opacity-35 mix-blend-screen"
         />
       )}
 
       {/* 4. Rolex-Style Audio Mute / Unmute Control Icon Button */}
-      {videoLoaded && !videoError && (
+      {!isMobile && videoLoaded && !videoError && (
         <button
           onClick={toggleMute}
           title={isMuted ? 'Unmute video audio' : 'Mute video audio'}

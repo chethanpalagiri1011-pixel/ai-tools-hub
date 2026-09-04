@@ -24,6 +24,8 @@ const SHOWCASE_SECTIONS = [
     colorText: 'text-purple-400',
     btnBg: 'bg-purple-600 hover:bg-purple-500 shadow-purple-500/25',
     videoSources: [
+      '/videos/tool-showcase.mp4',
+      '/videos/image-gen.mp4',
       'https://cdn.pixabay.com/video/2021/04/12/70868-536480579_tiny.mp4',
       'https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-and-code-41539-large.mp4',
     ],
@@ -38,6 +40,8 @@ const SHOWCASE_SECTIONS = [
     colorText: 'text-blue-400',
     btnBg: 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/25',
     videoSources: [
+      '/videos/tool-showcase.mp4',
+      '/videos/summarizer.mp4',
       'https://cdn.pixabay.com/video/2020/05/25/40149-425170366_tiny.mp4',
       'https://assets.mixkit.co/videos/preview/mixkit-text-on-a-computer-screen-43284-large.mp4',
     ],
@@ -52,6 +56,8 @@ const SHOWCASE_SECTIONS = [
     colorText: 'text-teal-400',
     btnBg: 'bg-teal-600 hover:bg-teal-500 shadow-teal-500/25',
     videoSources: [
+      '/videos/tool-showcase.mp4',
+      '/videos/captions.mp4',
       'https://cdn.pixabay.com/video/2023/04/18/159493-819198642_tiny.mp4',
       'https://assets.mixkit.co/videos/preview/mixkit-social-media-icons-floating-in-the-air-42887-large.mp4',
     ],
@@ -66,55 +72,13 @@ const SHOWCASE_SECTIONS = [
     colorText: 'text-yellow-400',
     btnBg: 'bg-amber-600 hover:bg-amber-500 shadow-amber-500/25',
     videoSources: [
+      '/videos/tool-showcase.mp4',
+      '/videos/prompt-plus.mp4',
       'https://cdn.pixabay.com/video/2022/11/07/138122-768560124_tiny.mp4',
       'https://assets.mixkit.co/videos/preview/mixkit-digital-nodes-connecting-in-a-network-41551-large.mp4',
     ],
   },
 ];
-
-function FullFrameSectionVideo({ videoSources, toolId, isActive }) {
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError]   = useState(false);
-  const videoRef            = useRef(null);
-
-  useEffect(() => {
-    if (isActive && videoRef.current) {
-      videoRef.current.play().catch(() => {});
-    }
-  }, [isActive]);
-
-  return (
-    <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
-      {/* Dark Rolex Overlay for Crisp Text & UI Readability */}
-      <div className="absolute inset-0 bg-[#050510]/50 z-10" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050510] via-transparent to-[#050510]/60 z-10" />
-
-      {/* Full-Frame Looping Video Background */}
-      {!error && (
-        <video
-          ref={videoRef}
-          autoPlay
-          loop
-          muted
-          playsInline
-          onLoadedData={() => setLoaded(true)}
-          onError={() => setError(true)}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-            loaded ? 'opacity-70 scale-105' : 'opacity-0'
-          }`}
-        >
-          <source src={videoSources[0]} type="video/mp4" />
-          <source src={videoSources[1]} type="video/mp4" />
-        </video>
-      )}
-
-      {/* Canvas Fallback Engine for slow network / loading */}
-      {(!loaded || error) && (
-        <ShowcaseCodeAnimation toolId={toolId} isActive={isActive} />
-      )}
-    </div>
-  );
-}
 
 export default function ShowcasePage() {
   const [activeIdx, setActiveIdx] = useState(0);
@@ -193,6 +157,7 @@ export default function ShowcasePage() {
         style={{ scrollSnapType: 'y mandatory' }}
       >
         {SHOWCASE_SECTIONS.map((sec, idx) => {
+          const Icon = sec.icon;
           const isCurrent = activeIdx === idx;
 
           return (
@@ -201,12 +166,11 @@ export default function ShowcasePage() {
               ref={(el) => (sectionRefs.current[idx] = el)}
               className="w-full h-full min-h-[calc(100vh-80px)] snap-start snap-always relative flex items-center justify-center overflow-hidden px-4 md:px-8 py-12"
             >
-              {/* Full-Frame Looping Video Background */}
-              <FullFrameSectionVideo
-                videoSources={sec.videoSources}
-                toolId={sec.id}
-                isActive={isCurrent}
-              />
+              {/* 100% Code-Based Vibrant Animated Background */}
+              <ShowcaseCodeAnimation toolId={sec.id} isActive={isCurrent} />
+
+              {/* Subtle Vignette Gradient for Depth */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#050510]/80 via-transparent to-[#050510]/60 z-1 pointer-events-none" />
 
               {/* Luxury Split 2-Column Showcase Overlay (Matched to Reference Layout) */}
               <div className="relative z-20 w-full flex items-center justify-center">
