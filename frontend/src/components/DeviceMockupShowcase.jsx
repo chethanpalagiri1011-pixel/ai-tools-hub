@@ -71,10 +71,10 @@ export default function DeviceMockupShowcase({ toolId = 'image', isActive = true
   }, [isActive]);
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-6 grid lg:grid-cols-12 gap-8 lg:gap-12 items-center min-h-[75vh]">
+    <div className="w-full max-w-5xl mx-auto px-4 md:px-8 grid lg:grid-cols-12 gap-6 lg:gap-10 items-center min-h-[70vh]">
       
       {/* LEFT COLUMN: Bold Luxury Typography & CTA Button */}
-      <div className={`lg:col-span-6 space-y-6 text-left transition-all duration-700 transform ${
+      <div className={`lg:col-span-6 space-y-5 text-left transition-all duration-700 transform ${
         isActive ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
       }`}>
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
@@ -84,18 +84,18 @@ export default function DeviceMockupShowcase({ toolId = 'image', isActive = true
           </span>
         </div>
 
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight font-display leading-[1.1]">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight font-display leading-[1.1]">
           {data.headline}
         </h1>
 
-        <p className="text-gray-300 text-base sm:text-lg max-w-lg leading-relaxed font-normal">
+        <p className="text-gray-300 text-sm sm:text-base max-w-md leading-relaxed font-normal">
           {data.sub}
         </p>
 
         <div className="pt-2 flex items-center gap-4 flex-wrap">
           <button
             onClick={() => navigate(`/dashboard/tools/${data.slug}`)}
-            className={`px-8 py-4 rounded-2xl text-white font-bold text-sm sm:text-base flex items-center gap-3 transition-all transform hover:scale-105 cursor-pointer shadow-2xl ${data.btnColor}`}
+            className={`px-7 py-3.5 rounded-2xl text-white font-bold text-sm sm:text-base flex items-center gap-3 transition-all transform hover:scale-105 cursor-pointer shadow-2xl ${data.btnColor}`}
           >
             <span>Try {data.title}</span>
             <ArrowRight size={18} />
@@ -103,15 +103,15 @@ export default function DeviceMockupShowcase({ toolId = 'image', isActive = true
         </div>
       </div>
 
-      {/* RIGHT COLUMN: 3D Floating Hero Showcase Object (Like Water Bottle in Reference) */}
+      {/* RIGHT COLUMN: Sleek 3D Levitating Glassmorphic Device Frame */}
       <div className={`lg:col-span-6 flex justify-center relative transition-all duration-1000 transform ${
         isActive ? 'scale-100 opacity-100 translate-x-0' : 'scale-90 opacity-0 translate-x-8'
       }`}>
         {/* Floating Accent Radial Aura Orb behind object */}
-        <div className={`absolute -inset-12 rounded-full bg-gradient-to-tr ${data.accentOrb} blur-3xl opacity-70 animate-pulse pointer-events-none`} />
+        <div className={`absolute -inset-10 rounded-full bg-gradient-to-tr ${data.accentOrb} blur-3xl opacity-70 animate-pulse pointer-events-none`} />
 
-        {/* 3D Floating Glassmorphism Hero Object Container */}
-        <div className="relative w-full max-w-md rounded-3xl border border-white/15 bg-black/50 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden transition-transform duration-500 hover:rotate-1 animate-float">
+        {/* 3D Floating Glassmorphism Tablet/Smartphone Frame Container */}
+        <div className="relative w-full max-w-sm sm:max-w-md rounded-[28px] border-2 border-white/20 bg-gradient-to-b from-white/10 via-black/85 to-black/95 backdrop-blur-2xl shadow-[0_25px_60px_rgba(0,0,0,0.9),_0_0_30px_rgba(139,92,246,0.25)] overflow-hidden transition-all duration-500 hover:rotate-1 animate-float">
           
           {/* Top Window Bar */}
           <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-white/5">

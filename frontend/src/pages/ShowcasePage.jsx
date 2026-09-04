@@ -105,10 +105,10 @@ export default function ShowcasePage() {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-[#050510]">
+    <div className="relative w-full h-full overflow-hidden bg-[#050510]">
       {/* Top Header Controls Overlay */}
-      <div className="fixed top-5 left-6 right-6 z-40 flex items-center justify-between pointer-events-none">
-        <div className="flex items-center gap-3 pointer-events-auto bg-black/40 px-4 py-2 rounded-2xl border border-white/10 backdrop-blur-xl">
+      <div className="fixed top-5 left-6 right-8 z-40 flex items-center justify-between pointer-events-none">
+        <div className="flex items-center gap-3 pointer-events-auto bg-black/50 px-4 py-2 rounded-2xl border border-white/10 backdrop-blur-xl shadow-lg">
           <Zap size={16} className="text-yellow-400" />
           <span className="text-xs font-semibold text-white">
             {user?.credits ?? 100} Credits Remaining
@@ -118,7 +118,7 @@ export default function ShowcasePage() {
         <div className="flex items-center gap-2 pointer-events-auto">
           <button
             onClick={() => navigate('/dashboard/grid')}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-gray-200 bg-black/50 hover:bg-purple-600/40 hover:text-white border border-white/15 backdrop-blur-xl transition-all cursor-pointer shadow-lg"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-gray-200 bg-black/60 hover:bg-purple-600/40 hover:text-white border border-white/15 backdrop-blur-xl transition-all cursor-pointer shadow-lg"
           >
             <LayoutGrid size={15} />
             <span>Dashboard View</span>
@@ -127,7 +127,7 @@ export default function ShowcasePage() {
       </div>
 
       {/* Side Navigation Dots */}
-      <div className="fixed right-6 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-3">
+      <div className="fixed right-4 md:right-6 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-3">
         {SHOWCASE_SECTIONS.map((sec, idx) => (
           <button
             key={sec.id}
@@ -151,14 +151,12 @@ export default function ShowcasePage() {
         {SHOWCASE_SECTIONS.map((sec, idx) => {
           const Icon = sec.icon;
           const isCurrent = activeIdx === idx;
-          const isNext = activeIdx + 1 === idx;
-          const shouldLoad = isCurrent || isNext;
 
           return (
             <div
               key={sec.id}
               ref={(el) => (sectionRefs.current[idx] = el)}
-              className="w-screen h-screen snap-start snap-always relative flex items-center justify-center overflow-hidden"
+              className="w-full h-full min-h-[calc(100vh-80px)] snap-start snap-always relative flex items-center justify-center overflow-hidden px-4 md:px-8 py-12"
             >
               {/* 100% Code-Based Vibrant Animated Background */}
               <ShowcaseCodeAnimation toolId={sec.id} isActive={isCurrent} />
