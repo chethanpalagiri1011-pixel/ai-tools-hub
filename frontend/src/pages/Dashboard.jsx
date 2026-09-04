@@ -11,10 +11,10 @@ import Tilt3DCard from '../components/Tilt3DCard';
 import ToolCardVideo from '../components/ToolCardVideo';
 
 const TOOLS = [
-  { id: 'image',   icon: ImageIcon,     label: 'Image Generator', desc: 'Text to image',       color: 'from-purple-500 to-pink-500',   count: '1.2M' },
-  { id: 'summary', icon: FileText,      label: 'Text Summarizer',  desc: 'Smart condensing',    color: 'from-blue-500 to-cyan-500',     count: '420K' },
-  { id: 'caption', icon: MessageSquare, label: 'Caption Generator', desc: 'Engaging copy',      color: 'from-teal-500 to-green-500',    count: '310K' },
-  { id: 'prompt',  icon: Sparkles,      label: 'Prompt Enhancer',  desc: 'Better AI results',  color: 'from-yellow-500 to-orange-500', count: '89K' },
+  { id: 'image',   slug: 'image-gen',   icon: ImageIcon,     label: 'Image Generator', desc: 'Text to image',       color: 'from-purple-500 to-pink-500',   count: '1.2M' },
+  { id: 'summary', slug: 'summarizer',  icon: FileText,      label: 'Text Summarizer',  desc: 'Smart condensing',    color: 'from-blue-500 to-cyan-500',     count: '420K' },
+  { id: 'caption', slug: 'captions',    icon: MessageSquare, label: 'Caption Generator', desc: 'Engaging copy',      color: 'from-teal-500 to-green-500',    count: '310K' },
+  { id: 'prompt',  slug: 'prompt-plus', icon: Sparkles,      label: 'Prompt Enhancer',  desc: 'Better AI results',  color: 'from-yellow-500 to-orange-500', count: '89K' },
 ];
 
 const QUICK_STATS = [
@@ -32,9 +32,9 @@ export default function Dashboard() {
 
   const recentHistory = history.slice(0, 4);
 
-  const handleToolClick = (toolId) => {
-    setActiveTool(toolId);
-    navigate('/dashboard/tools');
+  const handleToolClick = (tool) => {
+    setActiveTool(tool.id);
+    navigate(`/dashboard/tools/${tool.slug}`);
   };
 
   const hour = new Date().getHours();
@@ -116,7 +116,7 @@ export default function Dashboard() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {TOOLS.map(tool => (
             <Tilt3DCard key={tool.id}
-              onClick={() => handleToolClick(tool.id)}
+              onClick={() => handleToolClick(tool)}
               className="p-5 rounded-2xl border border-white/8 text-left group hover:border-purple-500/40 transition-all duration-300 relative overflow-hidden"
               style={{ background: 'rgba(255,255,255,0.02)' }}>
               

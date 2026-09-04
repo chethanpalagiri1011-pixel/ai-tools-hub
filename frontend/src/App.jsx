@@ -15,6 +15,7 @@ import HistoryPage    from './pages/HistoryPage';
 import ArcadePage     from './pages/ArcadePage';
 import MyImagesPage   from './pages/MyImagesPage';
 import AdminDashboard from './pages/AdminDashboard';
+import ToolDedicatedPage from './pages/ToolDedicatedPage';
 import DashboardLayout from './layouts/DashboardLayout';
 
 function ProtectedRoute({ children }) {
@@ -67,16 +68,23 @@ function App() {
             <Route path="/login"  element={<PublicRoute><LoginPage /></PublicRoute>} />
             <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
 
+            {/* Direct Tool Redirects */}
+            <Route path="/tools/image-gen"   element={<Navigate to="/dashboard/tools/image-gen" replace />} />
+            <Route path="/tools/summarizer"  element={<Navigate to="/dashboard/tools/summarizer" replace />} />
+            <Route path="/tools/captions"    element={<Navigate to="/dashboard/tools/captions" replace />} />
+            <Route path="/tools/prompt-plus" element={<Navigate to="/dashboard/tools/prompt-plus" replace />} />
+
             {/* Protected — wrapped in DashboardLayout */}
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-              <Route index        element={<Dashboard />} />
-              <Route path="tools"     element={<AIToolsPage />} />
-              <Route path="my-images" element={<MyImagesPage />} />
-              <Route path="history"   element={<HistoryPage />} />
-              <Route path="profile"   element={<ProfilePage />} />
-              <Route path="settings"  element={<SettingsPage />} />
-              <Route path="arcade"    element={<ArcadePage />} />
-              <Route path="admin"     element={<AdminDashboard />} />
+              <Route index            element={<Dashboard />} />
+              <Route path="tools"         element={<AIToolsPage />} />
+              <Route path="tools/:toolSlug" element={<ToolDedicatedPage />} />
+              <Route path="my-images"     element={<MyImagesPage />} />
+              <Route path="history"       element={<HistoryPage />} />
+              <Route path="profile"       element={<ProfilePage />} />
+              <Route path="settings"      element={<SettingsPage />} />
+              <Route path="arcade"        element={<ArcadePage />} />
+              <Route path="admin"         element={<AdminDashboard />} />
             </Route>
 
             {/* Fallback */}
