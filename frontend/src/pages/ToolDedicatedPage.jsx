@@ -5,6 +5,7 @@ import ImageGenerator from '../components/tools/ImageGenerator';
 import TextSummarizer from '../components/tools/TextSummarizer';
 import CaptionGenerator from '../components/tools/CaptionGenerator';
 import PromptEnhancer from '../components/tools/PromptEnhancer';
+import CinematicVideoBackdrop from '../components/CinematicVideoBackdrop';
 
 const TOOL_CONFIG = {
   'image-gen':   { id: 'image',   label: 'AI Image Generator',      icon: ImageIcon,     color: 'from-purple-500 to-pink-500',   activeColor: 'text-purple-300',  component: ImageGenerator },
@@ -32,50 +33,56 @@ export default function ToolDedicatedPage({ defaultToolId }) {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 animate-fade-in transition-all duration-300">
-      {/* Top Navigation & Back Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4 bg-white/[0.02] p-4 rounded-2xl border border-white/8 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/dashboard/tools')}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-gray-300 bg-white/5 hover:bg-purple-500/20 hover:text-white border border-white/10 hover:border-purple-500/30 transition-all cursor-pointer shadow"
-          >
-            <ArrowLeft size={15} />
-            <span>Back to AI Tools</span>
-          </button>
+    <div className="relative min-h-screen">
+      {/* Rolex-Style Full-Frame Cinematic Video Backdrop */}
+      <CinematicVideoBackdrop toolSlug={currentSlug} />
 
-          <div className="h-4 w-px bg-white/10 hidden sm:block" />
+      {/* Main UI Overlaid on Top of Video */}
+      <div className="relative z-10 max-w-5xl mx-auto space-y-6 animate-fade-in transition-all duration-300 py-2">
+        {/* Top Navigation & Back Header */}
+        <div className="flex items-center justify-between flex-wrap gap-4 bg-black/40 p-4 rounded-2xl border border-white/10 backdrop-blur-xl shadow-2xl">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/dashboard/tools')}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-gray-200 bg-white/10 hover:bg-purple-600/30 hover:text-white border border-white/15 hover:border-purple-500/40 transition-all cursor-pointer shadow-lg backdrop-blur-md"
+            >
+              <ArrowLeft size={15} />
+              <span>Back to AI Tools</span>
+            </button>
 
-          {/* Breadcrumbs */}
-          <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-400">
-            <Link to="/dashboard/tools" className="hover:text-purple-300 transition-colors">AI Tools Hub</Link>
-            <ChevronRight size={12} className="text-gray-600" />
-            <span className={`font-semibold ${toolInfo.activeColor}`}>{toolInfo.label}</span>
+            <div className="h-4 w-px bg-white/15 hidden sm:block" />
+
+            {/* Breadcrumbs */}
+            <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-300">
+              <Link to="/dashboard/tools" className="hover:text-purple-300 transition-colors font-medium">AI Tools Hub</Link>
+              <ChevronRight size={12} className="text-gray-500" />
+              <span className={`font-bold ${toolInfo.activeColor}`}>{toolInfo.label}</span>
+            </div>
+          </div>
+
+          {/* Quick Tool Switcher Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto py-1">
+            {Object.entries(TOOL_CONFIG).map(([slug, cfg]) => (
+              <button
+                key={slug}
+                onClick={() => handleNavToTool(slug)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer backdrop-blur-md ${
+                  currentSlug === slug
+                    ? 'bg-purple-600/40 text-white border border-purple-500/60 shadow-lg shadow-purple-500/20'
+                    : 'bg-white/10 text-gray-300 hover:text-white border border-white/10 hover:bg-white/15'
+                }`}
+              >
+                <cfg.icon size={13} />
+                <span>{cfg.label.replace('AI ', '').replace(' Generator', '')}</span>
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Quick Tool Switcher Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto py-1">
-          {Object.entries(TOOL_CONFIG).map(([slug, cfg]) => (
-            <button
-              key={slug}
-              onClick={() => handleNavToTool(slug)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
-                currentSlug === slug
-                  ? 'bg-purple-600/30 text-white border border-purple-500/50 shadow'
-                  : 'bg-white/5 text-gray-400 hover:text-gray-200 border border-white/5'
-              }`}
-            >
-              <cfg.icon size={13} />
-              <span>{cfg.label.replace('AI ', '').replace(' Generator', '')}</span>
-            </button>
-          ))}
+        {/* Main Tool UI Box Overlaid on Video */}
+        <div className="p-6 rounded-2xl border border-white/10 bg-black/40 shadow-2xl backdrop-blur-2xl">
+          <ToolComponent />
         </div>
-      </div>
-
-      {/* Main Full Page Tool Content */}
-      <div className="p-6 rounded-2xl border border-white/8 bg-white/[0.02] shadow-2xl backdrop-blur-xl">
-        <ToolComponent />
       </div>
     </div>
   );
