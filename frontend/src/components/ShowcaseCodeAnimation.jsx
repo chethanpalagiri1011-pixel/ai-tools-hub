@@ -3,17 +3,16 @@ import * as THREE from 'three';
 
 /**
  * Real GPU-Rendered Three.js Particle Background Component
- * 1. AI Image Generator: Orange & Pink particle swarm converging into a photo-frame silhouette
- * 2. Document Summarizer: Blue-toned particle streams flowing horizontally and compressing
- * 3. Social Caption Generator: Green-toned particle pops/bursts
- * 4. AI Prompt Enhancer: Purple/violet particle swarm brightening & expanding outward
+ * - Organic, continuous floating drift physics for every particle (no static particles)
+ * - Soft cinematic glowing & pulsing size/opacity cycle
+ * - Zero change to colors, layout, browser mockup, headline text, or buttons
  */
 
 const TOOL_THEMES = {
   image: {
     blob1: 'bg-orange-600/50 blur-[100px]',
     blob2: 'bg-pink-600/50 blur-[120px]',
-    blob3: 'bg-amber-600/40 blur-[90px]',
+    blob3: 'bg-purple-600/40 blur-[90px]',
   },
   summary: {
     blob1: 'bg-blue-600/50 blur-[100px]',
@@ -32,7 +31,7 @@ const TOOL_THEMES = {
   },
 };
 
-// Create soft glow particle texture via Canvas 2D
+// Create soft glow particle sprite texture via Canvas 2D
 function createGlowParticleTexture() {
   const canvas = document.createElement('canvas');
   canvas.width = 64;
@@ -41,7 +40,7 @@ function createGlowParticleTexture() {
 
   const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
   gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-  gradient.addColorStop(0.25, 'rgba(255, 255, 255, 0.8)');
+  gradient.addColorStop(0.25, 'rgba(255, 255, 255, 0.85)');
   gradient.addColorStop(0.55, 'rgba(255, 255, 255, 0.35)');
   gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
@@ -88,28 +87,29 @@ export default function ShowcaseCodeAnimation({ toolId = 'image', isActive = tru
     const basePositions = new Float32Array(particleCount * 3);
     const framePositions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
-    const velocities = new Float32Array(particleCount * 3);
     const burstPhases = new Float32Array(particleCount);
 
-    // Color definitions
+    // Color Palette Definitions (Pink/Orange/Purple glow for Image Gen)
     const colorOrange = new THREE.Color('#f97316');
     const colorPink = new THREE.Color('#ec4899');
+    const colorPurple = new THREE.Color('#a855f7');
+    const colorRose = new THREE.Color('#f43f5e');
+
     const colorBlue = new THREE.Color('#3b82f6');
     const colorCyan = new THREE.Color('#06b6d4');
     const colorEmerald = new THREE.Color('#10b981');
     const colorMint = new THREE.Color('#34d399');
     const colorViolet = new THREE.Color('#8b5cf6');
-    const colorPurple = new THREE.Color('#a855f7');
     const colorFuchsia = new THREE.Color('#d946ef');
 
-    // Initialize positions and velocities
+    // Initialize Particle Coordinates
     for (let i = 0; i < particleCount; i++) {
       const idx = i * 3;
 
-      // Base random positions
-      const rx = (Math.random() - 0.5) * 22;
-      const ry = (Math.random() - 0.5) * 14;
-      const rz = (Math.random() - 0.5) * 8;
+      // Base random distribution across 3D viewport
+      const rx = (Math.random() - 0.5) * 24;
+      const ry = (Math.random() - 0.5) * 15;
+      const rz = (Math.random() - 0.5) * 9;
 
       positions[idx] = rx;
       positions[idx + 1] = ry;
@@ -119,33 +119,25 @@ export default function ShowcaseCodeAnimation({ toolId = 'image', isActive = tru
       basePositions[idx + 1] = ry;
       basePositions[idx + 2] = rz;
 
-      velocities[idx] = (Math.random() - 0.5) * 0.02;
-      velocities[idx + 1] = (Math.random() - 0.5) * 0.02;
-      velocities[idx + 2] = (Math.random() - 0.5) * 0.02;
-
       burstPhases[i] = Math.random() * Math.PI * 2;
 
-      // ── Tool 1: Photo-Frame Silhouette Positions (First 500 particles form frame) ──
+      // Photo-Frame Silhouette Target Positions (First 500 particles for Image Gen)
       if (i < 500) {
         const side = i % 4;
-        const progress = (Math.floor(i / 4) / 125) - 0.5; // -0.5 to 0.5
-        const frameW = 6.5;
-        const frameH = 4.2;
+        const progress = (Math.floor(i / 4) / 125) - 0.5;
+        const frameW = 6.8;
+        const frameH = 4.4;
 
         if (side === 0) {
-          // Top edge
           framePositions[idx] = progress * frameW * 2;
           framePositions[idx + 1] = frameH;
         } else if (side === 1) {
-          // Bottom edge
           framePositions[idx] = progress * frameW * 2;
           framePositions[idx + 1] = -frameH;
         } else if (side === 2) {
-          // Left edge
           framePositions[idx] = -frameW;
           framePositions[idx + 1] = progress * frameH * 2;
         } else {
-          // Right edge
           framePositions[idx] = frameW;
           framePositions[idx + 1] = progress * frameH * 2;
         }
@@ -156,10 +148,11 @@ export default function ShowcaseCodeAnimation({ toolId = 'image', isActive = tru
         framePositions[idx + 2] = rz;
       }
 
-      // Initialize Colors based on toolId
+      // Initialize Palette Colors
       let col = new THREE.Color();
       if (toolId === 'image') {
-        col = Math.random() > 0.4 ? colorOrange : colorPink;
+        const rand = Math.random();
+        col = rand < 0.35 ? colorOrange : (rand < 0.7 ? colorPink : (rand < 0.88 ? colorPurple : colorRose));
       } else if (toolId === 'summary') {
         col = Math.random() > 0.4 ? colorCyan : colorBlue;
       } else if (toolId === 'caption') {
@@ -176,13 +169,13 @@ export default function ShowcaseCodeAnimation({ toolId = 'image', isActive = tru
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-    // Particle Shader / Points Material with Soft Glow Bloom
+    // Points Material with Additive Glow Blending
     const material = new THREE.PointsMaterial({
-      size: toolId === 'image' ? 0.35 : 0.32,
+      size: toolId === 'image' ? 0.38 : 0.34,
       map: particleTexture,
       vertexColors: true,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.92,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
@@ -190,7 +183,7 @@ export default function ShowcaseCodeAnimation({ toolId = 'image', isActive = tru
     const particlesSystem = new THREE.Points(geometry, material);
     scene.add(particlesSystem);
 
-    // 3. Animation Loop & Real-Time GPU Physics
+    // 3. 60FPS Smooth Animation Loop (Continuous Drift + Soft Glow Pulse)
     let clock = new THREE.Clock();
     let animId;
 
@@ -202,58 +195,59 @@ export default function ShowcaseCodeAnimation({ toolId = 'image', isActive = tru
       const colAttr = geometry.attributes.color;
       const colArr = colAttr.array;
 
+      // Global slow breathing glow pulse
+      material.size = (toolId === 'image' ? 0.38 : 0.34) + Math.sin(elapsedTime * 1.2) * 0.04;
+      material.opacity = 0.85 + Math.sin(elapsedTime * 0.8) * 0.12;
+
       // ── Tool 1: AI Image Generator ─────────────────────────────────────────
-      // Orange & Pink swarm converging into a photo-frame silhouette before dispersing
       if (toolId === 'image') {
-        // Frame convergence cycle (oscillates between 0 disperse & 1 frame assemble)
-        const frameCycle = (Math.sin(elapsedTime * 0.9) + 1) / 2; // 0 to 1
-        const convergeFactor = Math.pow(frameCycle, 3); // Smooth ease-in curve
+        const frameCycle = (Math.sin(elapsedTime * 0.7) + 1) / 2;
+        const convergeFactor = Math.pow(frameCycle, 2.5);
 
         for (let i = 0; i < particleCount; i++) {
           const idx = i * 3;
 
+          // Multi-frequency trigonometric continuous organic drift
+          const floatX = Math.sin(elapsedTime * 0.5 + i * 0.1) * 0.4 + Math.cos(elapsedTime * 0.3 + i * 0.2) * 0.25;
+          const floatY = Math.cos(elapsedTime * 0.4 + i * 0.15) * 0.4 + Math.sin(elapsedTime * 0.25 + i * 0.1) * 0.25;
+          const floatZ = Math.sin(elapsedTime * 0.3 + i * 0.3) * 0.2;
+
           if (i < 500) {
-            // Lerp between base random position and photo-frame silhouette
             const targetX = THREE.MathUtils.lerp(basePositions[idx], framePositions[idx], convergeFactor);
             const targetY = THREE.MathUtils.lerp(basePositions[idx + 1], framePositions[idx + 1], convergeFactor);
             const targetZ = THREE.MathUtils.lerp(basePositions[idx + 2], framePositions[idx + 2], convergeFactor);
 
-            posArr[idx] += (targetX - posArr[idx]) * 0.08;
-            posArr[idx + 1] += (targetY - posArr[idx + 1]) * 0.08;
-            posArr[idx + 2] += (targetZ - posArr[idx + 2]) * 0.08;
+            posArr[idx] = targetX + floatX;
+            posArr[idx + 1] = targetY + floatY;
+            posArr[idx + 2] = targetZ + floatZ;
           } else {
-            // Swarm particles float gently with noise
-            posArr[idx] += Math.sin(elapsedTime + i) * 0.01;
-            posArr[idx + 1] += Math.cos(elapsedTime + i * 0.5) * 0.01;
+            posArr[idx] = basePositions[idx] + floatX;
+            posArr[idx + 1] = basePositions[idx + 1] + floatY;
+            posArr[idx + 2] = basePositions[idx + 2] + floatZ;
           }
         }
       }
 
       // ── Tool 2: Document Summarizer ────────────────────────────────────────
-      // Blue-toned streams flowing horizontally & compressing into bullet points
       else if (toolId === 'summary') {
         for (let i = 0; i < particleCount; i++) {
           const idx = i * 3;
+          const floatY = Math.sin(elapsedTime * 0.4 + i) * 0.15;
 
-          // Flow rightwards
           posArr[idx] += 0.08 + (i % 3) * 0.02;
           if (posArr[idx] > 12) {
             posArr[idx] = -12;
             posArr[idx + 1] = basePositions[idx + 1];
           }
 
-          // Compress towards 3 horizontal keypoint lines as x approaches center (x between -6 and +6)
           const distFromCenter = Math.abs(posArr[idx]);
           const compression = Math.max(0, 1 - distFromCenter / 7);
-
-          // Assign to 1 of 3 target Y lines: -2, 0, +2
           const targetYLine = ((i % 3) - 1) * 2;
-          posArr[idx + 1] = THREE.MathUtils.lerp(basePositions[idx + 1], targetYLine, compression * 0.85);
+          posArr[idx + 1] = THREE.MathUtils.lerp(basePositions[idx + 1], targetYLine, compression * 0.85) + floatY;
         }
       }
 
       // ── Tool 3: Social Caption Generator ──────────────────────────────────
-      // Green-toned particles forming small pops & bursts
       else if (toolId === 'caption') {
         const numBursts = 10;
         const particlesPerBurst = Math.floor(particleCount / numBursts);
@@ -273,7 +267,6 @@ export default function ShowcaseCodeAnimation({ toolId = 'image', isActive = tru
             posArr[idx + 1] = burstY + Math.sin(angle) * radius + (burstTime * 0.3);
             posArr[idx + 2] = Math.sin(angle * 2) * 0.5;
 
-            // Brighten green tint on burst pop
             const opacity = Math.max(0, 1 - (burstTime / (Math.PI * 2)));
             colArr[idx] = colorEmerald.r * opacity;
             colArr[idx + 1] = (colorEmerald.g + 0.3) * opacity;
@@ -284,23 +277,22 @@ export default function ShowcaseCodeAnimation({ toolId = 'image', isActive = tru
       }
 
       // ── Tool 4: AI Prompt Enhancer ─────────────────────────────────────────
-      // Purple/violet particle swarm gradually brightening & expanding outward
       else if (toolId === 'prompt') {
-        const pulseCycle = (Math.sin(elapsedTime * 0.9) + 1) / 2; // 0 to 1 expansion cycle
-        const expansionRadius = 1 + pulseCycle * 4.5;
+        const pulseCycle = (Math.sin(elapsedTime * 0.9) + 1) / 2;
 
         for (let i = 0; i < particleCount; i++) {
           const idx = i * 3;
+          const floatX = Math.sin(elapsedTime * 0.4 + i) * 0.2;
+          const floatY = Math.cos(elapsedTime * 0.3 + i) * 0.2;
+
           const dirX = basePositions[idx];
           const dirY = basePositions[idx + 1];
           const dirZ = basePositions[idx + 2];
 
-          // Expand outward from origin
-          posArr[idx] = dirX * (0.3 + pulseCycle * 0.8);
-          posArr[idx + 1] = dirY * (0.3 + pulseCycle * 0.8);
+          posArr[idx] = dirX * (0.3 + pulseCycle * 0.8) + floatX;
+          posArr[idx + 1] = dirY * (0.3 + pulseCycle * 0.8) + floatY;
           posArr[idx + 2] = dirZ * (0.3 + pulseCycle * 0.8);
 
-          // Brighten color as expansion grows
           colArr[idx] = colorViolet.r + pulseCycle * 0.3;
           colArr[idx + 1] = colorViolet.g + pulseCycle * 0.2;
           colArr[idx + 2] = colorFuchsia.b;
@@ -309,15 +301,15 @@ export default function ShowcaseCodeAnimation({ toolId = 'image', isActive = tru
       }
 
       posAttr.needsUpdate = true;
-      particlesSystem.rotation.y = elapsedTime * 0.05;
-      particlesSystem.rotation.x = Math.sin(elapsedTime * 0.03) * 0.05;
+      particlesSystem.rotation.y = elapsedTime * 0.025;
+      particlesSystem.rotation.x = Math.sin(elapsedTime * 0.02) * 0.03;
 
       renderer.render(scene, camera);
     };
 
     animate();
 
-    // 4. Handle Window Resize
+    // 4. Resize Handler
     const handleResize = () => {
       if (!containerRef.current) return;
       const w = containerRef.current.clientWidth || window.innerWidth;
@@ -328,7 +320,6 @@ export default function ShowcaseCodeAnimation({ toolId = 'image', isActive = tru
     };
     window.addEventListener('resize', handleResize);
 
-    // Cleanup on unmount or inactive
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', handleResize);
