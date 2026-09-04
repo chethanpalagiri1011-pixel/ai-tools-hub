@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from app.database import get_db
 from app.schemas.product import ProductCreate, ProductUpdate, ProductResponse
 from app.services.product_service import ProductService
@@ -16,12 +16,31 @@ async def list_products(
     tag: Optional[str] = Query(None, description="Filter by tag (sale, new, popular, trending)"),
     sort: Optional[str] = Query(None, description="Sort order: price-low, price-high, rating, name"),
     skip: int = Query(0, ge=0),
-    limit: int = Query(50, ge=1, le=100),
+    limit: int = Query(100, ge=1, le=500),
     db: AsyncSession = Depends(get_db)
 ):
     """Public API: Fetch list of products with search, category/tag filtering, sorting, and pagination."""
     return await ProductService.list_products(
         db, search=search, category=category, tag=tag, sort=sort, skip=skip, limit=limit
+    )
+
+@router.get("/search")
+async def search_products(
+    q: Optional[str] = Query(None, description="Search term across name, description, badge, tag"),
+    category: Optional[str] = Query(None, description="Category filter"),
+    brand: Optional[str] = Query(None, description="Brand name filter"),
+    min_price: Optional[float] = Query(None, description="Minimum price filter"),
+    max_price: Optional[float] = Query(None, description="Maximum price filter"),
+    in_stock: Optional[bool] = Query(None, description="In stock only filter"),
+    sort: Optional[str] = Query(None, description="Sort order: price-low, price-high, rating, name"),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
+    db: AsyncSession = Depends(get_db)
+):
+    """Public Dedicated Search Endpoint: Query products with full multi-field database filters."""
+    return await ProductService.search_products(
+        db, q=q, category=category, brand=brand, min_price=min_price, max_price=max_price,
+        in_stock=in_stock, sort=sort, skip=skip, limit=limit
     )
 
 @router.get("/{product_id}", response_model=ProductResponse)

@@ -1,13 +1,12 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import or_, desc, asc
+from sqlalchemy import or_, and_, desc, asc, func
 from fastapi import HTTPException, status
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from app.models.product import Product
 from app.models.category import Category
 from app.models.user import User
 from app.schemas.product import ProductCreate, ProductUpdate, ProductResponse
-
 from sqlalchemy.orm import selectinload
 
 class ProductService:
@@ -19,14 +18,13 @@ class ProductService:
         tag: Optional[str] = None,
         sort: Optional[str] = None,
         skip: int = 0,
-        limit: int = 50
+        limit: int = 200
     ) -> List[ProductResponse]:
         query = select(Product).options(selectinload(Product.category)).filter(Product.is_active == True)
 
         if category and category.lower() != "all":
-            # Search by category name or slug
             query = query.join(Product.category).filter(
-                or_(Category.name.iloclike(f"%{category}%"), Category.slug.iloclike(f"%{category}%"))
+                or_(Category.name.ilike(f"%{category}%"), Category.slug.ilike(f"%{category}%"))
             )
 
         if tag and tag.lower() != "all":
@@ -35,9 +33,9 @@ class ProductService:
         if search:
             query = query.filter(
                 or_(
-                    Product.name.iloclike(f"%{search}%"),
-                    Product.description.iloclike(f"%{search}%"),
-                    Product.badge.iloclike(f"%{search}%")
+                    Product.name.ilike(f"%{search}%"),
+                    Product.description.ilike(f"%{search}%"),
+                    Product.badge.ilike(f"%{search}%")
                 )
             )
 
@@ -63,6 +61,88 @@ class ProductService:
                 resp.category_name = p.category.name
             responses.append(resp)
         return responses
+
+    @staticmethod
+    async def search_products(
+        db: AsyncSession,
+        q: Optional[str] = None,
+        category: Optional[str] = None,
+        brand: Optional[str] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        in_stock: Optional[bool] = None,
+        sort: Optional[str] = None,
+        skip: int = 0,
+        limit: int = 100
+    ) -> Dict[str, Any]:
+        query = select(Product).options(selectinload(Product.category)).filter(Product.is_active == True)
+
+        if category and category.lower() != "all":
+            query = query.join(Product.category).filter(
+                or_(Category.name.ilike(f"%{category}%"), Category.slug.ilike(f"%{category}%"))
+            )
+
+        if q:
+            term = f"%{q.strip()}%"
+            query = query.filter(
+                or_(
+                    Product.name.ilike(term),
+                    Product.description.ilike(term),
+                    Product.badge.ilike(term),
+                    Product.tag.ilike(term)
+                )
+            )
+
+        if brand:
+            query = query.filter(
+                or_(
+                    Product.name.ilike(f"%{brand}%"),
+                    Product.description.ilike(f"%{brand}%")
+                )
+            )
+
+        if min_price is not None:
+            query = query.filter(Product.price >= min_price)
+
+        if max_price is not None:
+            query = query.filter(Product.price <= max_price)
+
+        if in_stock:
+            query = query.filter(Product.stock > 0)
+
+        # Count total matching items
+        count_query = select(func.count()).select_from(query.subquery())
+        count_res = await db.execute(count_query)
+        total = count_res.scalar_one()
+
+        if sort == "price-low":
+            query = query.order_by(asc(Product.price))
+        elif sort == "price-high":
+            query = query.order_by(desc(Product.price))
+        elif sort == "rating":
+            query = query.order_by(desc(Product.rating))
+        elif sort == "name":
+            query = query.order_by(asc(Product.name))
+        else:
+            query = query.order_by(desc(Product.id))
+
+        query = query.offset(skip).limit(limit)
+        result = await db.execute(query)
+        products = result.scalars().all()
+
+        items = []
+        for p in products:
+            resp = ProductResponse.model_validate(p)
+            if p.category:
+                resp.category_name = p.category.name
+            items.append(resp)
+
+        return {
+            "total": total,
+            "skip": skip,
+            "limit": limit,
+            "items": items
+        }
 
     @staticmethod
     async def get_product_by_id(db: AsyncSession, product_id: int) -> ProductResponse:
@@ -105,7 +185,6 @@ class ProductService:
         if not product:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
-        # RBAC: Only admin or the seller who owns the product can update it
         if user.role != "admin" and product.seller_id != user.id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to edit this product")
 
@@ -126,7 +205,6 @@ class ProductService:
         if user.role != "admin" and product.seller_id != user.id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete this product")
 
-        # Soft delete / deactivate
         product.is_active = False
         await db.commit()
         return {"message": "Product deactivated successfully"}

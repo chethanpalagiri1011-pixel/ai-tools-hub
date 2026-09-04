@@ -11,12 +11,19 @@ router = APIRouter()
 
 class ChatRequest(BaseModel):
     message: str
+    context: Optional[Dict[str, Any]] = None
 
 @router.post("")
+@router.post("/message")
 async def chatbot_reply(
     chat_in: ChatRequest,
     current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ) -> Dict[str, Any]:
     """AI Customer Support Chatbot endpoint for FAQs, product search assistance, and order status lookups."""
-    return await ChatbotService.process_chat_message(db, chat_in.message, user=current_user)
+    return await ChatbotService.process_chat_message(
+        db, 
+        message=chat_in.message, 
+        user=current_user,
+        context=chat_in.context
+    )

@@ -5,8 +5,11 @@ from app.database import Base
 
 class OrderStatus(str, enum.Enum):
     PENDING = "pending"
-    PAID = "paid"
+    CONFIRMED = "confirmed"
+    PROCESSING = "processing"
+    PACKED = "packed"
     SHIPPED = "shipped"
+    OUT_FOR_DELIVERY = "out_for_delivery"
     DELIVERED = "delivered"
     CANCELLED = "cancelled"
 

@@ -29,6 +29,12 @@ class UserService:
             user.email = update_data.email
         if update_data.password:
             user.hashed_password = get_password_hash(update_data.password)
+        if update_data.dob is not None:
+            user.dob = update_data.dob
+        if update_data.gender is not None:
+            user.gender = update_data.gender
+        if update_data.avatar_url is not None:
+            user.avatar_url = update_data.avatar_url
 
         await db.commit()
         await db.refresh(user)
@@ -57,6 +63,12 @@ class UserService:
             user.role = update_data.role
         if update_data.is_active is not None:
             user.is_active = update_data.is_active
+        if update_data.dob is not None:
+            user.dob = update_data.dob
+        if update_data.gender is not None:
+            user.gender = update_data.gender
+        if update_data.avatar_url is not None:
+            user.avatar_url = update_data.avatar_url
 
         await db.commit()
         await db.refresh(user)

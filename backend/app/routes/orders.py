@@ -35,6 +35,15 @@ async def get_order_details(
     """Customer/Admin: View detailed status & item breakdown for a specific order."""
     return await OrderService.get_order(db, id_or_tracking, current_user)
 
+@router.post("/{order_id}/cancel", response_model=OrderResponse)
+async def cancel_order(
+    order_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Customer/Admin: Cancel order and return product quantities back to stock."""
+    return await OrderService.cancel_order(db, order_id, current_user)
+
 @router.put("/{order_id}/status", response_model=OrderResponse)
 async def update_order_status(
     order_id: int,

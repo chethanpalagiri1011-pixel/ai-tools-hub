@@ -27,6 +27,6 @@ async def test_order_checkout_flow():
 
         assert checkout_res.status_code == 201
         order = checkout_res.json()
-        assert order["status"] == "paid"
+        assert order["status"] in ["confirmed", "paid"]
         assert len(order["items"]) == 1
         assert order["discount"] > 0

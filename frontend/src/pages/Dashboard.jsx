@@ -7,6 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { useState } from 'react';
 import CinematicIntro from '../components/CinematicIntro';
+import Tilt3DCard from '../components/Tilt3DCard';
+import ToolCardVideo from '../components/ToolCardVideo';
 
 const TOOLS = [
   { id: 'image',   icon: ImageIcon,     label: 'Image Generator', desc: 'Text to image',       color: 'from-purple-500 to-pink-500',   count: '1.2M' },
@@ -113,19 +115,25 @@ export default function Dashboard() {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {TOOLS.map(tool => (
-            <button key={tool.id}
+            <Tilt3DCard key={tool.id}
               onClick={() => handleToolClick(tool.id)}
-              className="p-5 rounded-2xl border border-white/8 text-left group hover:border-purple-500/40 transition-all duration-300 hover:-translate-y-1"
+              className="p-5 rounded-2xl border border-white/8 text-left group hover:border-purple-500/40 transition-all duration-300 relative overflow-hidden"
               style={{ background: 'rgba(255,255,255,0.02)' }}>
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                <tool.icon size={18} className="text-white" />
+              
+              {/* Unique Looping 3D Animated Video per Tool Theme */}
+              <ToolCardVideo toolId={tool.id} />
+
+              <div className="relative z-10">
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                  <tool.icon size={18} className="text-white" />
+                </div>
+                <p className="text-white font-semibold text-sm mb-1">{tool.label}</p>
+                <p className="text-gray-400 text-xs">{tool.desc}</p>
+                <p className="text-gray-500 text-xs mt-3 flex items-center gap-1">
+                  <Clock size={10} /> {tool.count} uses
+                </p>
               </div>
-              <p className="text-white font-semibold text-sm mb-1">{tool.label}</p>
-              <p className="text-gray-500 text-xs">{tool.desc}</p>
-              <p className="text-gray-600 text-xs mt-3 flex items-center gap-1">
-                <Clock size={10} /> {tool.count} uses
-              </p>
-            </button>
+            </Tilt3DCard>
           ))}
         </div>
       </div>

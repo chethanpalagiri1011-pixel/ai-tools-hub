@@ -4,6 +4,8 @@ import ImageGenerator  from '../components/tools/ImageGenerator';
 import TextSummarizer  from '../components/tools/TextSummarizer';
 import CaptionGenerator from '../components/tools/CaptionGenerator';
 import PromptEnhancer  from '../components/tools/PromptEnhancer';
+import Tilt3DCard from '../components/Tilt3DCard';
+import ToolCardVideo from '../components/ToolCardVideo';
 
 const TABS = [
   { id: 'image',   label: 'Image Gen',  icon: ImageIcon,     color: 'from-purple-500 to-pink-500',   activeColor: 'text-purple-300',  borderColor: 'border-purple-500' },
@@ -35,9 +37,9 @@ export default function AIToolsPage() {
       {/* Tab Selector */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {TABS.map(tab => (
-          <button key={tab.id}
+          <Tilt3DCard key={tab.id}
             onClick={() => setActiveTool(tab.id)}
-            className={`p-4 rounded-xl border text-left transition-all duration-200 ${
+            className={`p-4 rounded-xl border text-left transition-all duration-200 relative overflow-hidden ${
               activeTool === tab.id
                 ? `border-white/20 ${tab.activeColor}`
                 : 'border-white/8 text-gray-500 hover:text-gray-300 hover:border-white/15'
@@ -47,14 +49,18 @@ export default function AIToolsPage() {
                 ? 'rgba(255,255,255,0.06)'
                 : 'rgba(255,255,255,0.02)',
             }}>
-            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${tab.color} flex items-center justify-center mb-3`}>
-              <tab.icon size={16} className="text-white" />
+            <ToolCardVideo toolId={tab.id} />
+            
+            <div className="relative z-10">
+              <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${tab.color} flex items-center justify-center mb-3 shadow-md`}>
+                <tab.icon size={16} className="text-white" />
+              </div>
+              <p className={`text-sm font-semibold ${activeTool === tab.id ? '' : 'text-gray-400'}`}>{tab.label}</p>
+              {activeTool === tab.id && (
+                <div className={`mt-2 h-0.5 w-8 rounded-full bg-gradient-to-r ${tab.color}`} />
+              )}
             </div>
-            <p className={`text-sm font-semibold ${activeTool === tab.id ? '' : 'text-gray-400'}`}>{tab.label}</p>
-            {activeTool === tab.id && (
-              <div className={`mt-2 h-0.5 w-8 rounded-full bg-gradient-to-r ${tab.color}`} />
-            )}
-          </button>
+          </Tilt3DCard>
         ))}
       </div>
 

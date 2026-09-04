@@ -34,12 +34,12 @@ class OrderService:
             if not item.product or not item.product.is_active:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Product with ID {item.product_id} is no longer available"
+                    detail=f"Product '{item.product_name or item.product_id}' is no longer available"
                 )
             if item.product.stock < item.quantity:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Insufficient stock for '{item.product.name}'. Available: {item.product.stock}"
+                    detail=f"Sorry, '{item.product.name}' is no longer available in the requested quantity (Available: {item.product.stock})."
                 )
             
             item_subtotal = item.product.price * item.quantity
@@ -52,7 +52,7 @@ class OrderService:
                 "quantity": item.quantity
             })
 
-        # Calculate discount
+        # Calculate discount & shipping fee in INR
         discount_pct = 0.0
         if checkout_in.coupon_code:
             code = checkout_in.coupon_code.strip().upper()
@@ -62,12 +62,13 @@ class OrderService:
                 discount_pct = 10.0
 
         discount = (subtotal * discount_pct) / 100.0
-        shipping_fee = 0.0 if subtotal >= 50.0 else 5.99
-        total = round(max(0.0, subtotal - discount + shipping_fee), 2)
+        shipping_fee = 0.0 if subtotal >= 500.0 else 49.0
+        tax = round((subtotal - discount) * 0.18, 2)  # 18% GST Tax
+        total = round(max(0.0, subtotal - discount + shipping_fee + tax), 2)
 
         tracking_num = generate_tracking_number()
 
-        # Begin atomic order creation
+        # Atomic order creation
         new_order = Order(
             tracking_number=tracking_num,
             user_id=user.id,
@@ -75,16 +76,15 @@ class OrderService:
             discount=round(discount, 2),
             shipping_fee=round(shipping_fee, 2),
             total=total,
-            status=OrderStatus.PAID,  # Mock payment immediately marks order as PAID
-            shipping_address=checkout_in.shipping_address or "Standard Shipping Address",
+            status=OrderStatus.CONFIRMED,
+            shipping_address=checkout_in.shipping_address or "Standard Delivery Address",
             coupon_code=checkout_in.coupon_code
         )
         db.add(new_order)
-        await db.flush()  # to get new_order.id
+        await db.flush()
 
         # Deduct stock & create order items
         for oi in order_items_to_create:
-            # Deduct stock
             p_res = await db.execute(select(Product).filter(Product.id == oi["product_id"]))
             p = p_res.scalars().first()
             if p:
@@ -99,24 +99,24 @@ class OrderService:
             )
             db.add(order_item)
 
-        # Create Mock Payment record
+        # Create Payment record
         payment = Payment(
             transaction_id=generate_transaction_id(),
             order_id=new_order.id,
             amount=total,
-            payment_method=checkout_in.payment_method or "mock_card",
+            payment_method=checkout_in.payment_method or "mock_upi",
             status=PaymentStatus.SUCCESS,
-            gateway_response="Mock payment approved successfully"
+            gateway_response="Payment approved successfully"
         )
         db.add(payment)
 
-        # Delete user's cart items
+        # Clear user cart
         for item in cart_items:
             await db.delete(item)
 
         await db.commit()
 
-        # Reload complete order with items
+        # Reload complete order
         order_res = await db.execute(
             select(Order)
             .options(selectinload(Order.items))
@@ -150,7 +150,6 @@ class OrderService:
         if not order:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
 
-        # Customer can only view own order unless admin
         if user.role != "admin" and order.user_id != user.id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
 
@@ -166,6 +165,40 @@ class OrderService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
 
         order.status = status_in.status
+        await db.commit()
+        await db.refresh(order)
+        return OrderResponse.model_validate(order)
+
+    @staticmethod
+    async def cancel_order(db: AsyncSession, order_id: int, user: User) -> OrderResponse:
+        res = await db.execute(
+            select(Order).options(selectinload(Order.items)).filter(Order.id == order_id)
+        )
+        order = res.scalars().first()
+        if not order:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+
+        if user.role != "admin" and order.user_id != user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+
+        # Can only cancel if status is PENDING, CONFIRMED, or PROCESSING
+        cancellable = [OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.PROCESSING]
+        if order.status not in cancellable:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Order cannot be cancelled because it is already in '{order.status.value}' state."
+            )
+
+        order.status = OrderStatus.CANCELLED
+
+        # Restore product stock
+        for item in order.items:
+            if item.product_id:
+                p_res = await db.execute(select(Product).filter(Product.id == item.product_id))
+                p = p_res.scalars().first()
+                if p:
+                    p.stock += item.quantity
+
         await db.commit()
         await db.refresh(order)
         return OrderResponse.model_validate(order)

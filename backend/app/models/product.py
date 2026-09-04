@@ -11,6 +11,7 @@ class Product(Base):
     price = Column(Float, nullable=False)
     old_price = Column(Float, nullable=True)
     emoji = Column(String(10), default="📦", nullable=False)
+    image_url = Column(String(500), nullable=True)
     badge = Column(String(50), nullable=True)  # e.g., 'Sale', 'New', 'Popular'
     tag = Column(String(50), index=True, nullable=True)    # e.g., 'sale', 'new', 'popular', 'trending'
     rating = Column(Float, default=5.0, nullable=False)

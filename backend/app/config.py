@@ -21,6 +21,15 @@ class Settings(BaseSettings):
     MOCK_PAYMENT_ENABLED: bool = True
     LLM_API_KEY: str = ""
 
+    # Real SMS OTP Settings
+    OTP_DEVELOPMENT_MODE: bool = False
+    SMS_PROVIDER: str = "TWILIO"
+    TWILIO_ACCOUNT_SID: str = ""
+    TWILIO_AUTH_TOKEN: str = ""
+    TWILIO_PHONE_NUMBER: str = ""
+    MSG91_AUTH_KEY: str = ""
+    FAST2SMS_API_KEY: str = ""
+
     class Config:
         env_file = ".env"
         extra = "ignore"
