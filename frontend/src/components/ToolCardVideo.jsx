@@ -4,6 +4,14 @@ import { useState, useEffect, useRef } from 'react';
  * High-Fidelity 3D Looping Animation Component for AI Tool Cards
  * Renders crisp, glowing, theme-matched 3D visual loops (60fps)
  */
+const drawRoundRect = (ctx, x, y, w, h, r = 4) => {
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(x, y, w, h, r);
+  } else {
+    ctx.rect(x, y, w, h);
+  }
+};
+
 export default function ToolCardVideo({ toolId, fallbackGradient }) {
   const canvasRef = useRef(null);
 
@@ -59,7 +67,7 @@ export default function ToolCardVideo({ toolId, fallbackGradient }) {
             ctx.shadowColor = '#ec4899';
             ctx.shadowBlur = 12 * progress;
             ctx.beginPath();
-            ctx.roundRect(x, y, sz, sz, 4);
+            drawRoundRect(ctx, x, y, sz, sz, 4);
             ctx.fill();
             ctx.shadowBlur = 0;
           }
@@ -78,7 +86,7 @@ export default function ToolCardVideo({ toolId, fallbackGradient }) {
           ctx.shadowColor = '#06b6d4';
           ctx.shadowBlur = 10;
           ctx.beginPath();
-          ctx.roundRect(startX + (i * 10 * collapse), y, lineWidth, 8, 4);
+          drawRoundRect(ctx, startX + (i * 10 * collapse), y, lineWidth, 8, 4);
           ctx.fill();
           ctx.shadowBlur = 0;
 
@@ -100,7 +108,7 @@ export default function ToolCardVideo({ toolId, fallbackGradient }) {
         ctx.shadowColor = '#10b981';
         ctx.shadowBlur = 15;
         ctx.beginPath();
-        ctx.roundRect(w * 0.15, h * 0.2 + floatY, w * 0.7 * popScale, h * 0.5 * popScale, 16);
+        drawRoundRect(ctx, w * 0.15, h * 0.2 + floatY, w * 0.7 * popScale, h * 0.5 * popScale, 16);
         ctx.fill();
         ctx.stroke();
         ctx.shadowBlur = 0;
