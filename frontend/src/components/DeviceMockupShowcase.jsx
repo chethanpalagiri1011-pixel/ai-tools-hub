@@ -1,215 +1,237 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, CheckCircle2, Heart, Share2, MessageCircle, Flame } from 'lucide-react';
+import { Sparkles, CheckCircle2, Flame, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 /**
- * 100% Code-Based Device Mockup & Animated Text Reveal Component
- * - Styled Browser/Phone Frame with interactive tool preview animations
- * - Animated headline text reveal with staggered slide-in
- * - Floating blurred glowing accent orb for depth
- * - Zero external media files, lightweight 60fps CSS animations
+ * Luxury 3D Product Showcase Component (Matched to User's Reference Layout)
+ * - 2-Column Split: Bold Luxury Typography (Left) + Floating 3D Hero Object (Right)
+ * - Floating 3D Levitation Motion (`animate-float`)
+ * - High-contrast glassmorphism card with dynamic tool output preview
  */
 
-const SECTION_CONFIG = {
+const SECTION_DATA = {
   image: {
-    headline: 'Generate Anything, Instantly',
-    badge: '4K AI Vision Engine',
-    accentBlob: 'from-purple-600/30 via-pink-600/20 to-transparent',
+    badge: '4K AI VISION ENGINE',
+    headline: 'Elevate Your Visuals.',
+    sub: 'Turn your imagination into stunning 4K photorealistic artwork, digital paintings, and sketches in seconds.',
+    slug: 'image-gen',
+    title: 'AI Image Generator',
+    btnColor: 'bg-purple-600 hover:bg-purple-500 shadow-purple-500/30',
+    accentOrb: 'from-purple-500/40 via-pink-500/20 to-transparent',
     borderColor: 'border-purple-500/30',
-    headerColor: 'bg-purple-950/40',
-    titleColor: 'text-purple-300',
+    textColor: 'text-purple-300',
   },
   summary: {
-    headline: 'Condense Reading in Seconds',
-    badge: 'Smart Summary Engine',
-    accentBlob: 'from-blue-600/30 via-cyan-600/20 to-transparent',
+    badge: 'DOCUMENT INTELLIGENCE',
+    headline: 'Master Information Fast.',
+    sub: 'Instantly condense long articles, financial reports, and complex documents into key bullet-point takeaways.',
+    slug: 'summarizer',
+    title: 'Document Summarizer',
+    btnColor: 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/30',
+    accentOrb: 'from-blue-500/40 via-cyan-500/20 to-transparent',
     borderColor: 'border-blue-500/30',
-    headerColor: 'bg-blue-950/40',
-    titleColor: 'text-blue-300',
+    textColor: 'text-blue-300',
   },
   caption: {
-    headline: 'Viral Social Copy in 1 Click',
-    badge: 'Multi-Tone Copy Engine',
-    accentBlob: 'from-teal-600/30 via-emerald-600/20 to-transparent',
+    badge: 'VIRAL COPY ENGINE',
+    headline: 'Craft Viral Social Copy.',
+    sub: 'Generate engaging social media copy and curated hashtag packages for Instagram, X, TikTok, and LinkedIn.',
+    slug: 'captions',
+    title: 'Social Caption Generator',
+    btnColor: 'bg-teal-600 hover:bg-teal-500 shadow-teal-500/30',
+    accentOrb: 'from-teal-500/40 via-emerald-500/20 to-transparent',
     borderColor: 'border-teal-500/30',
-    headerColor: 'bg-teal-950/40',
-    titleColor: 'text-teal-300',
+    textColor: 'text-teal-300',
   },
   prompt: {
-    headline: 'Transform Ideas into Masterpieces',
-    badge: 'Prompt Optimizer Engine',
-    accentBlob: 'from-amber-600/30 via-orange-600/20 to-transparent',
+    badge: 'PROMPT OPTIMIZER ENGINE',
+    headline: 'Supercharge Your Prompts.',
+    sub: 'Enrich simple text ideas with high-resolution lighting tags, camera settings, and negative prompts.',
+    slug: 'prompt-plus',
+    title: 'AI Prompt Enhancer',
+    btnColor: 'bg-amber-600 hover:bg-amber-500 shadow-amber-500/30',
+    accentOrb: 'from-amber-500/40 via-orange-500/20 to-transparent',
     borderColor: 'border-amber-500/30',
-    headerColor: 'bg-amber-950/40',
-    titleColor: 'text-amber-300',
+    textColor: 'text-amber-300',
   },
 };
 
-export default function DeviceMockupShowcase({ toolId, isActive }) {
+export default function DeviceMockupShowcase({ toolId = 'image', isActive = true }) {
   const [frameStep, setFrameStep] = useState(0);
-  const config = SECTION_CONFIG[toolId] || SECTION_CONFIG.image;
+  const navigate = useNavigate();
+  const data = SECTION_DATA[toolId] || SECTION_DATA.image;
 
-  // Animation step loop inside mockup frame
+  // Frame animation loop inside 3D hero object
   useEffect(() => {
     if (!isActive) return;
     const interval = setInterval(() => {
       setFrameStep((prev) => (prev + 1) % 4);
-    }, 2500);
+    }, 2400);
     return () => clearInterval(interval);
   }, [isActive]);
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto flex flex-col items-center justify-center space-y-6 pointer-events-none">
-      {/* 1. Floating Glowing Backdrop Blob */}
-      <div
-        className={`absolute -inset-10 rounded-full bg-gradient-to-r ${config.accentBlob} blur-3xl opacity-60 animate-pulse pointer-events-none transition-all duration-1000`}
-      />
-
-      {/* 2. Animated Headline Text Reveal */}
-      <div
-        className={`text-center space-y-2 transition-all duration-700 transform ${
-          isActive ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
-        }`}
-      >
-        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/5 border ${config.borderColor} ${config.titleColor} backdrop-blur-md`}>
-          <Sparkles size={12} /> {config.badge}
-        </span>
-        <h3 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight font-display drop-shadow-md">
-          {config.headline}
-        </h3>
-      </div>
-
-      {/* 3. Browser Device Mockup Frame */}
-      <div
-        className={`w-full max-w-xl rounded-2xl border ${config.borderColor} bg-black/60 backdrop-blur-xl shadow-2xl overflow-hidden transition-all duration-700 transform ${
-          isActive ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-8'
-        }`}
-      >
-        {/* Browser Top Navigation Bar */}
-        <div className={`flex items-center justify-between px-4 py-2.5 border-b border-white/10 ${config.headerColor}`}>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
-            <span className="w-3 h-3 rounded-full bg-yellow-500/80 inline-block" />
-            <span className="w-3 h-3 rounded-full bg-green-500/80 inline-block" />
-          </div>
-          <div className="px-3 py-0.5 rounded-md bg-white/5 text-[11px] font-mono text-gray-400 border border-white/5">
-            ai-tools.hub/{toolId}
-          </div>
-          <div className="w-12" />
+    <div className="w-full max-w-6xl mx-auto px-6 grid lg:grid-cols-12 gap-8 lg:gap-12 items-center min-h-[75vh]">
+      
+      {/* LEFT COLUMN: Bold Luxury Typography & CTA Button */}
+      <div className={`lg:col-span-6 space-y-6 text-left transition-all duration-700 transform ${
+        isActive ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+      }`}>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
+          <Sparkles size={14} className={data.textColor} />
+          <span className={`text-xs font-bold uppercase tracking-wider ${data.textColor}`}>
+            {data.badge}
+          </span>
         </div>
 
-        {/* Browser Body Animated Content Area */}
-        <div className="p-5 min-h-[220px] flex flex-col justify-center relative bg-gradient-to-b from-white/[0.02] to-transparent">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight font-display leading-[1.1]">
+          {data.headline}
+        </h1>
+
+        <p className="text-gray-300 text-base sm:text-lg max-w-lg leading-relaxed font-normal">
+          {data.sub}
+        </p>
+
+        <div className="pt-2 flex items-center gap-4 flex-wrap">
+          <button
+            onClick={() => navigate(`/dashboard/tools/${data.slug}`)}
+            className={`px-8 py-4 rounded-2xl text-white font-bold text-sm sm:text-base flex items-center gap-3 transition-all transform hover:scale-105 cursor-pointer shadow-2xl ${data.btnColor}`}
+          >
+            <span>Try {data.title}</span>
+            <ArrowRight size={18} />
+          </button>
+        </div>
+      </div>
+
+      {/* RIGHT COLUMN: 3D Floating Hero Showcase Object (Like Water Bottle in Reference) */}
+      <div className={`lg:col-span-6 flex justify-center relative transition-all duration-1000 transform ${
+        isActive ? 'scale-100 opacity-100 translate-x-0' : 'scale-90 opacity-0 translate-x-8'
+      }`}>
+        {/* Floating Accent Radial Aura Orb behind object */}
+        <div className={`absolute -inset-12 rounded-full bg-gradient-to-tr ${data.accentOrb} blur-3xl opacity-70 animate-pulse pointer-events-none`} />
+
+        {/* 3D Floating Glassmorphism Hero Object Container */}
+        <div className="relative w-full max-w-md rounded-3xl border border-white/15 bg-black/50 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden transition-transform duration-500 hover:rotate-1 animate-float">
           
-          {/* Mockup Content 1: AI Image Generator */}
-          {toolId === 'image' && (
-            <div className="space-y-3">
-              <div className="relative h-36 rounded-xl overflow-hidden border border-purple-500/20 bg-purple-950/20 flex items-center justify-center">
-                {/* Shimmer Scan Line */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/20 to-transparent animate-shimmer" />
-                
-                {/* Generated Artwork Preview Animation */}
-                <div className={`transition-all duration-1000 ${frameStep > 0 ? 'scale-100 opacity-100 blur-0' : 'scale-90 opacity-20 blur-md'}`}>
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-400 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                    <Sparkles size={36} className="text-white animate-spin-slow" />
+          {/* Top Window Bar */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-white/5">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block shadow" />
+              <span className="w-3 h-3 rounded-full bg-yellow-500/80 inline-block shadow" />
+              <span className="w-3 h-3 rounded-full bg-green-500/80 inline-block shadow" />
+            </div>
+            <span className="text-[11px] font-mono text-gray-400 bg-black/40 px-3 py-0.5 rounded-full border border-white/5">
+              ai-tools.hub/{data.slug}
+            </span>
+          </div>
+
+          {/* Interactive Tool Preview Content */}
+          <div className="p-6 min-h-[260px] flex flex-col justify-center relative">
+            
+            {/* Tool 1 Preview: AI Image Generator */}
+            {toolId === 'image' && (
+              <div className="space-y-4">
+                <div className="relative h-44 rounded-2xl overflow-hidden border border-purple-500/30 bg-purple-950/30 flex items-center justify-center shadow-inner">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/20 to-transparent animate-shimmer" />
+                  
+                  <div className={`transition-all duration-1000 ${frameStep > 0 ? 'scale-100 opacity-100 blur-0' : 'scale-90 opacity-20 blur-md'}`}>
+                    <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-400 flex items-center justify-center shadow-2xl shadow-purple-500/40">
+                      <Sparkles size={44} className="text-white animate-spin-slow" />
+                    </div>
+                  </div>
+
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-purple-200 bg-black/70 px-3.5 py-1.5 rounded-xl backdrop-blur-md border border-white/10">
+                    <span>Prompt: Lord Ganesha 8K</span>
+                    <span className="text-green-400 font-bold">100% Generated ✨</span>
                   </div>
                 </div>
-
-                <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between text-[11px] text-purple-200 bg-black/60 px-3 py-1 rounded-lg backdrop-blur-md">
-                  <span>Prompt: Lord Ganesha 8K</span>
-                  <span className="text-green-400 font-bold">100% Generated ✨</span>
-                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Mockup Content 2: Document Summarizer */}
-          {toolId === 'summary' && (
-            <div className="space-y-3">
-              <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-950/20 space-y-2.5">
-                <div className="flex items-center justify-between text-xs text-blue-300 font-semibold border-b border-blue-500/20 pb-2">
-                  <span>Summary Report</span>
-                  <span className="text-blue-400 font-mono">0.4s Fast</span>
+            {/* Tool 2 Preview: Document Summarizer */}
+            {toolId === 'summary' && (
+              <div className="p-5 rounded-2xl border border-blue-500/30 bg-blue-950/30 space-y-3 shadow-inner">
+                <div className="flex items-center justify-between text-xs text-blue-300 font-bold border-b border-blue-500/20 pb-2">
+                  <span>Executive Summary</span>
+                  <span className="text-cyan-400 font-mono">0.4s AI Fast</span>
                 </div>
                 
-                {/* Collapsing Paragraph into 3 Bullet Points */}
-                <div className="space-y-2">
+                <div className="space-y-2.5 pt-1">
                   {[
                     'Executive summary generated in 0.4 seconds',
-                    'Key takeaways & actionable points extracted cleanly',
-                    '85% document size reduction with 100% accuracy',
+                    'Key takeaways & actionable insights extracted',
+                    '85% text size reduction with 100% accuracy',
                   ].map((bullet, idx) => (
                     <div
                       key={idx}
-                      className={`flex items-start gap-2 text-xs transition-all duration-500 ${
+                      className={`flex items-start gap-2.5 text-xs transition-all duration-500 ${
                         frameStep >= idx ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'
                       }`}
                     >
-                      <CheckCircle2 size={14} className="text-cyan-400 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-200">{bullet}</span>
+                      <CheckCircle2 size={16} className="text-cyan-400 flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-200 font-medium">{bullet}</span>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Mockup Content 3: Social Caption Generator */}
-          {toolId === 'caption' && (
-            <div className="p-4 rounded-xl border border-teal-500/20 bg-teal-950/20 space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-teal-500/30 flex items-center justify-center text-teal-300 font-bold text-xs">
-                  AI
+            {/* Tool 3 Preview: Social Caption Generator */}
+            {toolId === 'caption' && (
+              <div className="p-5 rounded-2xl border border-teal-500/30 bg-teal-950/30 space-y-3.5 shadow-inner">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-teal-500/30 flex items-center justify-center text-teal-300 font-bold text-xs shadow">
+                    AI
+                  </div>
+                  <span className="text-xs font-bold text-white">@aitoolshub</span>
                 </div>
-                <span className="text-xs font-bold text-white">@aitoolshub</span>
-              </div>
 
-              {/* Typing Caption Effect */}
-              <p className="text-xs text-gray-200 leading-relaxed font-mono">
-                "Creating magic with AI Tools Hub! ✨ Multi-tone captions & viral hashtags generated in seconds."
-              </p>
-
-              {/* Popping Hashtag Chips */}
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {['#viral', '#trending', '#aitools', '#creative'].map((tag, idx) => (
-                  <span
-                    key={tag}
-                    className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-teal-500/20 border border-teal-500/40 text-teal-300 transition-all duration-300 ${
-                      frameStep >= idx ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
-                    }`}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Mockup Content 4: AI Prompt Enhancer */}
-          {toolId === 'prompt' && (
-            <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-950/20 space-y-3">
-              <div className="text-[11px] text-amber-400/80 font-mono">Original: "A cat in a chair"</div>
-              
-              {/* Expanding Enhanced Prompt Sweep Effect */}
-              <div className="p-3 rounded-lg bg-black/40 border border-amber-500/30 space-y-1 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/10 to-transparent animate-shimmer" />
-                <div className="text-xs text-amber-200 font-semibold flex items-center gap-1.5">
-                  <Flame size={14} className="text-amber-400" />
-                  <span>Enhanced Masterpiece Prompt:</span>
-                </div>
-                <p className="text-xs text-gray-300 font-mono leading-relaxed">
-                  "Photorealistic cinematic portrait of a majestic cat sitting on an ornate chair, 8k resolution, volumetric studio lighting, masterpiece"
+                <p className="text-xs text-gray-200 leading-relaxed font-mono bg-black/30 p-3 rounded-xl border border-white/5">
+                  "Creating magic with AI Tools Hub! ✨ Multi-tone captions & viral hashtags generated in seconds."
                 </p>
-              </div>
 
-              <div className="flex items-center justify-between text-[11px] text-amber-300">
-                <span>Prompt Quality Score:</span>
-                <span className="font-bold text-amber-400">99 / 100 🔥</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {['#viral', '#trending', '#aitools', '#creative'].map((tag, idx) => (
+                    <span
+                      key={tag}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold bg-teal-500/20 border border-teal-500/40 text-teal-300 transition-all duration-300 ${
+                        frameStep >= idx ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
+                      }`}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
+            {/* Tool 4 Preview: AI Prompt Enhancer */}
+            {toolId === 'prompt' && (
+              <div className="p-5 rounded-2xl border border-amber-500/30 bg-amber-950/30 space-y-3 shadow-inner">
+                <div className="text-xs text-amber-400/80 font-mono">Input: "A cat in a chair"</div>
+                
+                <div className="p-3.5 rounded-xl bg-black/50 border border-amber-500/40 space-y-1.5 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent animate-shimmer" />
+                  <div className="text-xs text-amber-300 font-bold flex items-center gap-1.5">
+                    <Flame size={15} className="text-amber-400" />
+                    <span>Enhanced Masterpiece Prompt:</span>
+                  </div>
+                  <p className="text-xs text-gray-200 font-mono leading-relaxed">
+                    "Photorealistic cinematic portrait of a majestic cat sitting on an ornate chair, 8k resolution, volumetric studio lighting, masterpiece"
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-amber-300 font-medium">
+                  <span>Quality Score:</span>
+                  <span className="font-bold text-amber-400">99 / 100 🔥</span>
+                </div>
+              </div>
+            )}
+
+          </div>
         </div>
       </div>
+
     </div>
   );
 }

@@ -166,26 +166,9 @@ export default function ShowcasePage() {
               {/* Subtle Vignette Gradient for Depth */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#050510]/80 via-transparent to-[#050510]/60 z-1 pointer-events-none" />
 
-              {/* Section Content Overlay */}
-              <div className="relative z-20 text-center max-w-4xl px-6 space-y-6 animate-fade-in flex flex-col items-center">
-                {/* 100% Code-Based Device Mockup Frame & Animated Text Reveal */}
+              {/* Luxury Split 2-Column Showcase Overlay (Matched to Reference Layout) */}
+              <div className="relative z-20 w-full flex items-center justify-center">
                 <DeviceMockupShowcase toolId={sec.id} isActive={isCurrent} />
-
-                <div className="space-y-2 pt-2">
-                  <p className="text-gray-300 text-sm md:text-base max-w-xl mx-auto leading-relaxed">
-                    {sec.tagline}
-                  </p>
-                </div>
-
-                <div>
-                  <button
-                    onClick={() => navigate(`/dashboard/tools/${sec.slug}`)}
-                    className={`px-8 py-3.5 rounded-2xl text-white font-bold text-sm md:text-base flex items-center gap-3 mx-auto transition-all transform hover:scale-105 cursor-pointer shadow-2xl ${sec.btnBg}`}
-                  >
-                    <span>Try {sec.title}</span>
-                    <ArrowRight size={18} />
-                  </button>
-                </div>
               </div>
 
               {/* First Section Scroll Down Hint */}
