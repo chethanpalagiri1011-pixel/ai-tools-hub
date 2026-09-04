@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronDown, ImageIcon, FileText, MessageSquare, Sparkles, LayoutGrid, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import ShowcaseCodeAnimation from '../components/ShowcaseCodeAnimation';
 
 /**
  * Snap-Scrolling Showcase Page (Post-Login Hero Showcase)
@@ -162,20 +163,8 @@ export default function ShowcasePage() {
               <div className="absolute inset-0 bg-[#050510]/60 z-10" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#050510] via-black/40 to-black/60 z-10 backdrop-blur-[1px]" />
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-[#050510]/40 to-[#050510] z-10" />
-
-              {/* Lazy-Loaded Full-Frame Background Video */}
-              {shouldLoad && (
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="absolute inset-0 w-full h-full object-cover opacity-45 mix-blend-screen scale-105"
-                >
-                  <source src={sec.videoSources[0]} type="video/mp4" />
-                  <source src={sec.videoSources[1]} type="video/mp4" />
-                </video>
-              )}
+              {/* 100% Code-Based Procedural Animated Background */}
+              <ShowcaseCodeAnimation toolId={sec.id} isActive={isCurrent} />
 
               {/* Section Content Overlay */}
               <div className="relative z-20 text-center max-w-2xl px-6 space-y-6 animate-fade-in">
