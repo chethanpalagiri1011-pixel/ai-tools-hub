@@ -30,7 +30,8 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [showIntro, setShowIntro] = useState(false);
 
-  const recentHistory = history.slice(0, 4);
+  const safeHistory = Array.isArray(history) ? history : [];
+  const recentHistory = safeHistory.slice(0, 4);
 
   const handleToolClick = (tool) => {
     setActiveTool(tool.id);
@@ -56,10 +57,10 @@ export default function Dashboard() {
           <div>
             <p className="text-purple-300 text-sm mb-1">{greeting} 👋</p>
             <h1 className="font-display text-2xl md:text-3xl font-bold text-white">
-              Welcome back, {user?.name?.split(' ')[0]}!
+              Welcome back, {user?.name ? user.name.split(' ')[0] : 'Creator'}!
             </h1>
             <p className="text-gray-400 text-sm mt-1">
-              You have <span className="text-purple-300 font-semibold">{user?.credits} credits</span> remaining
+              You have <span className="text-purple-300 font-semibold">{user?.credits ?? 100} credits</span> remaining
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -80,10 +81,11 @@ export default function Dashboard() {
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Credits Left',  value: user?.credits,    icon: Zap,        color: 'text-yellow-400', bg: 'rgba(234,179,8,0.1)' },
-          { label: 'Generations',   value: history.length,   icon: Activity,   color: 'text-purple-400', bg: 'rgba(139,92,246,0.1)' },
-          { label: 'Saved Items',   value: history.filter(h=>h.saved).length, icon: Star, color: 'text-blue-400', bg: 'rgba(59,130,246,0.1)' },
-          { label: 'This Week',     value: history.filter(h => {
+          { label: 'Credits Left',  value: user?.credits ?? 100, icon: Zap,        color: 'text-yellow-400', bg: 'rgba(234,179,8,0.1)' },
+          { label: 'Generations',   value: safeHistory.length,   icon: Activity,   color: 'text-purple-400', bg: 'rgba(139,92,246,0.1)' },
+          { label: 'Saved Items',   value: safeHistory.filter(h => h?.saved).length, icon: Star, color: 'text-blue-400', bg: 'rgba(59,130,246,0.1)' },
+          { label: 'This Week',     value: safeHistory.filter(h => {
+              if (!h?.createdAt) return false;
               const d = new Date(h.createdAt);
               const now = new Date();
               return (now - d) < 7 * 24 * 60 * 60 * 1000;

@@ -16,9 +16,14 @@ export function AppProvider({ children }) {
       if (user) {
         try {
           const res = await api.get('/api/history/');
-          setHistory(res.data);
+          if (Array.isArray(res.data)) {
+            setHistory(res.data);
+          } else {
+            setHistory([]);
+          }
         } catch (err) {
           console.error("Failed to fetch history", err);
+          setHistory([]);
         }
       } else {
         setHistory([]);
