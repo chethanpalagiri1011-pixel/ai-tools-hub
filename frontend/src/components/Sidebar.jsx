@@ -7,8 +7,9 @@ import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 
 const navItems = [
-  { to: '/dashboard',              icon: LayoutDashboard, label: 'Dashboard',    end: true },
-  { to: '/dashboard/tools',        icon: Wand2,            label: 'AI Tools' },
+  { to: '/dashboard',              icon: Sparkles,         label: 'Hero Showcase ✨', end: true },
+  { to: '/dashboard/grid',         icon: LayoutDashboard, label: 'Dashboard Grid',  end: true },
+  { to: '/dashboard/tools',        icon: Wand2,            label: 'AI Tools Suite' },
   { to: '/dashboard/my-images',    icon: Images,           label: 'My Images 🖼️' },
   { to: '/dashboard/arcade',       icon: Gamepad2,         label: '🎮 Earn Credits' },
   { to: '/dashboard/admin',        icon: ShieldCheck,      label: '👑 Owner Panel' },

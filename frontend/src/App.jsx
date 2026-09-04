@@ -16,6 +16,7 @@ import ArcadePage     from './pages/ArcadePage';
 import MyImagesPage   from './pages/MyImagesPage';
 import AdminDashboard from './pages/AdminDashboard';
 import ToolDedicatedPage from './pages/ToolDedicatedPage';
+import ShowcasePage from './pages/ShowcasePage';
 import DashboardLayout from './layouts/DashboardLayout';
 
 function ProtectedRoute({ children }) {
@@ -76,7 +77,8 @@ function App() {
 
             {/* Protected — wrapped in DashboardLayout */}
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-              <Route index            element={<Dashboard />} />
+              <Route index            element={<ShowcasePage />} />
+              <Route path="grid"          element={<Dashboard />} />
               <Route path="tools"         element={<AIToolsPage />} />
               <Route path="tools/:toolSlug" element={<ToolDedicatedPage />} />
               <Route path="my-images"     element={<MyImagesPage />} />
