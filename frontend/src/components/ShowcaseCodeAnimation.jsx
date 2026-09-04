@@ -133,44 +133,74 @@ export default function ShowcaseCodeAnimation({ toolId = 'image', isActive = tru
         ctx.fill();
       });
 
-      // ── Tool 2: Document Summarizer Scanning Waves ─────────────────────────
-      if (toolId === 'summary') {
-        const scanY = (frame * 3.5) % h;
-        const gradient = ctx.createLinearGradient(0, scanY - 30, 0, scanY + 30);
+      // ── Tool 1: AI Image Generator Photorealistic Aperture & Aurora Waves ───
+      if (toolId === 'image') {
+        const cx = w / 2;
+        const cy = h / 2;
+        const apertureRadius = 120 + Math.sin(frame * 0.03) * 25;
+        
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(frame * 0.015);
+        ctx.strokeStyle = 'rgba(236, 72, 153, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let k = 0; k < 6; k++) {
+          const angle = (k * Math.PI) / 3;
+          ctx.moveTo(Math.cos(angle) * apertureRadius, Math.sin(angle) * apertureRadius);
+          ctx.lineTo(Math.cos(angle + 0.5) * (apertureRadius + 60), Math.sin(angle + 0.5) * (apertureRadius + 60));
+        }
+        ctx.stroke();
+        ctx.restore();
+
+      // ── Tool 2: Document Summarizer Scanning Lasers & Matrix Code Cascade ──
+      } else if (toolId === 'summary') {
+        const scanY = (frame * 4) % h;
+        const gradient = ctx.createLinearGradient(0, scanY - 40, 0, scanY + 40);
         gradient.addColorStop(0, 'rgba(59, 130, 246, 0)');
-        gradient.addColorStop(0.5, 'rgba(6, 182, 212, 0.4)');
+        gradient.addColorStop(0.5, 'rgba(6, 182, 212, 0.6)');
         gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
 
         ctx.fillStyle = gradient;
-        ctx.fillRect(0, scanY - 30, w, 60);
+        ctx.fillRect(0, scanY - 40, w, 80);
 
-      // ── Tool 3: Social Caption Floating Badges ────────────────────────────
+        // Laser Beam Accent Line
+        ctx.strokeStyle = 'rgba(167, 243, 208, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, scanY);
+        ctx.lineTo(w, scanY);
+        ctx.stroke();
+
+      // ── Tool 3: Social Caption Floating 3D Badges & Hashtags ─────────────
       } else if (toolId === 'caption') {
         captionBadges.forEach((b, idx) => {
-          const bx = (w * b.x) + Math.sin(frame * b.speed + idx) * 25;
-          const by = (h * b.y) + Math.cos(frame * b.speed + idx) * 20;
+          const bx = (w * b.x) + Math.sin(frame * b.speed + idx) * 30;
+          const by = (h * b.y) + Math.cos(frame * b.speed + idx) * 25;
 
           ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-          ctx.strokeStyle = 'rgba(20, 184, 166, 0.6)';
+          ctx.strokeStyle = 'rgba(20, 184, 166, 0.7)';
           ctx.lineWidth = 1.5;
-          ctx.fillRect(bx - 10, by - 18, 170, 36);
-          ctx.strokeRect(bx - 10, by - 18, 170, 36);
+          ctx.fillRect(bx - 12, by - 20, 180, 40);
+          ctx.strokeRect(bx - 12, by - 20, 180, 40);
 
           ctx.fillStyle = '#34d399';
-          ctx.font = 'bold 13px sans-serif';
-          ctx.fillText(b.text, bx + 5, by + 5);
+          ctx.font = 'bold 14px sans-serif';
+          ctx.fillText(b.text, bx + 6, by + 5);
         });
 
-      // ── Tool 4: Prompt Enhancer Expanding Rings ───────────────────────────
+      // ── Tool 4: Prompt Enhancer Golden Neural Rings & Constellations ───────
       } else if (toolId === 'prompt') {
-        const expand = (frame * 2) % 350;
-        const ringAlpha = (1 - expand / 350) * 0.5;
+        for (let r = 0; r < 3; r++) {
+          const expand = (frame * 2.5 + r * 120) % 400;
+          const ringAlpha = Math.max(0, (1 - expand / 400)) * 0.55;
 
-        ctx.strokeStyle = `rgba(245, 158, 11, ${ringAlpha})`;
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.arc(w / 2, h / 2, expand, 0, Math.PI * 2);
-        ctx.stroke();
+          ctx.strokeStyle = `rgba(245, 158, 11, ${ringAlpha})`;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(w / 2, h / 2, expand, 0, Math.PI * 2);
+          ctx.stroke();
+        }
       }
 
       animId = requestAnimationFrame(render);
