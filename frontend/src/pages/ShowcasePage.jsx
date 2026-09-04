@@ -160,12 +160,11 @@ export default function ShowcasePage() {
               ref={(el) => (sectionRefs.current[idx] = el)}
               className="w-screen h-screen snap-start snap-always relative flex items-center justify-center overflow-hidden"
             >
-              {/* Background Rolex Dark Overlays */}
-              <div className="absolute inset-0 bg-[#050510]/60 z-10" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#050510] via-black/40 to-black/60 z-10 backdrop-blur-[1px]" />
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-[#050510]/40 to-[#050510] z-10" />
-              {/* 100% Code-Based Procedural Animated Background */}
+              {/* 100% Code-Based Vibrant Animated Background */}
               <ShowcaseCodeAnimation toolId={sec.id} isActive={isCurrent} />
+
+              {/* Subtle Vignette Gradient for Depth */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#050510]/80 via-transparent to-[#050510]/60 z-1 pointer-events-none" />
 
               {/* Section Content Overlay */}
               <div className="relative z-20 text-center max-w-4xl px-6 space-y-6 animate-fade-in flex flex-col items-center">
