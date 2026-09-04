@@ -77,7 +77,7 @@ function App() {
 
             {/* Protected — wrapped in DashboardLayout */}
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-              <Route index            element={<ShowcasePage />} />
+              <Route index            element={<Dashboard />} />
               <Route path="showcase"      element={<ShowcasePage />} />
               <Route path="overview"      element={<Dashboard />} />
               <Route path="tools"         element={<AIToolsPage />} />
